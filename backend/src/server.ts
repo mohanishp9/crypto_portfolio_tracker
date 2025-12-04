@@ -1,0 +1,45 @@
+import express, { Application, Request, Response } from "express";
+import dotenv from "dotenv";
+import cors from "cors";
+import cookieParser from "cookie-parser";
+import { connectDB } from "./config/db";
+dotenv.config();
+
+const app: Application = express();
+const PORT = process.env.PORT || 5000;
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(
+    cors({
+        origin: "http://localhost:5173",
+        credentials: true,
+    })
+);
+app.use(cookieParser());
+
+
+app.get("/api/health", (req: Request, res: Response) => {
+    res.json({ status: "ok" });
+})
+
+app.use((req: Request, res: Response) => {
+    res.status(404).json({ success: false, message: 'Route not found' });
+});
+
+app.use((err: any, req: Request, res: Response, next: any) => {
+    console.error(err.stack);
+    res.status(500).json({
+        success: false,
+        message: process.env.NODE_ENV === 'development' ? err.message : 'Internal Server Error'
+    });
+});
+
+connectDB().then(() => {
+    app.listen(PORT, () => {
+        console.log(`Server started on port ${PORT}`);
+    });
+}).catch((err) => {
+    console.error('Failed to connect to database: ', err);
+    process.exit(1);
+});
