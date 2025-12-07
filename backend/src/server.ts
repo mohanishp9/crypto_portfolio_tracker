@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import { connectDB } from "./config/db";
+import authRoutes from "./routes/auth.routes";
 dotenv.config();
 
 const app: Application = express();
@@ -19,9 +20,11 @@ app.use(
 app.use(cookieParser());
 
 
-app.get("/api/health", (req: Request, res: Response) => {
-    res.json({ status: "ok" });
-})
+// app.get("/api/health", (req: Request, res: Response) => {
+//     res.json({ status: "ok" });
+// })
+
+app.use("/api/auth", authRoutes);
 
 app.use((req: Request, res: Response) => {
     res.status(404).json({ success: false, message: 'Route not found' });
