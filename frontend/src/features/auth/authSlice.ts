@@ -3,7 +3,7 @@ import type { PayloadAction } from "@reduxjs/toolkit";
 
 // --- Types ---
 export interface User {
-    id: string;
+    _id: string;
     name: string;
     email: string;
 }
@@ -17,9 +17,9 @@ export interface AuthState {
 
 // --- Initial State ---
 const initialState: AuthState = {
-    user: null,
-    token: null,
-    isAuthenticated: false,
+    user: JSON.parse(localStorage.getItem('user') || 'null'),
+    token: localStorage.getItem('token') || null,
+    isAuthenticated: !!localStorage.getItem('token'),
     loading: false,
 }
 
@@ -27,14 +27,19 @@ const authSlice = createSlice({
     name: "auth",
     initialState,
     reducers: {
-        // Placeholder reducer — you will add login logic later
+
         setCredentials: (
             state,
             action: PayloadAction<{ user: User; token: string }>
         ) => {
-            state.user = action.payload.user;
-            state.token = action.payload.token;
+            const { user, token } = action.payload;
+
+            state.user = user;
+            state.token = token;
             state.isAuthenticated = true;
+
+            localStorage.setItem('user', JSON.stringify(user));
+            localStorage.setItem('token', token);
         },
 
         // Logout = clear everything
@@ -42,6 +47,9 @@ const authSlice = createSlice({
             state.user = null;
             state.token = null;
             state.isAuthenticated = false;
+
+            localStorage.removeItem('user');
+            localStorage.removeItem('token');
         },
     },
 });

@@ -1,13 +1,24 @@
 import './App.css'
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import Register from './pages/Register';
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
+import ProtectedRoute from './components/ProtectedRoute';
+import type { RootState } from "./app/store";
+
 
 function App() {
+  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
+
 
   return (
-    <div className="h-screen flex items-center justify-center bg-gray-900 text-white">
-      <h1 className="text-4xl font-bold underline">
-        Crypto Portfolio Tracker
-      </h1>
-    </div>
+    <Routes>
+      <Route path="/" element={isAuthenticated ? <Navigate to="/dashboard" /> : <Navigate to="/login" />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+    </Routes>
   );
 }
 
