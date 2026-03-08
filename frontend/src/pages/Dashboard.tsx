@@ -1,14 +1,37 @@
 import { useEffect, useState } from "react";
 import { useGetCurrentUserQuery, useLogoutMutation } from "../services/authApi";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { logout as logoutAction } from "../features/auth/authSlice";
 import { useNavigate } from "react-router-dom";
+import { useGetPortfolioQuery, useGetPortfolioStatsQuery } from "../services/portfolioApi";
+import { openAddModal, openEditModal, setSelectedHolding, openDeleteModal } from "../features/portfolio/portfolioSlice";
+import type { RootState } from "../app/store";
+import type { Holding } from "../types/portfolio.types";
+import AddHoldingModal from "../components/AddHoldingModal";
+import EditHoldingModal from "../components/EditHoldingModal";
+import DeleteConfirmModal from "../components/DeleteConfirmModal";
 
 const Dashboard = () => {
     const { data, isLoading, error } = useGetCurrentUserQuery();
     const [logoutMutation, { isLoading: isLoggingOut }] = useLogoutMutation();
     const dispatch = useDispatch();
     const navigate = useNavigate();
+
+    const {
+        selectedHolding,
+        isAddModalOpen,
+        isEditModalOpen,
+        isDeleteModalOpen,
+    } = useSelector((state: RootState) => state.portfolio);
+
+    // Fetch portfolio data
+    const { data: portfolioData, isLoading: portfolioLoading } = useGetPortfolioQuery(undefined, {
+        pollingInterval: 30000, // Refresh every 30 seconds
+    });
+
+    const { data: statsData, isLoading: statsLoading } = useGetPortfolioStatsQuery(undefined, {
+        pollingInterval: 30000, // Refresh every 30 seconds
+    });
 
     // Redirect to login if there's an authentication error
     useEffect(() => {
@@ -32,6 +55,16 @@ const Dashboard = () => {
             navigate('/login');
         }
     };
+
+    const handleEdit = (holding: Holding) => {
+        dispatch(setSelectedHolding(holding));
+        dispatch(openEditModal());
+    };
+    const handleDelete = (holding: Holding) => {
+        dispatch(setSelectedHolding(holding));
+        dispatch(openDeleteModal());
+    };
+
 
     // Loading state
     if (isLoading) {
@@ -168,24 +201,113 @@ const Dashboard = () => {
                     </div>
                 </div>
 
-                {/* Coming Soon / Placeholder */}
-                <div className="mt-8 bg-white rounded-xl shadow-sm border border-gray-100 p-8">
-                    <h3 className="text-xl font-semibold text-gray-900 mb-4">Portfolio Features</h3>
-                    <div className="bg-gray-50 border-2 border-dashed border-gray-200 rounded-lg p-12 text-center">
-                        <div className="text-gray-400 mb-4">
-                            <svg className="mx-auto h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5"
-                                    d="M9 19v-6a2 2 0 012-2h8a2 2 0 012 2v6m-6-8V9a2 2 0 00-2-2h-2a2 2 0 00-2 2v2m6 4h.01" />
-                            </svg>
-                        </div>
-                        <p className="text-gray-600 text-lg font-medium">
-                            Portfolio tracking coming soon
-                        </p>
-                        <p className="text-gray-500 mt-2">
-                            Add your holdings and track performance in real-time.
+                <button
+                    onClick={() => dispatch(openAddModal())}
+                    className="bg-indigo-600 text-white px-6 py-3 rounded-lg mt-4"
+                >
+                    +Add Holding
+                </button>
+
+                {/* Stats Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
+
+                    {/* Total Value */}
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                        <h3 className="text-sm text-gray-500 mb-2">Total Value</h3>
+                        <p className="text-2xl font-semibold text-gray-900">
+                            ${statsData?.currentValue?.toFixed(2) ?? "0.00"}
                         </p>
                     </div>
+
+                    {/* Total Investment */}
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                        <h3 className="text-sm text-gray-500 mb-2">Total Investment</h3>
+                        <p className="text-2xl font-semibold text-gray-900">
+                            ${statsData?.investment?.toFixed(2) ?? "0.00"}
+                        </p>
+                    </div>
+
+                    {/* Profit / Loss */}
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                        <h3 className="text-sm text-gray-500 mb-2">Profit / Loss</h3>
+                        <p
+                            className={`text-2xl font-semibold ${(statsData?.profitLoss ?? 0) < 0 ? "text-red-600" : "text-green-600"
+                                }`}
+                        >
+                            ${statsData?.profitLoss?.toFixed(2) ?? "0.00"}
+                        </p>
+                    </div>
+
+                    {/* Change % */}
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                        <h3 className="text-sm text-gray-500 mb-2">Change %</h3>
+                        <p
+                            className={`text-2xl font-semibold ${(statsData?.profitPercentage ?? 0) < 0 ? "text-red-600" : "text-green-600"
+                                }`}
+                        >
+                            {statsData?.profitPercentage?.toFixed(2) ?? "0.00"}%
+                        </p>
+                    </div>
+
                 </div>
+
+                {/* Holdings Table */}
+                <table className="min-w-full mt-8">
+                    <thead>
+                        <tr>
+                            <th>Coin</th>
+                            <th>Quantity</th>
+                            <th>Buy Price</th>
+                            <th>Current Price</th>
+                            <th>Value</th>
+                            <th>Profit/Loss</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {portfolioData?.portfolio.holdings.map((holding) => {
+                            const currentPrice = statsData?.prices?.[holding.coinId]?.usd ?? 0;
+
+                            const value = holding.quantity * currentPrice;
+                            const profitLoss = value - holding.quantity * holding.buyPrice;
+                            return (
+                                <tr key={holding._id}>
+                                    <td>{holding.coinName} ({holding.coinSymbol})</td>
+                                    <td>{holding.quantity}</td>
+                                    <td>${holding.buyPrice.toFixed(2)}</td>
+                                    <td>${currentPrice.toFixed(2)}</td> {/* Fetch from CoinGecko */}
+                                    <td>${value.toFixed(2)}</td> {/* quantity * current price */}
+                                    <td className={profitLoss > 0 ? 'text-green-600' : 'text-red-600'}>
+                                        ${profitLoss.toFixed(2)}
+                                    </td>
+                                    <td>
+                                        <button onClick={() => handleEdit(holding)}>Edit</button>
+                                        <button onClick={() => handleDelete(holding)}>Delete</button>
+                                    </td>
+                                </tr>
+                            )
+                        })}
+                    </tbody>
+                </table>
+
+                {portfolioData?.portfolio.holdings.length === 0 && (
+                    <div className="mt-8 bg-white rounded-xl shadow-sm border border-gray-100 p-8">
+                        <h3 className="text-xl font-semibold text-gray-900 mb-4">No Holdings</h3>
+                        <p className="text-gray-600 mb-8">
+                            No holdings yet. Add your first crypto!
+                        </p>
+                        <button
+                            onClick={() => dispatch(openAddModal())}
+                            className="w-50 bg-indigo-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-100 transition-all duration-200"
+                        >
+                            Add Holding
+                        </button>
+                    </div>
+                )}
+
+                {isAddModalOpen && <AddHoldingModal />}
+                {isEditModalOpen && <EditHoldingModal />}
+                {isDeleteModalOpen && <DeleteConfirmModal />}
             </main>
         </div>
     );

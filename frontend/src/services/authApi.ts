@@ -1,8 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
-// --------------------------------------------------
 // TypeScript Interfaces
-// --------------------------------------------------
 interface User {
     _id: string;
     name: string;
@@ -36,9 +34,8 @@ interface GetCurrentUserResponse {
     user: User;
 }
 
-// --------------------------------------------------
+
 // Create Auth API Slice
-// --------------------------------------------------
 export const authApi = createApi({
     reducerPath: 'authApi',
 
@@ -90,9 +87,8 @@ export const authApi = createApi({
     }),
 });
 
-// --------------------------------------------------
+
 // Export auto-generated hooks
-// --------------------------------------------------
 export const {
     useRegisterMutation,
     useLoginMutation,
