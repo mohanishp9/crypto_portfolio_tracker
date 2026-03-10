@@ -31,14 +31,10 @@ const getPortfolioController = asyncHandler(async (req: Request, res: Response) 
 // @route POST /api/portfolio/holdings
 // @access Private
 const addHoldingController = asyncHandler(async (req: Request, res: Response) => {
+    const { coinId, coinName, coinSymbol, quantity, buyPrice } = addHoldingSchema.parse(req.body);
 
-    const validateData = addHoldingSchema.parse(req.body);
-    const { coinId, coinName, coinSymbol, quantity, buyPrice }: AddHoldingInput = validateData;
+    if (!req.user) throw new Error("Not authenticated");
 
-    if (!req.user) {
-        res.status(401);
-        throw new Error("Not authenticated");
-    }
     let portfolio = await Portfolio.findOne({ user: req.user._id });
     if (!portfolio) {
         portfolio = await Portfolio.create({
@@ -47,23 +43,44 @@ const addHoldingController = asyncHandler(async (req: Request, res: Response) =>
         });
     }
 
-    portfolio.holdings.push({
-        coinId,
-        coinName,
-        coinSymbol,
-        quantity,
-        buyPrice,
-        purchaseDate: new Date(),
-    })
+    const existingIndex = portfolio.holdings.findIndex(h => h.coinId === coinId);
+
+    if (existingIndex !== -1) {
+        // Update existing
+        const holding = portfolio.holdings[existingIndex];
+        const newQuantity = holding.quantity + quantity;
+
+        if (newQuantity <= 0) {
+            throw new Error("Resulting quantity cannot be zero or negative");
+        }
+
+        const oldTotalCost = holding.quantity * holding.buyPrice;
+        const addedCost = quantity * buyPrice;
+        const newTotalCost = oldTotalCost + addedCost;
+        const newAvgPrice = newTotalCost / newQuantity;
+
+        holding.quantity = newQuantity;
+        holding.buyPrice = Number(newAvgPrice.toFixed(8));
+        holding.purchaseDate = new Date();
+    } else {
+        // Add new
+        portfolio.holdings.push({
+            coinId,
+            coinName,
+            coinSymbol,
+            quantity,
+            buyPrice,
+            purchaseDate: new Date(),
+        });
+    }
 
     await portfolio.save();
 
-    res.status(200).json({
+    res.status(existingIndex !== -1 ? 200 : 201).json({
         success: true,
         portfolio,
     });
 });
-
 // @desc Update a holding in user Portfolio
 // @route PUT /api/portfolio/holdings/:holdingId
 // @access Private
