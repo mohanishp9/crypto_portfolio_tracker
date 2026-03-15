@@ -28,11 +28,7 @@
         "tsBuildInfoFile": "./dist/.tsbuildinfo",
         "types": [
             "node"
-        ],
-        "typeRoots": [
-            "./src/types",
-            "./node_modules/@types"
-        ],
+        ]
     },
     "include": [
         "src/**/*"
