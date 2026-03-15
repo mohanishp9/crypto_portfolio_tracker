@@ -15,7 +15,7 @@ export const portfolioApi = createApi({
 
     // Base query configuration
     baseQuery: fetchBaseQuery({
-        baseUrl: import.meta.env.VITE_API_BASE_URL,
+        baseUrl: import.meta.env.VITE_API_URL,
         credentials: 'include', // Send cookies with requests
     }),
 
