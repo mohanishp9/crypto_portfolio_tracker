@@ -90,7 +90,7 @@ const loginUserController = asyncHandler(async (req: Request, res: Response) => 
 // @desc Logout a user
 // @route POST /logout
 // @access Private
-const logoutUserController = asyncHandler(async (req: Request, res: Response) => {
+const logoutUserController = asyncHandler(async (_req: Request, res: Response) => {
     res.clearCookie("token");
     res.status(200).json({
         success: true,

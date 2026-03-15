@@ -106,7 +106,7 @@ const getPortfolioStatsController = asyncHandler(async (req: Request, res: Respo
     const profitLoss = totalCurrentValue - totalInvestment;
     const profitPercentage = totalInvestment > 0 ? (profitLoss / totalInvestment) * 100 : 0;
 
-    res.json({
+    return res.json({
         success: true,
         investment: totalInvestment,
         currentValue: totalCurrentValue,

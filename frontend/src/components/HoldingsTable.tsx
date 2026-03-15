@@ -1,5 +1,3 @@
-import type { Holding } from "../types/portfolio.types";
-
 interface HoldingsTableProps {
     statsData: any;
 }

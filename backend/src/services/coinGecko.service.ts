@@ -1,5 +1,5 @@
 import axios from "axios";
-import { CoinSearchResult, CoinSearchResponse, CoinPriceData, CoinPriceResponse, MarketCoin } from "../types/coinsData.types";
+import { CoinSearchResult, CoinSearchResponse, CoinPriceResponse, MarketCoin } from "../types/coinsData.types";
 
 // ── Simple in-memory cache ──────────────────────────────
 const cache = new Map<string, { data: any; expiresAt: number }>();

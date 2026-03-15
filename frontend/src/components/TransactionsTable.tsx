@@ -1,5 +1,3 @@
-import type { Transaction } from "../types/portfolio.types";
-
 interface TransactionsTableProps {
     transactions: any[];
     handleDelete: (transaction: any) => void;
@@ -54,7 +52,6 @@ const TransactionsTable = ({
                     <tbody>
                         {transactions.map((tx: any) => {
                             const isBuy = tx.type === "BUY";
-                            const isSell = tx.type === "SELL";
                             const date = new Date(tx.timestamp || tx.createdAt).toLocaleDateString();
 
                             return (
@@ -68,7 +65,7 @@ const TransactionsTable = ({
                                     <td className="px-6 py-5 whitespace-nowrap" style={{ fontSize: "0.7rem", letterSpacing: "0.06em", color: "#9aab97" }}>
                                         {date}
                                     </td>
-                                    
+
                                     <td className="px-6 py-5 whitespace-nowrap">
                                         <span
                                             style={{
