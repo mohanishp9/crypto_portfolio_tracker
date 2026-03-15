@@ -30,9 +30,6 @@
             "./src/types",
             "./node_modules/@types"
         ],
-        "types": [
-            "node"
-        ]
     },
     "include": [
         "src/**/*"
