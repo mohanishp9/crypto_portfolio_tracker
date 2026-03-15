@@ -17,7 +17,8 @@ app.use(
     cors({
         origin: [
             "http://localhost:5173",
-            "grove-crypto-tracker.vercel.app",
+            "https://grove-portfolio.onrender.com",
+            "https://grove-crypto-tracker.vercel.app",
         ],
         credentials: true,
     })
