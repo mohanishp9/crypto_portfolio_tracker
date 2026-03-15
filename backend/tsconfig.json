@@ -26,10 +26,6 @@
         "allowJs": false,
         "incremental": true,
         "tsBuildInfoFile": "./dist/.tsbuildinfo",
-        "typeRoots": [
-            "./src/types",
-            "./node_modules/@types"
-        ],
     },
     "include": [
         "src/**/*"
