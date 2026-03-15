@@ -46,7 +46,6 @@ const addHoldingController = asyncHandler(async (req: Request, res: Response) =>
     const existingIndex = portfolio.holdings.findIndex(h => h.coinId === coinId);
 
     if (existingIndex !== -1) {
-        // Update existing
         const holding = portfolio.holdings[existingIndex];
         const newQuantity = holding.quantity + quantity;
 
@@ -81,6 +80,7 @@ const addHoldingController = asyncHandler(async (req: Request, res: Response) =>
         portfolio,
     });
 });
+
 // @desc Update a holding in user Portfolio
 // @route PUT /api/portfolio/holdings/:holdingId
 // @access Private
