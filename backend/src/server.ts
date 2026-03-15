@@ -17,7 +17,7 @@ app.use(
     cors({
         origin: [
             "http://localhost:5173",
-            "https://grove-portfolio.onrender.com"
+            "https://grove-portfolio.onrender.com",
         ],
         credentials: true,
     })
