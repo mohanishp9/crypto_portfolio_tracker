@@ -28,7 +28,8 @@ const registerUserController = asyncHandler(async (req: Request, res: Response) 
 
     if (user) {
         const jwtToken = generateToken(user._id.toString());
-        const isProduction = process.env.NODE_ENV === "production";
+        const isProduction = process.env.NODE_ENV !== "development";
+        ;
         res.cookie("token", jwtToken, {
             httpOnly: true,
             secure: isProduction,
