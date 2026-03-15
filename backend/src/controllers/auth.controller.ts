@@ -28,10 +28,11 @@ const registerUserController = asyncHandler(async (req: Request, res: Response) 
 
     if (user) {
         const jwtToken = generateToken(user._id.toString());
+        const isProduction = process.env.NODE_ENV === "production";
         res.cookie("token", jwtToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "strict",
+            secure: isProduction,
+            sameSite: isProduction ? "none" : "lax",
             maxAge: 7 * 24 * 60 * 60 * 1000,
         })
         res.status(201).json({
@@ -66,10 +67,11 @@ const loginUserController = asyncHandler(async (req: Request, res: Response) => 
 
     if (await user.comparePassword(password)) {
         const jwtToken = generateToken(user._id.toString());
+        const isProduction = process.env.NODE_ENV === "production";
         res.cookie("token", jwtToken, {
             httpOnly: true,
-            secure: true,
-            sameSite: "none",
+            secure: isProduction,
+            sameSite: isProduction ? "none" : "lax",
             maxAge: 7 * 24 * 60 * 60 * 1000,
         })
         res.status(200).json({
