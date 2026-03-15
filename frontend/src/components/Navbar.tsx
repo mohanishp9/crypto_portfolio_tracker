@@ -24,7 +24,11 @@ const Navbar = ({ email, handleLogout, isLoggingOut }: NavbarProps) => {
                 <div className="flex justify-between items-center h-16">
 
                     {/* Logo */}
-                    <div className="flex items-center gap-3">
+                    <button 
+                        onClick={() => navigate("/")}
+                        className="flex items-center gap-3 transition-opacity hover:opacity-80"
+                        style={{ background: "transparent", border: "none", cursor: "pointer", padding: 0 }}
+                    >
                         <div
                             style={{
                                 width: 28,
@@ -62,7 +66,7 @@ const Navbar = ({ email, handleLogout, isLoggingOut }: NavbarProps) => {
                                 Portfolio
                             </span>
                         </h1>
-                    </div>
+                    </button>
 
                     {/* Right side */}
                     <div className="flex items-center gap-5">
@@ -88,6 +92,33 @@ const Navbar = ({ email, handleLogout, isLoggingOut }: NavbarProps) => {
                                 background: "rgba(61,74,62,0.5)",
                             }}
                         />
+
+                        {/* Dashboard button */}
+                        <button
+                            onClick={() => navigate("/")}
+                            title="View dashboard"
+                            style={{
+                                width: 34,
+                                height: 34,
+                                borderRadius: "50%",
+                                border: "1px solid rgba(107,124,106,0.3)",
+                                background: "transparent",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                cursor: "pointer",
+                                transition: "all 0.2s"
+                            }}
+                            onMouseEnter={e => { e.currentTarget.style.background = "rgba(107,124,106,0.15)"; }}
+                            onMouseLeave={e => { e.currentTarget.style.background = "transparent"; }}
+                        >
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9aab97" strokeWidth="1.2">
+                                <rect x="3" y="3" width="7" height="7" rx="1" />
+                                <rect x="14" y="3" width="7" height="7" rx="1" />
+                                <rect x="14" y="14" width="7" height="7" rx="1" />
+                                <rect x="3" y="14" width="7" height="7" rx="1" />
+                            </svg>
+                        </button>
 
                         {/* Profile button */}
                         <button

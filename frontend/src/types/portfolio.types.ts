@@ -41,20 +41,25 @@ export interface PortfolioStatsResponse {
     profitLoss: number;
     profitPercentage: number;
     prices: CoinPriceMap;
+    portfolio: any[];
 }
 
-export interface AddHoldingInput {
+export interface AddTransactionInput {
     coinId: string;
     coinName: string;
     coinSymbol: string;
     quantity: number;
-    buyPrice: number;
+    price: number;
+    fee?: number;
+    type: TransactionType;
 }
 
-export interface UpdateHoldingInput {
-    holdingId: string;
-    quantity?: number;
-    buyPrice?: number;
-}
+export type TransactionType = "BUY" | "SELL";
 
-export type DeleteHoldingInput = string; // holdingId
+export interface Transaction {
+    coinId: string;
+    quantity: number;
+    price: number;
+    fee?: number;
+    type: TransactionType;
+}

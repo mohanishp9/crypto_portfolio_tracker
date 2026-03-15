@@ -1,21 +1,19 @@
 import express from "express";
 import {
     getPortfolioController,
-    addHoldingController,
-    updateHoldingController,
-    deleteHoldingController,
+    addTransactionController,
     getPortfolioStatsController,
+    deleteTransactionController,
     searchCoinsController,
 } from "../controllers/portfolio.controller";
 import { protect } from "../middleware/auth.middleware";
 
 const router = express.Router();
 
-router.get("/", protect, getPortfolioController);
-router.post("/holdings", protect, addHoldingController);
-router.put("/holdings/:holdingId", protect, updateHoldingController);
-router.delete("/holdings/:holdingId", protect, deleteHoldingController);
+router.post("/transactions", protect, addTransactionController);
+router.get("/transactions", protect, getPortfolioController);
 router.get("/stats", protect, getPortfolioStatsController);
+router.delete("/transactions/:id", protect, deleteTransactionController);
 router.get("/search", protect, searchCoinsController);
 
 export default router;

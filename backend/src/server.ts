@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import { connectDB } from "./config/db";
 import authRoutes from "./routes/auth.routes";
 import portfolioRoutes from "./routes/portfolio.routes";
+import marketRoutes from "./routes/market.routes";
 dotenv.config();
 
 const app: Application = express();
@@ -27,6 +28,7 @@ app.use(cookieParser());
 
 app.use("/api/auth", authRoutes);
 app.use('/api/portfolio', portfolioRoutes);
+app.use('/api/market', marketRoutes);
 
 app.use((req: Request, res: Response) => {
     res.status(404).json({ success: false, message: 'Route not found' });

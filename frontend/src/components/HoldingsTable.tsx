@@ -1,19 +1,13 @@
 import type { Holding } from "../types/portfolio.types";
 
 interface HoldingsTableProps {
-    portfolioData: any;
     statsData: any;
-    handleEdit: (holding: Holding) => void;
-    handleDelete: (holding: Holding) => void;
 }
 
 const HoldingsTable = ({
-    portfolioData,
     statsData,
-    handleEdit,
-    handleDelete,
 }: HoldingsTableProps) => {
-    const holdings = portfolioData?.portfolio?.holdings ?? [];
+    const holdings = statsData?.portfolio ?? [];
 
     return (
         <div
@@ -45,7 +39,7 @@ const HoldingsTable = ({
                     {/* THEAD */}
                     <thead>
                         <tr style={{ borderBottom: "1px solid rgba(61,74,62,0.3)" }}>
-                            {["Coin", "Quantity", "Buy Price", "Current Price", "Value", "Profit / Loss", "Actions"].map((h) => (
+                            {["Coin", "Quantity", "Avg Cost", "Current Price", "Value", "Unrealized PnL"].map((h) => (
                                 <th
                                     key={h}
                                     scope="col"
@@ -60,16 +54,14 @@ const HoldingsTable = ({
 
                     {/* TBODY */}
                     <tbody>
-                        {portfolioData?.portfolio.holdings.map((holding) => {
-                            const currentPrice = statsData?.prices?.[holding.coinId]?.usd ?? 0;
-                            const value = holding.quantity * currentPrice;
-                            const profitLoss = value - holding.quantity * holding.buyPrice;
-                            const isProfit = profitLoss > 0;
-                            const isLoss = profitLoss < 0;
+                        {holdings.map((holding: any) => {
+                            const avgCost = holding.quantity > 0 ? holding.totalCost / holding.quantity : 0;
+                            const isProfit = holding.unrealizedProfit > 0;
+                            const isLoss = holding.unrealizedProfit < 0;
 
                             return (
                                 <tr
-                                    key={holding._id}
+                                    key={holding.coinId}
                                     className="group transition-colors duration-300"
                                     style={{ borderBottom: "1px solid rgba(61,74,62,0.15)" }}
                                     onMouseEnter={e => e.currentTarget.style.background = "rgba(42,61,46,0.5)"}
@@ -80,12 +72,9 @@ const HoldingsTable = ({
                                     <td className="px-6 py-5 whitespace-nowrap">
                                         <div
                                             className="font-light"
-                                            style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.1rem", color: "#ede8dd", letterSpacing: "0.04em" }}
+                                            style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.1rem", color: "#ede8dd", letterSpacing: "0.04em", textTransform: "capitalize" }}
                                         >
-                                            {holding.coinName}
-                                        </div>
-                                        <div style={{ fontSize: "0.55rem", letterSpacing: "0.25em", color: "#6b7c6a", marginTop: "2px" }}>
-                                            {holding.coinSymbol.toUpperCase()}
+                                            {holding.coinId}
                                         </div>
                                     </td>
 
@@ -94,14 +83,14 @@ const HoldingsTable = ({
                                         {holding.quantity.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })}
                                     </td>
 
-                                    {/* Buy Price */}
+                                    {/* Avg Cost */}
                                     <td className="px-6 py-5 whitespace-nowrap" style={{ fontSize: "0.7rem", letterSpacing: "0.06em", color: "#9aab97" }}>
-                                        ${holding.buyPrice.toFixed(2)}
+                                        ${avgCost.toFixed(2)}
                                     </td>
 
                                     {/* Current Price */}
                                     <td className="px-6 py-5 whitespace-nowrap" style={{ fontSize: "0.7rem", letterSpacing: "0.06em", color: "#9aab97" }}>
-                                        ${currentPrice.toFixed(2)}
+                                        ${holding.currentPrice.toFixed(2)}
                                     </td>
 
                                     {/* Value */}
@@ -110,7 +99,7 @@ const HoldingsTable = ({
                                             className="font-light"
                                             style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.05rem", color: "#d4cfc4", letterSpacing: "0.04em" }}
                                         >
-                                            ${value.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                            ${holding.value.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                                         </span>
                                     </td>
 
@@ -132,29 +121,11 @@ const HoldingsTable = ({
                                             }}
                                         >
                                             {isProfit ? "+" : isLoss ? "−" : ""}
-                                            ${Math.abs(profitLoss).toFixed(2)}
+                                            ${Math.abs(holding.unrealizedProfit).toFixed(2)}
                                             <span style={{ fontSize: "0.5rem", opacity: 0.7 }}>
                                                 {isProfit ? "▲" : isLoss ? "▼" : "—"}
                                             </span>
                                         </span>
-                                    </td>
-
-                                    {/* Actions */}
-                                    <td className="px-6 py-5 whitespace-nowrap">
-                                        <div className="flex gap-4">
-                                            <button
-                                                onClick={() => handleEdit(holding)}
-                                                className="text-[0.6rem] tracking-[0.2em] uppercase text-[#7fa8b4] hover:text-[#ede8dd] transition-colors duration-200"
-                                            >
-                                                Edit
-                                            </button>
-                                            <button
-                                                onClick={() => handleDelete(holding)}
-                                                className="text-[0.6rem] tracking-[0.2em] uppercase text-[#8b5e3c] hover:text-[#c4885a] transition-colors duration-200"
-                                            >
-                                                Delete
-                                            </button>
-                                        </div>
                                     </td>
 
                                 </tr>
@@ -162,9 +133,9 @@ const HoldingsTable = ({
                         })}
 
                         {/* Empty state */}
-                        {(!portfolioData?.portfolio.holdings || portfolioData.portfolio.holdings.length === 0) && (
+                        {holdings.length === 0 && (
                             <tr>
-                                <td colSpan={7} className="px-6 py-20 text-center">
+                                <td colSpan={6} className="px-6 py-20 text-center">
                                     <svg
                                         className="mx-auto mb-5"
                                         style={{ width: 36, height: 36, color: "#3d4a3e" }}
@@ -186,7 +157,7 @@ const HoldingsTable = ({
                                         No holdings yet
                                     </p>
                                     <p style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#3d4a3e", marginTop: "8px" }}>
-                                        Add your first coin to begin
+                                        Add your first transaction to begin
                                     </p>
                                 </td>
                             </tr>

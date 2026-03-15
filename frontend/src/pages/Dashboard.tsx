@@ -1,27 +1,22 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useGetCurrentUserQuery, useLogoutMutation } from "../services/authApi";
 import { useDispatch, useSelector } from "react-redux";
 import { logout as logoutAction } from "../features/auth/authSlice";
 import { useNavigate } from "react-router-dom";
 import {
-  useGetPortfolioQuery,
-  useGetPortfolioStatsQuery,
-} from "../services/portfolioApi";
-import {
   openAddModal,
-  openEditModal,
-  setSelectedHolding,
+  setSelectedTransaction,
   openDeleteModal,
 } from "../features/portfolio/portfolioSlice";
 import type { RootState } from "../app/store";
-import type { Holding } from "../types/portfolio.types";
 import AddHoldingModal from "../components/AddHoldingModal";
-import EditHoldingModal from "../components/EditHoldingModal";
 import DeleteConfirmModal from "../components/DeleteConfirmModal";
 import { usePortfolioData } from "../hooks/usePortfolioData";
 import Navbar from "../components/Navbar";
 import PortfolioStats from "../components/PortfolioStats";
 import HoldingsTable from "../components/HoldingsTable";
+import TransactionsTable from "../components/TransactionsTable";
+import TopCoinsList from "../components/TopCoinsList";
 
 const Dashboard = () => {
   const { data, isLoading, error } = useGetCurrentUserQuery();
@@ -29,10 +24,9 @@ const Dashboard = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { selectedHolding, isAddModalOpen, isEditModalOpen, isDeleteModalOpen } =
-    useSelector((state: RootState) => state.portfolio);
+  const { isAddModalOpen, isDeleteModalOpen } = useSelector((state: RootState) => state.portfolio);
 
-  const { portfolioData, statsData, portfolioLoading, statsLoading } = usePortfolioData();
+  const { transactionsData, statsData, transactionsLoading, statsLoading } = usePortfolioData();
 
   useEffect(() => {
     if (error && "status" in error && error.status === 401) {
@@ -52,17 +46,13 @@ const Dashboard = () => {
     }
   };
 
-  const handleEdit = (holding: Holding) => {
-    dispatch(setSelectedHolding(holding));
-    dispatch(openEditModal());
-  };
-  const handleDelete = (holding: Holding) => {
-    dispatch(setSelectedHolding(holding));
+  const handleDelete = (transaction: any) => {
+    dispatch(setSelectedTransaction(transaction));
     dispatch(openDeleteModal());
   };
 
   // ── Loading ──────────────────────────────────────────────
-  if (isLoading) {
+  if (isLoading || transactionsLoading || statsLoading) {
     return (
       <div
         className="min-h-screen flex items-center justify-center"
@@ -240,7 +230,7 @@ const Dashboard = () => {
           </h2>
         </div>
 
-        {/* Add Holding */}
+        {/* Add Transaction */}
         <button
           onClick={() => dispatch(openAddModal())}
           className="transition-all duration-300"
@@ -272,26 +262,37 @@ const Dashboard = () => {
           <span style={{ fontSize: "0.9rem", fontFamily: "'Cormorant Garamond', serif", fontWeight: 300 }}>
             +
           </span>
-          Add Holding
+          Add Transaction
         </button>
 
         {/* Stats */}
         <PortfolioStats statsData={statsData} />
 
-        {/* Table */}
-        <div className="mt-8">
-          <HoldingsTable
-            portfolioData={portfolioData}
-            statsData={statsData}
-            handleEdit={handleEdit}
-            handleDelete={handleDelete}
-          />
+        {/* Main content — table + sidebar */}
+        <div className="mt-8 flex gap-4 items-start">
+
+          {/* Left — tables, takes all remaining width */}
+          <div className="flex-1 min-w-0 flex flex-col gap-8">
+            <HoldingsTable statsData={statsData} />
+            <TransactionsTable
+              transactions={transactionsData?.transactions || []}
+              handleDelete={handleDelete}
+            />
+          </div>
+
+          {/* Right — top coins sidebar, fixed width, matches table height */}
+          <div
+            className="hidden lg:block flex-shrink-0"
+            style={{ width: "260px", position: "sticky", top: "80px" }}
+          >
+            <TopCoinsList />
+          </div>
+
         </div>
 
       </main>
 
       {isAddModalOpen && <AddHoldingModal />}
-      {isEditModalOpen && <EditHoldingModal />}
       {isDeleteModalOpen && <DeleteConfirmModal />}
     </div>
   );

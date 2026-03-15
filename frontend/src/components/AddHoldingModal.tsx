@@ -2,24 +2,25 @@ import { useSelector, useDispatch } from "react-redux";
 import type { RootState } from "../app/store";
 import useDebounce from "../hooks/useDebounce";
 import { useState } from "react";
-import { useSearchCoinsQuery, useAddHoldingMutation } from "../services/portfolioApi";
+import { useSearchCoinsQuery, useAddTransactionMutation } from "../services/portfolioApi";
 import { closeAddModal } from "../features/portfolio/portfolioSlice";
-
+import type { TransactionType } from "../types/portfolio.types";
 
 const AddHoldingModal = () => {
     const dispatch = useDispatch();
     const isOpen = useSelector((state: RootState) => state.portfolio.isAddModalOpen);
-    const [addHolding, { isLoading }] = useAddHoldingMutation();
+    const [addTransaction, { isLoading }] = useAddTransactionMutation();
     const [coinInput, setCoinInput] = useState<string>("");
-    const [showDropdown, setShowDropdown] = useState(false); // ← controls visibility
+    const [showDropdown, setShowDropdown] = useState(false); // controls visibility
     const debouncedCoin = useDebounce(coinInput);
     const { data: coins } = useSearchCoinsQuery(debouncedCoin, {
         skip: debouncedCoin.length < 2,
     });
     const [formData, setFormData] = useState({
         coinId: "", coinName: "", coinSymbol: "",
-        quantity: "", buyPrice: "",
+        quantity: "", price: "", type: "BUY" as TransactionType
     });
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     if (!isOpen) return null;
 
@@ -31,22 +32,24 @@ const AddHoldingModal = () => {
             coinSymbol: coin.symbol,
         }));
         setCoinInput(coin.name);
-        setShowDropdown(false); // ← close on select
+        setShowDropdown(false); // close on select
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setErrorMessage(null);
         const quantity = Number(formData.quantity);
-        const buyPrice = Number(formData.buyPrice);
-        if (!formData.coinId || quantity <= 0 || buyPrice <= 0) return;
+        const price = Number(formData.price);
+        if (!formData.coinId || quantity <= 0 || price <= 0) return;
         try {
-            await addHolding({ ...formData, quantity, buyPrice }).unwrap();
-            setFormData({ coinId: "", coinName: "", coinSymbol: "", quantity: "", buyPrice: "" });
+            await addTransaction({ ...formData, quantity, price }).unwrap();
+            setFormData({ coinId: "", coinName: "", coinSymbol: "", quantity: "", price: "", type: "BUY" });
             setCoinInput("");
             setShowDropdown(false);
             dispatch(closeAddModal());
-        } catch (err) {
-            console.error("Failed to add holding:", err);
+        } catch (err: any) {
+            console.error("Failed to add transaction:", err);
+            setErrorMessage(err?.data?.message || err?.error || "Failed to save transaction.");
         }
     };
 
@@ -118,11 +121,6 @@ const AddHoldingModal = () => {
                                 setCoinInput(e.target.value);
                                 setShowDropdown(true); // ← reopen on new typing
                             }}
-                            onFocus={() => {
-                                if (coinInput.length >= 2) setShowDropdown(true);
-                            }}
-                            placeholder="Search Bitcoin, ETH..."
-                            style={inputStyle}
                             onFocus={e => {
                                 e.currentTarget.style.borderColor = "rgba(196,136,90,0.5)";
                                 if (coinInput.length >= 2) setShowDropdown(true);
@@ -133,6 +131,7 @@ const AddHoldingModal = () => {
                                 setTimeout(() => setShowDropdown(false), 150);
                             }}
                             autoComplete="off"
+                            style={inputStyle}
                         />
 
                         {/* Dropdown — absolutely positioned so it floats over other fields */}
@@ -181,6 +180,35 @@ const AddHoldingModal = () => {
                         )}
                     </div>
 
+                    {/* Transaction Type */}
+                    <div>
+                        <label style={labelStyle}>Type</label>
+                        <div className="flex gap-4">
+                            <label className="flex items-center gap-2" style={{ cursor: "pointer" }}>
+                                <input
+                                    type="radio"
+                                    name="type"
+                                    value="BUY"
+                                    checked={formData.type === "BUY"}
+                                    onChange={() => setFormData(prev => ({ ...prev, type: "BUY" }))}
+                                    style={{ accentColor: "#587560" }}
+                                />
+                                <span style={{ fontSize: "0.72rem", color: formData.type === "BUY" ? "#587560" : "#6b7c6a", fontFamily: "'DM Mono', monospace" }}>BUY</span>
+                            </label>
+                            <label className="flex items-center gap-2" style={{ cursor: "pointer" }}>
+                                <input
+                                    type="radio"
+                                    name="type"
+                                    value="SELL"
+                                    checked={formData.type === "SELL"}
+                                    onChange={() => setFormData(prev => ({ ...prev, type: "SELL" }))}
+                                    style={{ accentColor: "#8b5e3c" }}
+                                />
+                                <span style={{ fontSize: "0.72rem", color: formData.type === "SELL" ? "#8b5e3c" : "#6b7c6a", fontFamily: "'DM Mono', monospace" }}>SELL</span>
+                            </label>
+                        </div>
+                    </div>
+
                     {/* Quantity */}
                     <div>
                         <label htmlFor="quantity" style={labelStyle}>Quantity</label>
@@ -196,19 +224,26 @@ const AddHoldingModal = () => {
                         />
                     </div>
 
-                    {/* Buy Price */}
+                    {/* Price */}
                     <div>
-                        <label style={labelStyle}>Buy Price <span style={{ color: "#3d4a3e" }}>/ USD</span></label>
+                        <label style={labelStyle}>Price <span style={{ color: "#3d4a3e" }}>/ USD</span></label>
                         <input
                             type="number"
-                            value={formData.buyPrice}
-                            onChange={(e) => setFormData((prev) => ({ ...prev, buyPrice: e.target.value }))}
+                            value={formData.price}
+                            onChange={(e) => setFormData((prev) => ({ ...prev, price: e.target.value }))}
                             placeholder="0.00"
                             style={inputStyle}
                             onFocus={e => e.currentTarget.style.borderColor = "rgba(196,136,90,0.5)"}
                             onBlur={e => e.currentTarget.style.borderColor = "rgba(61,74,62,0.4)"}
                         />
                     </div>
+
+                    {/* Error Message */}
+                    {errorMessage && (
+                        <div style={{ color: "#8b5e3c", fontSize: "0.65rem", letterSpacing: "0.05em", marginTop: "10px" }}>
+                            {errorMessage}
+                        </div>
+                    )}
 
                     {/* Actions */}
                     <div className="flex justify-end gap-3" style={{ borderTop: "1px solid rgba(61,74,62,0.2)", paddingTop: "20px" }}>

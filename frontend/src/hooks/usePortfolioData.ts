@@ -1,11 +1,11 @@
-import { useGetPortfolioQuery, useGetPortfolioStatsQuery } from "../services/portfolioApi";
+import { useGetTransactionsQuery, useGetPortfolioStatsQuery } from "../services/portfolioApi";
 
 export const usePortfolioData = () => {
     const {
-        data: portfolioData,
-        isLoading: portfolioLoading,
-        error: portfolioError,
-    } = useGetPortfolioQuery(undefined, {
+        data: transactionsData,
+        isLoading: transactionsLoading,
+        error: transactionsError,
+    } = useGetTransactionsQuery(undefined, {
         pollingInterval: 30000,
     });
 
@@ -18,11 +18,11 @@ export const usePortfolioData = () => {
     });
 
     return {
-        portfolioData,
+        transactionsData,
         statsData,
-        portfolioLoading,
+        transactionsLoading,
         statsLoading,
-        portfolioError,
+        transactionsError,
         statsError,
     };
 };

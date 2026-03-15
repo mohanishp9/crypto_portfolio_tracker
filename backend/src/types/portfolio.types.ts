@@ -1,19 +1,29 @@
 import { Types } from "mongoose";
 
-export interface IHolding {
+export interface ITransaction {
+    user?: Types.ObjectId;
     coinId: string;
-    coinName: string;
     coinSymbol: string;
+    coinName: string;
+    type: "BUY" | "SELL";
     quantity: number;
-    buyPrice: number;
-    purchaseDate: Date;
-    _id?: Types.ObjectId;
+    price: number;
+    fee?: number;
+    timestamp: Date;
 }
 
-export interface IPortfolio {
-    _id?: Types.ObjectId;
-    user: Types.ObjectId;
-    holdings: Types.DocumentArray<IHolding>;
-    createdAt: Date;
-    updatedAt: Date;
+export type TransactionType = "BUY" | "SELL";
+
+export interface Transaction {
+    coinId: string;
+    quantity: number;
+    price: number;
+    fee?: number;
+    type: TransactionType;
+}
+
+export interface Holding {
+    quantity: number;
+    totalCost: number;
+    realizedProfit: number;
 }

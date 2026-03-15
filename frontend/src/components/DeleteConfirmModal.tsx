@@ -1,26 +1,30 @@
 import { useSelector, useDispatch } from "react-redux";
 import type { RootState } from "../app/store";
-import { useDeleteHoldingMutation } from "../services/portfolioApi";
-import { closeDeleteModal, clearSelectedHolding } from "../features/portfolio/portfolioSlice";
+import { useDeleteTransactionMutation } from "../services/portfolioApi";
+import { closeDeleteModal, clearSelectedTransaction } from "../features/portfolio/portfolioSlice";
 
 const DeleteConfirmModal = () => {
     const dispatch = useDispatch();
-    const [deleteHolding, { isLoading }] = useDeleteHoldingMutation();
-    const selectedHolding = useSelector((state: RootState) => state.portfolio.selectedHolding);
+    const [deleteTransaction, { isLoading }] = useDeleteTransactionMutation();
+    const selectedTransaction = useSelector((state: RootState) => state.portfolio.selectedTransaction);
     const isDeleteModalOpen = useSelector((state: RootState) => state.portfolio.isDeleteModalOpen);
 
-    if (!isDeleteModalOpen || !selectedHolding) return null;
+    if (!isDeleteModalOpen || !selectedTransaction) return null;
 
     const handleDelete = async () => {
-        if (!selectedHolding?._id) return;
-        await deleteHolding(selectedHolding._id).unwrap();
-        dispatch(closeDeleteModal());
-        dispatch(clearSelectedHolding());
+        if (!selectedTransaction?._id) return;
+        try {
+            await deleteTransaction(selectedTransaction._id).unwrap();
+            dispatch(closeDeleteModal());
+            dispatch(clearSelectedTransaction());
+        } catch (err) {
+            console.error(err);
+        }
     };
 
     const handleCancel = () => {
         dispatch(closeDeleteModal());
-        dispatch(clearSelectedHolding());
+        dispatch(clearSelectedTransaction());
     };
 
     return (
@@ -44,14 +48,14 @@ const DeleteConfirmModal = () => {
                         className="font-light"
                         style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.4rem", color: "#ede8dd", letterSpacing: "0.04em" }}
                     >
-                        Delete <span style={{ fontStyle: "italic", color: "#c4885a" }}>{selectedHolding.coinName}</span>
+                        Delete <span style={{ fontStyle: "italic", color: "#c4885a" }}>{selectedTransaction.coinName} Transaction</span>
                     </h2>
                 </div>
 
                 {/* Body */}
                 <div className="px-7 py-6">
                     <p style={{ fontSize: "0.65rem", letterSpacing: "0.08em", color: "#6b7c6a", lineHeight: 1.8 }}>
-                        This holding will be permanently removed from your grove. This action cannot be undone.
+                        This transaction will be permanently removed from your history. This action cannot be undone.
                     </p>
                 </div>
 

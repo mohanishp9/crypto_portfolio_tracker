@@ -1,15 +1,13 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import type {
-    GetPortfolioResponse,
     PortfolioMutationResponse,
     PortfolioStatsResponse,
-    AddHoldingInput,
-    UpdateHoldingInput,
-    DeleteHoldingInput
+    AddTransactionInput,
 } from '../types/portfolio.types';
 
 import type {
-    CoinSearchResult
+    CoinSearchResult,
+    TopCoin
 } from '../types/coin.types';
 
 export const portfolioApi = createApi({
@@ -25,38 +23,27 @@ export const portfolioApi = createApi({
 
     // Define endpoints
     endpoints: (builder) => ({
-        // getPortfolio
-        getPortfolio: builder.query<GetPortfolioResponse, void>({
-            query: () => '/portfolio',
+        // getTransactions (formerly getPortfolio)
+        getTransactions: builder.query<{ success: boolean; transactions: any[] }, void>({
+            query: () => '/portfolio/transactions',
             providesTags: ['Portfolio'],
         }),
 
-        // addHolding
-        addHolding: builder.mutation<PortfolioMutationResponse, AddHoldingInput>({
-            query: (holding) => ({
-                url: '/portfolio/holdings',
+        // addTransaction
+        addTransaction: builder.mutation<PortfolioMutationResponse, AddTransactionInput>({
+            query: (transaction) => ({
+                url: '/portfolio/transactions',
                 method: 'POST',
-                body: holding,
+                body: transaction,
             }),
             invalidatesTags: ['Portfolio'],
         }),
 
-        // updateHolding
-        updateHolding: builder.mutation<PortfolioMutationResponse, UpdateHoldingInput>({
-            query: ({ holdingId, ...body }) => ({
-                url: `/portfolio/holdings/${holdingId}`,
-                method: 'PUT',
-                body: body, // Only send quantity and buyPrice
-            }),
-            invalidatesTags: ['Portfolio'],
-        }),
-
-        //deleteHolding
-        deleteHolding: builder.mutation<PortfolioMutationResponse, DeleteHoldingInput>({
-            query: (holdingId) => ({
-                url: `/portfolio/holdings/${holdingId}`,
+        // deleteTransaction
+        deleteTransaction: builder.mutation<PortfolioMutationResponse, string>({
+            query: (id) => ({
+                url: `/portfolio/transactions/${id}`,
                 method: 'DELETE',
-                // body: holdingId,
             }),
             invalidatesTags: ['Portfolio'],
         }),
@@ -71,14 +58,18 @@ export const portfolioApi = createApi({
             query: (searchTerm) => `/portfolio/search?query=${searchTerm}`,
             transformResponse: (response: { success: boolean; coins: CoinSearchResult[] }) => response.coins,
         }),
+
+        getTopCoins: builder.query<{ success: boolean; coins: TopCoin[] }, void>({
+            query: () => '/market/top?limit=10'
+        })
     }),
 });
 
 export const {
-    useGetPortfolioQuery,
-    useAddHoldingMutation,
-    useUpdateHoldingMutation,
-    useDeleteHoldingMutation,
+    useGetTransactionsQuery,
+    useAddTransactionMutation,
+    useDeleteTransactionMutation,
     useGetPortfolioStatsQuery,
     useSearchCoinsQuery,
+    useGetTopCoinsQuery,
 } = portfolioApi;
