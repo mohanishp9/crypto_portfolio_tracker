@@ -6,11 +6,17 @@ import { connectDB } from "./config/db";
 import authRoutes from "./routes/auth.routes";
 import portfolioRoutes from "./routes/portfolio.routes";
 import marketRoutes from "./routes/market.routes";
+import helmet from "helmet";
 dotenv.config();
 
 const app: Application = express();
 const PORT = process.env.PORT || 5000;
 
+app.use(
+    helmet({
+      contentSecurityPolicy: false
+    })
+  );
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(
