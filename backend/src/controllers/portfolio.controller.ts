@@ -118,13 +118,18 @@ const getPortfolioStatsController = asyncHandler(async (req: Request, res: Respo
 
 const deleteTransactionController = asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
-    const transaction = await Transaction.findOneAndDelete({ _id: id, usre: req.user?._id });
+
+    const transaction = await Transaction.findOneAndDelete({
+        _id: id,
+        user: req.user?._id,
+    });
 
     if (!transaction) {
         res.status(404);
         throw new Error("Transaction not found");
     }
-    res.json({ success: true, id });
+
+    res.status(200).json({ success: true, id });
 });
 
 const searchCoinsController = asyncHandler(async (req: Request, res: Response) => {
