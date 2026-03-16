@@ -17,6 +17,11 @@ export const portfolioApi = createApi({
     baseQuery: fetchBaseQuery({
         baseUrl: import.meta.env.VITE_API_URL,
         credentials: 'include', // Send cookies with requests
+        prepareHeaders: (headers) => {
+            const token = localStorage.getItem('token');
+            if (token) headers.set('authorization', `Bearer ${token}`);
+            return headers;
+        },
     }),
 
     tagTypes: ['Portfolio'],

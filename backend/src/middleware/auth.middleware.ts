@@ -8,7 +8,10 @@ import { JWTPayload } from "../utils/jwt";
 
 const protect = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
 
-    const token = req.cookies.token;
+    const cookieToken = req.cookies?.token as string | undefined;
+    const authHeader = req.headers.authorization;
+    const bearerToken = authHeader?.startsWith("Bearer ") ? authHeader.slice("Bearer ".length) : undefined;
+    const token = cookieToken || bearerToken;
 
     if (!token) {
         res.status(401);
