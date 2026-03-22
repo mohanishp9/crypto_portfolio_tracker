@@ -12,7 +12,7 @@ import Profile from './pages/Profile';
 function App() {
   const { isAuthenticated } = useSelector((state: RootState) => state.auth);
 
-
+//
   return (
     <Routes>
       <Route path="/" element={isAuthenticated ? <Navigate to="/dashboard" /> : <Navigate to="/login" />} />
