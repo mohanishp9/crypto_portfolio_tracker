@@ -11,6 +11,9 @@ export const calculatePortfolio = (transactions: Transaction[]) => {
 
         if (!holdings[tx.coinId]) {
             holdings[tx.coinId] = {
+                coinId: tx.coinId,
+                coinName: tx.coinName,
+                coinSymbol: tx.coinSymbol,
                 quantity: 0,
                 totalCost: 0,
                 realizedProfit: 0

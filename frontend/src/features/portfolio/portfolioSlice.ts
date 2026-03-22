@@ -27,7 +27,6 @@ const portfolioSlice = createSlice({
 
         openAddModal: (state) => {
             state.isAddModalOpen = true;
-            state.selectedTransaction = null;
         },
 
         closeAddModal: (state) => {

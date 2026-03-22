@@ -6,6 +6,8 @@ import { connectDB } from "./config/db";
 import authRoutes from "./routes/auth.routes";
 import portfolioRoutes from "./routes/portfolio.routes";
 import marketRoutes from "./routes/market.routes";
+import watchlistRoutes from "./routes/watchlist.routes";
+import alertsRoutes from "./routes/alerts.routes";
 import helmet from "helmet";
 dotenv.config();
 
@@ -39,6 +41,8 @@ app.use(cookieParser());
 app.use("/api/auth", authRoutes);
 app.use('/api/portfolio', portfolioRoutes);
 app.use('/api/market', marketRoutes);
+app.use('/api/watchlist', watchlistRoutes);
+app.use('/api/alerts', alertsRoutes);
 
 app.use((_req: Request, res: Response) => {
     res.status(404).json({ success: false, message: 'Route not found' });

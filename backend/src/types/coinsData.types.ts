@@ -25,5 +25,28 @@ export interface MarketCoin {
     image: string;
     current_price: number;
     market_cap: number;
+    market_cap_rank: number;
     price_change_percentage_24h: number;
+}
+
+export interface CoinDetail {
+    id: string;
+    symbol: string;
+    name: string;
+    description: string;
+    image: string;
+    homepage?: string;
+    currentPrice: number;
+    priceChange24h: number;
+    marketCapRank?: number;
+    marketCap?: number;
+    high24h?: number;
+    low24h?: number;
+}
+
+export interface CachedResponse<T> {
+    data: T;
+    lastUpdated: string;
+    stale: boolean;
+    staleReason?: string;
 }
