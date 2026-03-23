@@ -16,9 +16,9 @@ const PORT = process.env.PORT || 5000;
 
 app.use(
     helmet({
-      contentSecurityPolicy: false
+        contentSecurityPolicy: false
     })
-  );
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(
@@ -27,6 +27,7 @@ app.use(
             "http://localhost:5173",
             "https://grove-portfolio.onrender.com",
             "https://grove-crypto-tracker.vercel.app",
+            "https://grove-crypto-portfolio-tracker2.vercel.app",
         ],
         credentials: true,
     })
