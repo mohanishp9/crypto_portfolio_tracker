@@ -47,8 +47,63 @@ const CHART_COINS = [
     { id: 'ripple', symbol: 'XRP', color: '#00AAE4' },
 ];
 
+const MOCK_COINS: CoinMarket[] = [
+    { id: 'bitcoin', symbol: 'btc', name: 'Bitcoin', image: 'https://coin-images.coingecko.com/coins/images/1/large/bitcoin.png', current_price: 65000, market_cap: 1200000000000, price_change_percentage_24h: 2.5, market_cap_rank: 1 },
+    { id: 'ethereum', symbol: 'eth', name: 'Ethereum', image: 'https://coin-images.coingecko.com/coins/images/279/large/ethereum.png', current_price: 3500, market_cap: 400000000000, price_change_percentage_24h: 1.2, market_cap_rank: 2 },
+    { id: 'tether', symbol: 'usdt', name: 'Tether', image: 'https://coin-images.coingecko.com/coins/images/325/large/Tether.png', current_price: 1, market_cap: 100000000000, price_change_percentage_24h: 0.01, market_cap_rank: 3 },
+    { id: 'binancecoin', symbol: 'bnb', name: 'BNB', image: 'https://coin-images.coingecko.com/coins/images/825/large/bnb-icon2_2x.png', current_price: 600, market_cap: 90000000000, price_change_percentage_24h: -1.5, market_cap_rank: 4 },
+    { id: 'solana', symbol: 'sol', name: 'Solana', image: 'https://coin-images.coingecko.com/coins/images/4128/large/solana.png', current_price: 150, market_cap: 70000000000, price_change_percentage_24h: 5.5, market_cap_rank: 5 },
+    { id: 'usd-coin', symbol: 'usdc', name: 'USDC', image: 'https://coin-images.coingecko.com/coins/images/6319/large/usdc.png', current_price: 1, market_cap: 32000000000, price_change_percentage_24h: -0.01, market_cap_rank: 6 },
+    { id: 'ripple', symbol: 'xrp', name: 'XRP', image: 'https://coin-images.coingecko.com/coins/images/44/large/xrp-symbol-white-128.png', current_price: 0.6, market_cap: 30000000000, price_change_percentage_24h: 0.5, market_cap_rank: 7 },
+    { id: 'steth', symbol: 'steth', name: 'Lido Staked Ether', image: 'https://coin-images.coingecko.com/coins/images/13442/large/steth_logo.png', current_price: 3500, market_cap: 25000000000, price_change_percentage_24h: 1.2, market_cap_rank: 8 },
+    { id: 'dogecoin', symbol: 'doge', name: 'Dogecoin', image: 'https://coin-images.coingecko.com/coins/images/5/large/dogecoin.png', current_price: 0.15, market_cap: 22000000000, price_change_percentage_24h: 10.2, market_cap_rank: 9 },
+    { id: 'toncoin', symbol: 'ton', name: 'Toncoin', image: 'https://coin-images.coingecko.com/coins/images/17980/large/ton_symbol.png', current_price: 6.5, market_cap: 20000000000, price_change_percentage_24h: 3.1, market_cap_rank: 10 }
+];
+
+const MOCK_GLOBAL: GlobalData = {
+    total_market_cap: 2500000000000,
+    total_volume_24h: 100000000000,
+    btc_dominance: 52.5
+};
+
+const MOCK_CHART = Array.from({ length: 7 * 24 }, (_, i) => ({
+    timestamp: Date.now() - (7 * 24 - i) * 3600000,
+    price: 60000 + Math.random() * 5000
+}));
+
+const MOCK_CHARTS: CoinCharts = {
+    bitcoin: MOCK_CHART,
+    ethereum: MOCK_CHART.map(p => ({ ...p, price: p.price * 0.05 })),
+    solana: MOCK_CHART.map(p => ({ ...p, price: p.price * 0.002 })),
+    binancecoin: MOCK_CHART.map(p => ({ ...p, price: p.price * 0.01 })),
+    ripple: MOCK_CHART.map(p => ({ ...p, price: p.price * 0.00001 }))
+};
+
 function isFresh<T>(entry: CacheEntry<T> | null): entry is CacheEntry<T> {
     return entry !== null && Date.now() - entry.timestamp < CACHE_TTL;
+}
+
+function getCachedItem<T>(key: string): CacheEntry<T> | null {
+    try {
+        const item = localStorage.getItem(key);
+        if (item) {
+            const parsed = JSON.parse(item);
+            if (Date.now() - parsed.timestamp < CACHE_TTL) {
+                return parsed;
+            }
+        }
+    } catch (e) {
+        // ignore
+    }
+    return null;
+}
+
+function setCachedItem<T>(key: string, data: CacheEntry<T>) {
+    try {
+        localStorage.setItem(key, JSON.stringify(data));
+    } catch (e) {
+        // ignore
+    }
 }
 
 // ── Formatters ─────────────────────────────────────────────────
@@ -83,10 +138,15 @@ const LandingPage = () => {
     const [activeChartTab, setActiveChartTab] = useState('bitcoin');
 
     const fetchMarketData = useCallback(async () => {
+        let cachedCoins = coinsCache || getCachedItem<CoinMarket[]>('grove_coins');
+        let cachedGlobal = globalCache || getCachedItem<GlobalData>('grove_global');
+
         // Return cached data if fresh
-        if (isFresh(coinsCache) && isFresh(globalCache)) {
-            setCoins(coinsCache.data);
-            setGlobalData(globalCache.data);
+        if (isFresh(cachedCoins) && isFresh(cachedGlobal)) {
+            coinsCache = cachedCoins;
+            globalCache = cachedGlobal;
+            setCoins(cachedCoins.data);
+            setGlobalData(cachedGlobal.data);
             setLoading(false);
             return;
         }
@@ -126,15 +186,25 @@ const LandingPage = () => {
                 btc_dominance: globalJson.data?.market_cap_percentage?.btc ?? 0,
             };
 
-            // Persist in module-level cache
+            // Persist in module-level cache and localStorage
             const now = Date.now();
             coinsCache = { data: parsedCoins, timestamp: now };
             globalCache = { data: parsedGlobal, timestamp: now };
+            setCachedItem('grove_coins', coinsCache);
+            setCachedItem('grove_global', globalCache);
 
             setCoins(parsedCoins);
             setGlobalData(parsedGlobal);
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to fetch market data');
+            console.warn('Failed to fetch market data, using fallback data', err);
+            // Fallback to cache (even if stale) or mock data
+            if (cachedCoins && cachedGlobal) {
+                setCoins((cachedCoins as CacheEntry<CoinMarket[]>).data);
+                setGlobalData((cachedGlobal as CacheEntry<GlobalData>).data);
+            } else {
+                setCoins(MOCK_COINS);
+                setGlobalData(MOCK_GLOBAL);
+            }
         } finally {
             setLoading(false);
         }
@@ -145,8 +215,11 @@ const LandingPage = () => {
     }, [fetchMarketData]);
 
     const fetchChartsData = useCallback(async () => {
-        if (chartsCache && Date.now() - chartsCache.timestamp < 10 * 60 * 1000) {
-            setChartData(chartsCache.data);
+        let cachedCharts = chartsCache || getCachedItem<CoinCharts>('grove_charts');
+        
+        if (isFresh(cachedCharts)) {
+            chartsCache = cachedCharts;
+            setChartData(cachedCharts.data);
             setChartLoading(false);
             return;
         }
@@ -155,21 +228,28 @@ const LandingPage = () => {
             const responses = await Promise.all(
                 CHART_COINS.map(c => fetch(`https://api.coingecko.com/api/v3/coins/${c.id}/market_chart?vs_currency=usd&days=7`))
             );
+            
+            if (responses.some(r => !r.ok)) {
+                throw new Error('CoinGecko API returned an error for chart data');
+            }
+
             const newChartData: CoinCharts = {};
             for (let i = 0; i < CHART_COINS.length; i++) {
-                if (responses[i].ok) {
-                    const json = await responses[i].json();
-                    newChartData[CHART_COINS[i].id] = json.prices.map((p: [number, number]) => ({
-                        timestamp: p[0], price: p[1]
-                    }));
-                } else {
-                    newChartData[CHART_COINS[i].id] = [];
-                }
+                const json = await responses[i].json();
+                newChartData[CHART_COINS[i].id] = json.prices.map((p: [number, number]) => ({
+                    timestamp: p[0], price: p[1]
+                }));
             }
             chartsCache = { data: newChartData, timestamp: Date.now() };
+            setCachedItem('grove_charts', chartsCache);
             setChartData(newChartData);
         } catch (err) {
-            console.error('Failed to fetch chart data', err);
+            console.warn('Failed to fetch chart data, using fallback data', err);
+            if (cachedCharts) {
+                setChartData((cachedCharts as CacheEntry<CoinCharts>).data);
+            } else {
+                setChartData(MOCK_CHARTS);
+            }
         } finally {
             setChartLoading(false);
         }
@@ -820,8 +900,11 @@ const LandingPage = () => {
                                     <ResponsiveContainer width="100%" height="100%">
                                         <PieChart>
                                             <Pie
-                                                data={coins}
-                                                dataKey="market_cap"
+                                                data={coins.map(coin => ({
+                                                    ...coin,
+                                                    value: coin.market_cap // Pie chart needs 'value' key or specific mapping
+                                                }))}
+                                                dataKey="value"
                                                 nameKey="symbol"
                                                 cx="50%"
                                                 cy="50%"
@@ -870,7 +953,7 @@ const LandingPage = () => {
                                                 <LabelList 
                                                     dataKey="price_change_percentage_24h" 
                                                     position="right" 
-                                                    formatter={(val: number) => fmtPct(val)} 
+                                                    formatter={(val: any) => fmtPct(Number(val))} 
                                                     style={{ fill: '#9aab97', fontSize: 9, fontFamily: "'DM Mono', monospace" }}
                                                 />
                                             </Bar>
