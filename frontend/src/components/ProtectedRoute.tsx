@@ -9,9 +9,9 @@ interface ProtectedRouteProps {
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     const { isAuthenticated } = useSelector((state: RootState) => state.auth);
 
-    // If not authenticated, redirect to login
+    // If not authenticated, redirect to landing page
     if (!isAuthenticated) {
-        return <Navigate to="/login" replace />;
+        return <Navigate to="/" replace />;
     }
 
     // If authenticated, render the protected content

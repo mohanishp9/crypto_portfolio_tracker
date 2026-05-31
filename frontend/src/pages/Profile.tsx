@@ -16,10 +16,10 @@ const Profile = () => {
         try {
             await logoutMutation().unwrap();
             dispatch(logoutAction());
-            navigate("/login");
+            navigate("/");
         } catch {
             dispatch(logoutAction());
-            navigate("/login");
+            navigate("/");
         }
     };
 

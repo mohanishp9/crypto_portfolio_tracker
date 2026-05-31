@@ -44,7 +44,7 @@ const Dashboard = () => {
   useEffect(() => {
     if (error && "status" in error && error.status === 401) {
       dispatch(logoutAction());
-      navigate("/login");
+      navigate("/");
     }
   }, [error, navigate, dispatch]);
 
@@ -53,7 +53,7 @@ const Dashboard = () => {
       await logoutMutation().unwrap();
     } finally {
       dispatch(logoutAction());
-      navigate("/login");
+      navigate("/");
     }
   };
 
