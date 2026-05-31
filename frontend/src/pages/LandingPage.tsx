@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import type { RootState } from '../app/store';
 import { BarChart3, Bell, Eye, ArrowLeftRight, Activity, FolderInput } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar, LabelList } from 'recharts';
@@ -128,6 +130,7 @@ const formatTooltipDate = (ts: number) => new Date(ts).toLocaleString('en-US', {
 // ── Component ──────────────────────────────────────────────────
 
 const LandingPage = () => {
+    const { isAuthenticated } = useSelector((state: RootState) => state.auth);
     const [coins, setCoins] = useState<CoinMarket[]>([]);
     const [globalData, setGlobalData] = useState<GlobalData | null>(null);
     const [loading, setLoading] = useState(true);
@@ -341,61 +344,94 @@ const LandingPage = () => {
                             </span>
                         </Link>
 
-                        {/* Right — Login + Sign Up */}
+                        {/* Right — Login + Sign Up or Dashboard */}
                         <div className="flex items-center gap-4">
-                            <Link
-                                to="/login"
-                                style={{
-                                    background: 'transparent',
-                                    border: 'none',
-                                    fontSize: '0.6rem',
-                                    letterSpacing: '0.25em',
-                                    textTransform: 'uppercase',
-                                    color: '#9aab97',
-                                    fontFamily: "'DM Mono', monospace",
-                                    textDecoration: 'none',
-                                    padding: '6px 0',
-                                    transition: 'color 0.2s',
-                                }}
-                                onMouseEnter={e => (e.currentTarget.style.color = '#ede8dd')}
-                                onMouseLeave={e => (e.currentTarget.style.color = '#9aab97')}
-                            >
-                                Login
-                            </Link>
+                            {isAuthenticated ? (
+                                <Link
+                                    to="/dashboard"
+                                    className="transition-all duration-300"
+                                    style={{
+                                        border: '1px solid rgba(196,136,90,0.4)',
+                                        color: '#c4885a',
+                                        fontFamily: "'DM Mono', monospace",
+                                        fontSize: '0.6rem',
+                                        letterSpacing: '0.25em',
+                                        textTransform: 'uppercase',
+                                        padding: '8px 18px',
+                                        textDecoration: 'none',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '8px',
+                                    }}
+                                    onMouseEnter={e => {
+                                        e.currentTarget.style.background = '#c4885a';
+                                        e.currentTarget.style.color = '#1a1c1a';
+                                    }}
+                                    onMouseLeave={e => {
+                                        e.currentTarget.style.background = 'transparent';
+                                        e.currentTarget.style.color = '#c4885a';
+                                    }}
+                                >
+                                    <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '0.9rem', fontWeight: 300 }}>→</span>
+                                    Dashboard
+                                </Link>
+                            ) : (
+                                <>
+                                    <Link
+                                        to="/login"
+                                        style={{
+                                            background: 'transparent',
+                                            border: 'none',
+                                            fontSize: '0.6rem',
+                                            letterSpacing: '0.25em',
+                                            textTransform: 'uppercase',
+                                            color: '#9aab97',
+                                            fontFamily: "'DM Mono', monospace",
+                                            textDecoration: 'none',
+                                            padding: '6px 0',
+                                            transition: 'color 0.2s',
+                                        }}
+                                        onMouseEnter={e => (e.currentTarget.style.color = '#ede8dd')}
+                                        onMouseLeave={e => (e.currentTarget.style.color = '#9aab97')}
+                                    >
+                                        Login
+                                    </Link>
 
-                            <div
-                                className="hidden sm:block"
-                                style={{ width: 1, height: 20, background: 'rgba(61,74,62,0.5)' }}
-                            />
+                                    <div
+                                        className="hidden sm:block"
+                                        style={{ width: 1, height: 20, background: 'rgba(61,74,62,0.5)' }}
+                                    />
 
-                            <Link
-                                to="/register"
-                                className="transition-all duration-300"
-                                style={{
-                                    border: '1px solid rgba(196,136,90,0.4)',
-                                    color: '#c4885a',
-                                    fontFamily: "'DM Mono', monospace",
-                                    fontSize: '0.6rem',
-                                    letterSpacing: '0.25em',
-                                    textTransform: 'uppercase',
-                                    padding: '8px 18px',
-                                    textDecoration: 'none',
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    gap: '8px',
-                                }}
-                                onMouseEnter={e => {
-                                    e.currentTarget.style.background = '#c4885a';
-                                    e.currentTarget.style.color = '#1a1c1a';
-                                }}
-                                onMouseLeave={e => {
-                                    e.currentTarget.style.background = 'transparent';
-                                    e.currentTarget.style.color = '#c4885a';
-                                }}
-                            >
-                                <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '0.9rem', fontWeight: 300 }}>→</span>
-                                Sign Up
-                            </Link>
+                                    <Link
+                                        to="/register"
+                                        className="transition-all duration-300"
+                                        style={{
+                                            border: '1px solid rgba(196,136,90,0.4)',
+                                            color: '#c4885a',
+                                            fontFamily: "'DM Mono', monospace",
+                                            fontSize: '0.6rem',
+                                            letterSpacing: '0.25em',
+                                            textTransform: 'uppercase',
+                                            padding: '8px 18px',
+                                            textDecoration: 'none',
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            gap: '8px',
+                                        }}
+                                        onMouseEnter={e => {
+                                            e.currentTarget.style.background = '#c4885a';
+                                            e.currentTarget.style.color = '#1a1c1a';
+                                        }}
+                                        onMouseLeave={e => {
+                                            e.currentTarget.style.background = 'transparent';
+                                            e.currentTarget.style.color = '#c4885a';
+                                        }}
+                                    >
+                                        <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '0.9rem', fontWeight: 300 }}>→</span>
+                                        Sign Up
+                                    </Link>
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -528,68 +564,102 @@ const LandingPage = () => {
                     className="flex flex-col sm:flex-row items-center gap-4 mt-10"
                     style={{ animation: 'heroFadeIn 0.8s ease-out 0.6s both' }}
                 >
-                    {/* Primary — Get Started */}
-                    <Link
-                        to="/register"
-                        id="hero-cta-register"
-                        className="transition-all duration-300"
-                        style={{
-                            border: '1px solid rgba(196,136,90,0.4)',
-                            background: '#c4885a',
-                            color: '#1a1c1a',
-                            fontFamily: "'DM Mono', monospace",
-                            fontSize: '0.62rem',
-                            letterSpacing: '0.3em',
-                            textTransform: 'uppercase',
-                            padding: '14px 36px',
-                            textDecoration: 'none',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '10px',
-                        }}
-                        onMouseEnter={e => {
-                            e.currentTarget.style.background = 'transparent';
-                            e.currentTarget.style.color = '#c4885a';
-                        }}
-                        onMouseLeave={e => {
-                            e.currentTarget.style.background = '#c4885a';
-                            e.currentTarget.style.color = '#1a1c1a';
-                        }}
-                    >
-                        <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1rem', fontWeight: 300 }}>→</span>
-                        Get Started
-                    </Link>
+                    {isAuthenticated ? (
+                        <Link
+                            to="/dashboard"
+                            className="transition-all duration-300"
+                            style={{
+                                border: '1px solid rgba(196,136,90,0.4)',
+                                background: '#c4885a',
+                                color: '#1a1c1a',
+                                fontFamily: "'DM Mono', monospace",
+                                fontSize: '0.62rem',
+                                letterSpacing: '0.3em',
+                                textTransform: 'uppercase',
+                                padding: '14px 36px',
+                                textDecoration: 'none',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '10px',
+                            }}
+                            onMouseEnter={e => {
+                                e.currentTarget.style.background = 'transparent';
+                                e.currentTarget.style.color = '#c4885a';
+                            }}
+                            onMouseLeave={e => {
+                                e.currentTarget.style.background = '#c4885a';
+                                e.currentTarget.style.color = '#1a1c1a';
+                            }}
+                        >
+                            <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1rem', fontWeight: 300 }}>→</span>
+                            Go to Dashboard
+                        </Link>
+                    ) : (
+                        <>
+                            {/* Primary — Get Started */}
+                            <Link
+                                to="/register"
+                                id="hero-cta-register"
+                                className="transition-all duration-300"
+                                style={{
+                                    border: '1px solid rgba(196,136,90,0.4)',
+                                    background: '#c4885a',
+                                    color: '#1a1c1a',
+                                    fontFamily: "'DM Mono', monospace",
+                                    fontSize: '0.62rem',
+                                    letterSpacing: '0.3em',
+                                    textTransform: 'uppercase',
+                                    padding: '14px 36px',
+                                    textDecoration: 'none',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '10px',
+                                }}
+                                onMouseEnter={e => {
+                                    e.currentTarget.style.background = 'transparent';
+                                    e.currentTarget.style.color = '#c4885a';
+                                }}
+                                onMouseLeave={e => {
+                                    e.currentTarget.style.background = '#c4885a';
+                                    e.currentTarget.style.color = '#1a1c1a';
+                                }}
+                            >
+                                <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1rem', fontWeight: 300 }}>→</span>
+                                Get Started
+                            </Link>
 
-                    {/* Secondary — Login */}
-                    <Link
-                        to="/login"
-                        id="hero-cta-login"
-                        className="transition-all duration-300"
-                        style={{
-                            border: '1px solid rgba(61,74,62,0.4)',
-                            background: 'transparent',
-                            color: '#9aab97',
-                            fontFamily: "'DM Mono', monospace",
-                            fontSize: '0.62rem',
-                            letterSpacing: '0.3em',
-                            textTransform: 'uppercase',
-                            padding: '14px 36px',
-                            textDecoration: 'none',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '10px',
-                        }}
-                        onMouseEnter={e => {
-                            e.currentTarget.style.borderColor = 'rgba(154,171,151,0.5)';
-                            e.currentTarget.style.color = '#ede8dd';
-                        }}
-                        onMouseLeave={e => {
-                            e.currentTarget.style.borderColor = 'rgba(61,74,62,0.4)';
-                            e.currentTarget.style.color = '#9aab97';
-                        }}
-                    >
-                        Login
-                    </Link>
+                            {/* Secondary — Login */}
+                            <Link
+                                to="/login"
+                                id="hero-cta-login"
+                                className="transition-all duration-300"
+                                style={{
+                                    border: '1px solid rgba(61,74,62,0.4)',
+                                    background: 'transparent',
+                                    color: '#9aab97',
+                                    fontFamily: "'DM Mono', monospace",
+                                    fontSize: '0.62rem',
+                                    letterSpacing: '0.3em',
+                                    textTransform: 'uppercase',
+                                    padding: '14px 36px',
+                                    textDecoration: 'none',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '10px',
+                                }}
+                                onMouseEnter={e => {
+                                    e.currentTarget.style.borderColor = 'rgba(154,171,151,0.5)';
+                                    e.currentTarget.style.color = '#ede8dd';
+                                }}
+                                onMouseLeave={e => {
+                                    e.currentTarget.style.borderColor = 'rgba(61,74,62,0.4)';
+                                    e.currentTarget.style.color = '#9aab97';
+                                }}
+                            >
+                                Login
+                            </Link>
+                        </>
+                    )}
                 </div>
             </section>
 
@@ -1051,7 +1121,7 @@ const LandingPage = () => {
                     {/* CTA */}
                     <div className="flex flex-col items-center mt-14">
                         <Link
-                            to="/register"
+                            to={isAuthenticated ? "/dashboard" : "/register"}
                             id="how-it-works-cta"
                             className="transition-all duration-300"
                             style={{
@@ -1078,7 +1148,7 @@ const LandingPage = () => {
                             }}
                         >
                             <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1rem', fontWeight: 300 }}>→</span>
-                            Start Tracking Free
+                            {isAuthenticated ? "Go to Dashboard" : "Start Tracking Free"}
                         </Link>
 
                         <div className="mt-10" style={{ width: 40, height: 1, background: 'rgba(196,136,90,0.25)' }} />
@@ -1200,12 +1270,20 @@ const LandingPage = () => {
                         
                         {/* Links */}
                         <div className="flex items-center gap-6">
-                            <Link to="/login" style={{ fontSize: '0.55rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#9aab97', fontFamily: "'DM Mono', monospace", textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#ede8dd'} onMouseLeave={e => e.currentTarget.style.color = '#9aab97'}>
-                                Login
-                            </Link>
-                            <Link to="/register" style={{ fontSize: '0.55rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#9aab97', fontFamily: "'DM Mono', monospace", textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#ede8dd'} onMouseLeave={e => e.currentTarget.style.color = '#9aab97'}>
-                                Sign Up
-                            </Link>
+                            {isAuthenticated ? (
+                                <Link to="/dashboard" style={{ fontSize: '0.55rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#9aab97', fontFamily: "'DM Mono', monospace", textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#ede8dd'} onMouseLeave={e => e.currentTarget.style.color = '#9aab97'}>
+                                    Dashboard
+                                </Link>
+                            ) : (
+                                <>
+                                    <Link to="/login" style={{ fontSize: '0.55rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#9aab97', fontFamily: "'DM Mono', monospace", textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#ede8dd'} onMouseLeave={e => e.currentTarget.style.color = '#9aab97'}>
+                                        Login
+                                    </Link>
+                                    <Link to="/register" style={{ fontSize: '0.55rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#9aab97', fontFamily: "'DM Mono', monospace", textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#ede8dd'} onMouseLeave={e => e.currentTarget.style.color = '#9aab97'}>
+                                        Sign Up
+                                    </Link>
+                                </>
+                            )}
                             <a href="https://github.com/mohanishp9/crypto_portfolio_tracker" target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.55rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#9aab97', fontFamily: "'DM Mono', monospace", textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#ede8dd'} onMouseLeave={e => e.currentTarget.style.color = '#9aab97'}>
                                 GitHub
                             </a>
