@@ -1,4 +1,5 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { createApi } from '@reduxjs/toolkit/query/react';
+import { baseQuery } from './baseQuery';
 
 // TypeScript Interfaces
 interface User {
@@ -10,7 +11,7 @@ interface User {
 interface AuthResponse {
     success: boolean;
     user: User;
-    jwtToken: string;
+    accessToken: string;
 }
 
 interface RegisterInput {
@@ -34,26 +35,16 @@ interface GetCurrentUserResponse {
     user: User;
 }
 
+interface RefreshResponse {
+    success: boolean;
+    accessToken: string;
+}
 
 // Create Auth API Slice
 export const authApi = createApi({
     reducerPath: 'authApi',
-
-    // Base query configuration
-    baseQuery: fetchBaseQuery({
-        baseUrl: import.meta.env.VITE_API_URL,
-        credentials: 'include', // Important: Send cookies with requests
-        prepareHeaders: (headers) => {
-            const token = localStorage.getItem('token');
-            if (token) headers.set('authorization', `Bearer ${token}`);
-            return headers;
-        },
-    }),
-
-    // Tag types for cache invalidation
+    baseQuery, // Redux-aware: reads accessToken from state, NOT localStorage
     tagTypes: ['User'],
-
-    // Define endpoints
     endpoints: (builder) => ({
         // Register mutation
         register: builder.mutation<AuthResponse, RegisterInput>({
@@ -89,6 +80,14 @@ export const authApi = createApi({
             query: () => '/auth/me',
             providesTags: ['User'],
         }),
+
+        // Refresh access token (uses HttpOnly cookie automatically)
+        refresh: builder.mutation<RefreshResponse, void>({
+            query: () => ({
+                url: '/auth/refresh',
+                method: 'POST',
+            }),
+        }),
     }),
 });
 
@@ -99,4 +98,5 @@ export const {
     useLoginMutation,
     useLogoutMutation,
     useGetCurrentUserQuery,
+    useRefreshMutation,
 } = authApi;

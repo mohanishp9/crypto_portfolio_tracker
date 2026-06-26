@@ -32,7 +32,7 @@ const Login = () => {
         if (!validateForm()) return;
         try {
             const result = await login({ email: formData.email, password: formData.password }).unwrap();
-            dispatch(setCredentials({ user: result.user, token: result.jwtToken }));
+            dispatch(setCredentials({ user: result.user, accessToken: result.accessToken }));
             navigate('/dashboard');
         } catch (err) {
             console.error('Login failed:', err);

@@ -1,10 +1,11 @@
+import type { HoldingStat, PortfolioStatsResponse } from "../types/portfolio.types";
+
 interface HoldingsTableProps {
-    statsData: any;
+    statsData?: PortfolioStatsResponse;
+    onSelectCoin: (coinId: string) => void;
 }
 
-const HoldingsTable = ({
-    statsData,
-}: HoldingsTableProps) => {
+const HoldingsTable = ({ statsData, onSelectCoin }: HoldingsTableProps) => {
     const holdings = statsData?.portfolio ?? [];
 
     return (
@@ -12,7 +13,6 @@ const HoldingsTable = ({
             className="overflow-hidden mt-1 rounded-sm"
             style={{ background: "#2e3330", border: "1px solid rgba(61,74,62,0.3)" }}
         >
-            {/* Header */}
             <div
                 className="px-6 py-5"
                 style={{ borderBottom: "1px solid rgba(61,74,62,0.25)", background: "#2a3d2e" }}
@@ -27,17 +27,15 @@ const HoldingsTable = ({
                     className="mt-1"
                     style={{ fontSize: "0.6rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "#6b7c6a" }}
                 >
-                    Real-time positions
+                    Allocation, cost basis, and return by coin
                 </p>
             </div>
 
             <div className="overflow-x-auto">
                 <table className="min-w-full">
-
-                    {/* THEAD */}
                     <thead>
                         <tr style={{ borderBottom: "1px solid rgba(61,74,62,0.3)" }}>
-                            {["Coin", "Quantity", "Avg Cost", "Current Price", "Value", "Unrealized PnL"].map((h) => (
+                            {["Coin", "Quantity", "Avg Cost", "Current Price", "Allocation", "Value", "Unrealized PnL", "Return"].map((h) => (
                                 <th
                                     key={h}
                                     scope="col"
@@ -50,10 +48,8 @@ const HoldingsTable = ({
                         </tr>
                     </thead>
 
-                    {/* TBODY */}
                     <tbody>
-                        {holdings.map((holding: any) => {
-                            const avgCost = holding.quantity > 0 ? holding.totalCost / holding.quantity : 0;
+                        {holdings.map((holding: HoldingStat) => {
                             const isProfit = holding.unrealizedProfit > 0;
                             const isLoss = holding.unrealizedProfit < 0;
 
@@ -62,36 +58,53 @@ const HoldingsTable = ({
                                     key={holding.coinId}
                                     className="group transition-colors duration-300"
                                     style={{ borderBottom: "1px solid rgba(61,74,62,0.15)" }}
-                                    onMouseEnter={e => e.currentTarget.style.background = "rgba(42,61,46,0.5)"}
-                                    onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.background = "rgba(42,61,46,0.5)";
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.background = "transparent";
+                                    }}
                                 >
-
-                                    {/* Coin */}
                                     <td className="px-6 py-5 whitespace-nowrap">
-                                        <div
-                                            className="font-light"
-                                            style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.1rem", color: "#ede8dd", letterSpacing: "0.04em", textTransform: "capitalize" }}
+                                        <button
+                                            type="button"
+                                            onClick={() => onSelectCoin(holding.coinId)}
+                                            style={{ background: "transparent", border: "none", padding: 0, textAlign: "left", cursor: "pointer" }}
                                         >
-                                            {holding.coinId}
-                                        </div>
+                                            <div
+                                                className="font-light"
+                                                style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.1rem", color: "#ede8dd", letterSpacing: "0.04em" }}
+                                            >
+                                                {holding.coinName}
+                                            </div>
+                                            <div style={{ fontSize: "0.52rem", letterSpacing: "0.2em", color: "#6b7c6a", textTransform: "uppercase" }}>
+                                                {holding.coinSymbol}
+                                            </div>
+                                        </button>
                                     </td>
 
-                                    {/* Quantity */}
                                     <td className="px-6 py-5 whitespace-nowrap" style={{ fontSize: "0.7rem", letterSpacing: "0.06em", color: "#9aab97" }}>
                                         {holding.quantity.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })}
                                     </td>
 
-                                    {/* Avg Cost */}
                                     <td className="px-6 py-5 whitespace-nowrap" style={{ fontSize: "0.7rem", letterSpacing: "0.06em", color: "#9aab97" }}>
-                                        ${avgCost.toFixed(2)}
+                                        ${holding.avgBuyPrice.toFixed(2)}
                                     </td>
 
-                                    {/* Current Price */}
-                                    <td className="px-6 py-5 whitespace-nowrap" style={{ fontSize: "0.7rem", letterSpacing: "0.06em", color: "#9aab97" }}>
-                                        ${holding.currentPrice.toFixed(2)}
+                                    <td className="px-6 py-5 whitespace-nowrap">
+                                        <div style={{ fontSize: "0.7rem", letterSpacing: "0.06em", color: "#9aab97" }}>
+                                            ${holding.currentPrice.toFixed(2)}
+                                        </div>
+                                        <div style={{ fontSize: "0.5rem", letterSpacing: "0.15em", color: holding.priceChange24h >= 0 ? "#587560" : "#8b5e3c" }}>
+                                            {holding.priceChange24h >= 0 ? "+" : ""}
+                                            {holding.priceChange24h.toFixed(2)}% 24H
+                                        </div>
                                     </td>
 
-                                    {/* Value */}
+                                    <td className="px-6 py-5 whitespace-nowrap" style={{ fontSize: "0.68rem", color: "#d4cfc4" }}>
+                                        {holding.allocationPercent.toFixed(1)}%
+                                    </td>
+
                                     <td className="px-6 py-5 whitespace-nowrap">
                                         <span
                                             className="font-light"
@@ -101,7 +114,6 @@ const HoldingsTable = ({
                                         </span>
                                     </td>
 
-                                    {/* Profit / Loss badge */}
                                     <td className="px-6 py-5 whitespace-nowrap">
                                         <span
                                             className="inline-flex items-center gap-1 px-3 py-1"
@@ -118,36 +130,21 @@ const HoldingsTable = ({
                                                 border: `1px solid ${isProfit ? "rgba(88,117,96,0.3)" : isLoss ? "rgba(139,94,60,0.3)" : "rgba(107,124,106,0.2)"}`,
                                             }}
                                         >
-                                            {isProfit ? "+" : isLoss ? "−" : ""}
-                                            ${Math.abs(holding.unrealizedProfit).toFixed(2)}
-                                            <span style={{ fontSize: "0.5rem", opacity: 0.7 }}>
-                                                {isProfit ? "▲" : isLoss ? "▼" : "—"}
-                                            </span>
+                                            {holding.unrealizedProfit >= 0 ? "+" : "-"}${Math.abs(holding.unrealizedProfit).toFixed(2)}
                                         </span>
                                     </td>
 
+                                    <td className="px-6 py-5 whitespace-nowrap" style={{ fontSize: "0.68rem", color: holding.totalReturn >= 0 ? "#587560" : "#8b5e3c" }}>
+                                        {holding.totalReturn >= 0 ? "+" : ""}
+                                        {holding.totalReturn.toFixed(2)}%
+                                    </td>
                                 </tr>
                             );
                         })}
 
-                        {/* Empty state */}
                         {holdings.length === 0 && (
                             <tr>
-                                <td colSpan={6} className="px-6 py-20 text-center">
-                                    <svg
-                                        className="mx-auto mb-5"
-                                        style={{ width: 36, height: 36, color: "#3d4a3e" }}
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth={0.8}
-                                            d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                        />
-                                    </svg>
+                                <td colSpan={8} className="px-6 py-20 text-center">
                                     <p
                                         className="font-light"
                                         style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.3rem", color: "#6b7c6a", letterSpacing: "0.05em" }}
@@ -155,13 +152,12 @@ const HoldingsTable = ({
                                         No holdings yet
                                     </p>
                                     <p style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#3d4a3e", marginTop: "8px" }}>
-                                        Add your first transaction to begin
+                                        Add a transaction or import your CSV to unlock allocation and performance views
                                     </p>
                                 </td>
                             </tr>
                         )}
                     </tbody>
-
                 </table>
             </div>
         </div>

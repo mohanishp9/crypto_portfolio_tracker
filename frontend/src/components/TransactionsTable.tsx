@@ -1,10 +1,12 @@
 interface TransactionsTableProps {
     transactions: any[];
+    handleEdit: (transaction: any) => void;
     handleDelete: (transaction: any) => void;
 }
 
 const TransactionsTable = ({
     transactions,
+    handleEdit,
     handleDelete,
 }: TransactionsTableProps) => {
 
@@ -37,7 +39,7 @@ const TransactionsTable = ({
                 <table className="min-w-full">
                     <thead>
                         <tr style={{ borderBottom: "1px solid rgba(61,74,62,0.3)" }}>
-                            {["Date", "Type", "Coin", "Quantity", "Price", "Total", "Actions"].map((h) => (
+                            {["Date", "Type", "Coin", "Quantity", "Price", "Fee", "Total", "Actions"].map((h) => (
                                 <th
                                     key={h}
                                     scope="col"
@@ -99,11 +101,21 @@ const TransactionsTable = ({
                                         ${tx.price.toFixed(2)}
                                     </td>
 
-                                    <td className="px-6 py-5 whitespace-nowrap" style={{ fontSize: "0.7rem", letterSpacing: "0.06em", color: "#d4cfc4" }}>
-                                        ${(tx.price * tx.quantity).toFixed(2)}
+                                    <td className="px-6 py-5 whitespace-nowrap" style={{ fontSize: "0.7rem", letterSpacing: "0.06em", color: "#9aab97" }}>
+                                        ${(tx.fee ?? 0).toFixed(2)}
                                     </td>
 
-                                    <td className="px-6 py-5 whitespace-nowrap">
+                                    <td className="px-6 py-5 whitespace-nowrap" style={{ fontSize: "0.7rem", letterSpacing: "0.06em", color: "#d4cfc4" }}>
+                                        ${(tx.price * tx.quantity + (tx.fee ?? 0)).toFixed(2)}
+                                    </td>
+
+                                    <td className="px-6 py-5 whitespace-nowrap flex gap-4">
+                                        <button
+                                            onClick={() => handleEdit(tx)}
+                                            className="text-[0.6rem] tracking-[0.2em] uppercase text-[#9aab97] hover:text-[#ede8dd] transition-colors duration-200"
+                                        >
+                                            Edit
+                                        </button>
                                         <button
                                             onClick={() => handleDelete(tx)}
                                             className="text-[0.6rem] tracking-[0.2em] uppercase text-[#8b5e3c] hover:text-[#c4885a] transition-colors duration-200"
@@ -116,8 +128,8 @@ const TransactionsTable = ({
                         })}
                         {transactions.length === 0 && (
                             <tr>
-                                <td colSpan={7} className="px-6 py-10 text-center" style={{ color: "#6b7c6a", fontSize: "0.8rem", letterSpacing: "0.05em" }}>
-                                    No transactions recorded.
+                                <td colSpan={8} className="px-6 py-10 text-center" style={{ color: "#6b7c6a", fontSize: "0.8rem", letterSpacing: "0.05em" }}>
+                                    No transactions recorded. Import a CSV or add your first trade to start building your history.
                                 </td>
                             </tr>
                         )}

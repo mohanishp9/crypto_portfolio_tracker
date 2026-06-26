@@ -6,6 +6,8 @@ import { connectDB } from "./config/db";
 import authRoutes from "./routes/auth.routes";
 import portfolioRoutes from "./routes/portfolio.routes";
 import marketRoutes from "./routes/market.routes";
+import watchlistRoutes from "./routes/watchlist.routes";
+import alertsRoutes from "./routes/alerts.routes";
 import helmet from "helmet";
 dotenv.config();
 
@@ -14,9 +16,9 @@ const PORT = process.env.PORT || 5000;
 
 app.use(
     helmet({
-      contentSecurityPolicy: false
+        contentSecurityPolicy: false
     })
-  );
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(
@@ -25,6 +27,7 @@ app.use(
             "http://localhost:5173",
             "https://grove-portfolio.onrender.com",
             "https://grove-crypto-tracker.vercel.app",
+            "https://grove-crypto-portfolio-tracker2.vercel.app",
         ],
         credentials: true,
     })
@@ -39,6 +42,8 @@ app.use(cookieParser());
 app.use("/api/auth", authRoutes);
 app.use('/api/portfolio', portfolioRoutes);
 app.use('/api/market', marketRoutes);
+app.use('/api/watchlist', watchlistRoutes);
+app.use('/api/alerts', alertsRoutes);
 
 app.use((_req: Request, res: Response) => {
     res.status(404).json({ success: false, message: 'Route not found' });

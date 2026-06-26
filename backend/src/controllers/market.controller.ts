@@ -1,5 +1,5 @@
 import { asyncHandler } from "../utils/asyncHandler";
-import { getTopCoins } from "../services/coinGecko.service";
+import { getCoinDetail, getTopCoins } from "../services/coinGecko.service";
 import { Request, Response } from "express";
 
 export const getTopCoinsController = asyncHandler(async (req: Request, res: Response) => {
@@ -7,6 +7,20 @@ export const getTopCoinsController = asyncHandler(async (req: Request, res: Resp
     const coins = await getTopCoins(limit);
     res.status(200).json({
         success: true,
-        coins,
+        coins: coins.data,
+        lastUpdated: coins.lastUpdated,
+        stale: coins.stale,
+        staleReason: coins.staleReason,
+    });
+});
+
+export const getCoinDetailController = asyncHandler(async (req: Request, res: Response) => {
+    const detail = await getCoinDetail(req.params.coinId);
+    res.status(200).json({
+        success: true,
+        coin: detail.data,
+        lastUpdated: detail.lastUpdated,
+        stale: detail.stale,
+        staleReason: detail.staleReason,
     });
 });

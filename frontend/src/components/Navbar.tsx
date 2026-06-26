@@ -95,7 +95,7 @@ const Navbar = ({ email, handleLogout, isLoggingOut }: NavbarProps) => {
 
                         {/* Dashboard button */}
                         <button
-                            onClick={() => navigate("/")}
+                            onClick={() => navigate("/dashboard")}
                             title="View dashboard"
                             style={{
                                 width: 34,

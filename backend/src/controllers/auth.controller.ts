@@ -1,9 +1,31 @@
 import { asyncHandler } from "../utils/asyncHandler";
 import { registerSchema, RegisterInput, loginSchema, LoginInput } from "../utils/validation";
 import User from "../models/User.model";
-import { generateToken } from "../utils/jwt";
+import RefreshToken from "../models/RefreshToken.model";
+import { generateAccessToken, generateRefreshToken, hashToken } from "../utils/jwt";
 import { Request, Response } from "express";
 
+const setRefreshTokenCookie = (res: Response, token: string) => {
+    const days = parseInt(process.env.REFRESH_TOKEN_EXPIRES_IN_DAYS || "7", 10);
+    res.cookie("refreshToken", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV !== "development", // Using secure in prod
+        sameSite: "strict",
+        maxAge: days * 24 * 60 * 60 * 1000,
+    });
+};
+
+const createRefreshTokenRecord = async (userId: string, token: string, familyId: string) => {
+    const days = parseInt(process.env.REFRESH_TOKEN_EXPIRES_IN_DAYS || "7", 10);
+    const expiresAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+    
+    await RefreshToken.create({
+        userId,
+        tokenHash: hashToken(token),
+        familyId,
+        expiresAt,
+    });
+};
 
 // @desc Create a new user
 // @route POST /register
@@ -24,16 +46,15 @@ const registerUserController = asyncHandler(async (req: Request, res: Response) 
         name,
         email,
         password,
-    })
+    });
 
     if (user) {
-        const jwtToken = generateToken(user._id.toString());
-        res.cookie("token", jwtToken, {
-            httpOnly: true,
-            secure: true,
-            sameSite: "none",
-            maxAge: 7 * 24 * 60 * 60 * 1000,
-        })
+        const accessToken = generateAccessToken(user._id.toString());
+        const { token, familyId } = generateRefreshToken();
+
+        await createRefreshTokenRecord(user._id.toString(), token, familyId);
+        setRefreshTokenCookie(res, token);
+
         res.status(201).json({
             success: true,
             user: {
@@ -41,8 +62,8 @@ const registerUserController = asyncHandler(async (req: Request, res: Response) 
                 name: user.name,
                 email: user.email,
             },
-            jwtToken,
-        })
+            accessToken,
+        });
     } else {
         res.status(400);
         throw new Error("Invalid user data");
@@ -65,13 +86,12 @@ const loginUserController = asyncHandler(async (req: Request, res: Response) => 
     }
 
     if (await user.comparePassword(password)) {
-        const jwtToken = generateToken(user._id.toString());
-        res.cookie("token", jwtToken, {
-            httpOnly: true,
-            secure: true,
-            sameSite: "none",
-            maxAge: 7 * 24 * 60 * 60 * 1000,
-        })
+        const accessToken = generateAccessToken(user._id.toString());
+        const { token, familyId } = generateRefreshToken();
+
+        await createRefreshTokenRecord(user._id.toString(), token, familyId);
+        setRefreshTokenCookie(res, token);
+
         res.status(200).json({
             success: true,
             user: {
@@ -79,19 +99,29 @@ const loginUserController = asyncHandler(async (req: Request, res: Response) => 
                 name: user.name,
                 email: user.email,
             },
-            jwtToken,
-        })
+            accessToken,
+        });
     } else {
         res.status(401);
         throw new Error("Invalid credentials");
     }
-})
+});
 
 // @desc Logout a user
 // @route POST /logout
 // @access Private
-const logoutUserController = asyncHandler(async (_req: Request, res: Response) => {
+const logoutUserController = asyncHandler(async (req: Request, res: Response) => {
+    const { refreshToken } = req.cookies;
+
+    if (refreshToken) {
+        const tokenHash = hashToken(refreshToken);
+        await RefreshToken.findOneAndDelete({ tokenHash });
+    }
+
+    res.clearCookie("refreshToken");
+    // Clear old token cookie in case users still have it from the previous system
     res.clearCookie("token");
+
     res.status(200).json({
         success: true,
         message: "User logged out successfully",
@@ -115,12 +145,82 @@ const getCurrentUserProfileController = asyncHandler(async (req: Request, res: R
     res.status(200).json({
         success: true,
         user,
-    })
-})
+    });
+});
+
+// @desc Refresh access token
+// @route POST /refresh
+// @access Public (Requires Refresh Token Cookie)
+const refreshTokenController = asyncHandler(async (req: Request, res: Response) => {
+    const { refreshToken } = req.cookies;
+
+    if (!refreshToken) {
+        res.status(401);
+        throw new Error("No refresh token provided");
+    }
+
+    const tokenHash = hashToken(refreshToken);
+    
+    // ATOMIC UPDATE: Find the token and immediately mark it as revoked (fixes race condition)
+    // If it's already revoked, this will return null, pushing us to the reuse detection fallback.
+    const tokenDoc = await RefreshToken.findOneAndUpdate(
+        { tokenHash, isRevoked: false },
+        { $set: { isRevoked: true } },
+        { new: false } // Returns the document BEFORE it was updated
+    );
+
+    if (!tokenDoc) {
+        // If not found, it's either an invalid token OR an already-revoked token being reused!
+        const revokedToken = await RefreshToken.findOne({ tokenHash, isRevoked: true });
+        
+        if (revokedToken) {
+            // AUTOMATIC REUSE DETECTION: A revoked token was used again!
+            // Revoke the entire family to protect the user's session.
+            await RefreshToken.updateMany(
+                { familyId: revokedToken.familyId },
+                { $set: { isRevoked: true } }
+            );
+            res.clearCookie("refreshToken");
+            res.status(401);
+            throw new Error("Compromised token detected. All sessions revoked. Please login again.");
+        }
+
+        res.clearCookie("refreshToken");
+        res.status(401);
+        throw new Error("Invalid refresh token");
+    }
+
+    // Check expiration manually
+    if (new Date() > tokenDoc.expiresAt) {
+        res.clearCookie("refreshToken");
+        res.status(401);
+        throw new Error("Refresh token expired");
+    }
+
+    // Valid token -> Token Rotation
+    // Note: We ALREADY marked the old token as revoked in the atomic findOneAndUpdate!
+    // Do NOT delete it, so we can detect reuse if an attacker tries to use it.
+
+    // 2. Generate new tokens (REUSING the same familyId)
+    const accessToken = generateAccessToken(tokenDoc.userId.toString());
+    const { token: newRefreshTokenStr, familyId } = generateRefreshToken(tokenDoc.familyId);
+
+    // 3. Save new refresh token (keeping same familyId)
+    await createRefreshTokenRecord(tokenDoc.userId.toString(), newRefreshTokenStr, familyId);
+    
+    // 4. Set new cookie and return new access token
+    setRefreshTokenCookie(res, newRefreshTokenStr);
+
+    res.status(200).json({
+        success: true,
+        accessToken,
+    });
+});
 
 export {
     registerUserController,
     loginUserController,
     logoutUserController,
     getCurrentUserProfileController,
+    refreshTokenController,
 };
