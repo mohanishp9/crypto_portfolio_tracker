@@ -1,4 +1,5 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi } from "@reduxjs/toolkit/query/react";
+import { baseQueryWithReauth } from "./baseQuery";
 import type { CoinSearchResult, TopCoin } from "../types/coin.types";
 import type {
     AddAlertInput,
@@ -16,15 +17,7 @@ import type {
 
 export const portfolioApi = createApi({
     reducerPath: "portfolioApi",
-    baseQuery: fetchBaseQuery({
-        baseUrl: import.meta.env.VITE_API_URL,
-        credentials: "include",
-        prepareHeaders: (headers) => {
-            const token = localStorage.getItem("token");
-            if (token) headers.set("authorization", `Bearer ${token}`);
-            return headers;
-        },
-    }),
+    baseQuery: baseQueryWithReauth, // Automatically handles 401s and token rotation
     tagTypes: ["Portfolio", "Watchlist", "Alerts", "Market"],
     endpoints: (builder) => ({
         getTransactions: builder.query<TransactionsResponse, void>({

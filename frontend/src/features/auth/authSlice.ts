@@ -1,7 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 
-// --- Types ---
 export interface User {
     _id: string;
     name: string;
@@ -10,52 +9,43 @@ export interface User {
 
 export interface AuthState {
     user: User | null;
-    token: string | null;
+    accessToken: string | null;
     isAuthenticated: boolean;
-    loading: boolean;
+    isInitialized: boolean;
 }
 
-// --- Initial State ---
 const initialState: AuthState = {
-    user: JSON.parse(localStorage.getItem('user') || 'null'),
-    token: localStorage.getItem('token') || null,
-    isAuthenticated: !!localStorage.getItem('token'),
-    loading: false,
-}
+    user: null, // User is strictly managed in Redux now to prevent partial logged-in states
+    accessToken: null, // STRICTLY IN MEMORY (Zero XSS exposure)
+    isAuthenticated: false,
+    isInitialized: false, // True when the silent refresh completes on app load
+};
 
 const authSlice = createSlice({
     name: "auth",
     initialState,
     reducers: {
-
         setCredentials: (
             state,
-            action: PayloadAction<{ user: User; token: string }>
+            action: PayloadAction<{ user: User; accessToken: string }>
         ) => {
-            const { user, token } = action.payload;
-
-            state.user = user;
-            state.token = token;
+            state.user = action.payload.user;
+            state.accessToken = action.payload.accessToken;
             state.isAuthenticated = true;
-
-            localStorage.setItem('user', JSON.stringify(user));
-            localStorage.setItem('token', token);
+            state.isInitialized = true;
         },
-
-        // Logout = clear everything
         logout: (state) => {
             state.user = null;
-            state.token = null;
+            state.accessToken = null;
             state.isAuthenticated = false;
-
-            localStorage.removeItem('user');
-            localStorage.removeItem('token');
+            state.isInitialized = true; // Still initialized, just not authenticated
         },
+        setAuthInitialized: (state) => {
+            state.isInitialized = true;
+        }
     },
 });
 
-// Export actions
-export const { setCredentials, logout } = authSlice.actions;
+export const { setCredentials, logout, setAuthInitialized } = authSlice.actions;
 
-// Export reducer
 export default authSlice.reducer;

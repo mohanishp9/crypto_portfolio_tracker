@@ -1,38 +1,40 @@
-import jwt from "jsonwebtoken";
 import { asyncHandler } from "../utils/asyncHandler"
 import User from "../models/User.model";
 import { Request, Response, NextFunction } from "express";
-import { JWTPayload } from "../utils/jwt";
-
-
+import { verifyAccessToken } from "../utils/jwt";
 
 const protect = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
 
-    const cookieToken = req.cookies?.token as string | undefined;
+    // 1. Only look for Access Token in the Authorization header
     const authHeader = req.headers.authorization;
-    const bearerToken = authHeader?.startsWith("Bearer ") ? authHeader.slice("Bearer ".length) : undefined;
-    const token = cookieToken || bearerToken;
+    const token = authHeader?.startsWith("Bearer ") ? authHeader.slice("Bearer ".length) : undefined;
 
     if (!token) {
         res.status(401);
-        throw new Error("Not authenticated");
+        throw new Error("Not authenticated, no access token");
     }
-    try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as JWTPayload;
-
-        const user = await User.findById(decoded.id).select("-password");
-
-        if (!user) {
-            res.status(401);
-            throw new Error("User not found")
-        }
-
-        req.user = user;
-        next();
-    } catch (error) {
+    
+    // 2. Verify the Access Token
+    const decoded = verifyAccessToken(token);
+    
+    if ("error" in decoded) {
         res.status(401);
-        throw new Error("Invalid token");
+        if (decoded.error === 'expired') {
+            throw new Error("TokenExpiredError"); // Interceptor explicitly looks for expired
+        }
+        throw new Error("Not authenticated, access token invalid");
     }
+
+    // 3. Attach user context
+    const user = await User.findById(decoded.id).select("-password");
+
+    if (!user) {
+        res.status(401);
+        throw new Error("User not found");
+    }
+
+    req.user = user;
+    next();
 })
 
 export { protect };

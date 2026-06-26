@@ -7,15 +7,19 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-    const { isAuthenticated } = useSelector((state: RootState) => state.auth);
+    const { isAuthenticated, isInitialized } = useSelector((state: RootState) => state.auth);
 
-    // If not authenticated, redirect to landing page
+    // AuthLoader hasn't finished the silent refresh yet — render nothing
+    // to prevent an incorrect redirect to the landing page.
+    if (!isInitialized) {
+        return null;
+    }
+
     if (!isAuthenticated) {
         return <Navigate to="/" replace />;
     }
 
-    // If authenticated, render the protected content
     return <>{children}</>;
 };
 
-export default ProtectedRoute;
+export default ProtectedRoute;
