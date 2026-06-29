@@ -10,7 +10,7 @@ const setRefreshTokenCookie = (res: Response, token: string) => {
     const isProd = process.env.NODE_ENV === "production";
     res.cookie("refreshToken", token, {
         httpOnly: true,
-        secure: isProd, 
+        secure: isProd,
         sameSite: isProd ? "none" : "strict",
         maxAge: days * 24 * 60 * 60 * 1000,
     });
@@ -171,7 +171,7 @@ const refreshTokenController = asyncHandler(async (req: Request, res: Response) 
     
     // ATOMIC UPDATE: Find the token and immediately mark it as revoked (fixes race condition)
     // If it's already revoked, this will return null, pushing us to the reuse detection fallback.
-    const tokenDoc = await RefreshToken.findOneAndUpdate(
+    let tokenDoc = await RefreshToken.findOneAndUpdate(
         { tokenHash, isRevoked: false },
         { $set: { isRevoked: true } },
         { new: false } // Returns the document BEFORE it was updated
@@ -182,25 +182,54 @@ const refreshTokenController = asyncHandler(async (req: Request, res: Response) 
         const revokedToken = await RefreshToken.findOne({ tokenHash, isRevoked: true });
         
         if (revokedToken) {
-            // AUTOMATIC REUSE DETECTION: A revoked token was used again!
-            // Revoke the entire family to protect the user's session.
-            await RefreshToken.updateMany(
-                { familyId: revokedToken.familyId },
-                { $set: { isRevoked: true } }
-            );
-            res.clearCookie("refreshToken");
-            res.status(401);
-            throw new Error("Compromised token detected. All sessions revoked. Please login again.");
-        }
+            // Grace Period: If the token was revoked very recently (e.g., within 15 seconds),
+            // it's almost certainly a race condition from a fast page reload, not a hacker.
+            const timeSinceRevocation = Date.now() - new Date(revokedToken.updatedAt).getTime();
+            const GRACE_PERIOD_MS = 15000; // 15 seconds
 
-        res.clearCookie("refreshToken");
-        res.status(401);
-        throw new Error("Invalid refresh token");
+            if (timeSinceRevocation <= GRACE_PERIOD_MS) {
+                // Allow the request to proceed and generate a new token
+                tokenDoc = revokedToken;
+            } else {
+                // AUTOMATIC REUSE DETECTION: A revoked token was used again outside the grace period!
+                // Revoke the entire family to protect the user's session.
+                await RefreshToken.updateMany(
+                    { familyId: revokedToken.familyId },
+                    { $set: { isRevoked: true } }
+                );
+                
+                const isProd = process.env.NODE_ENV === "production";
+                const cookieOptions = {
+                    httpOnly: true,
+                    secure: isProd,
+                    sameSite: isProd ? "none" : "strict",
+                } as const;
+                res.clearCookie("refreshToken", cookieOptions);
+                res.status(401);
+                throw new Error("Compromised token detected. All sessions revoked. Please login again.");
+            }
+        } else {
+            const isProd = process.env.NODE_ENV === "production";
+            const cookieOptions = {
+                httpOnly: true,
+                secure: isProd,
+                sameSite: isProd ? "none" : "strict",
+            } as const;
+            res.clearCookie("refreshToken", cookieOptions);
+            res.status(401);
+            throw new Error("Invalid refresh token");
+        }
     }
 
     // Check expiration manually
     if (new Date() > tokenDoc.expiresAt) {
-        res.clearCookie("refreshToken");
+        const isProd = process.env.NODE_ENV === "production";
+        const cookieOptions = {
+            httpOnly: true,
+            secure: isProd,
+            sameSite: isProd ? "none" : "strict",
+        } as const;
+        res.clearCookie("refreshToken", cookieOptions);
         res.status(401);
         throw new Error("Refresh token expired");
     }
