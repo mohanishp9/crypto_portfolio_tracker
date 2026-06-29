@@ -4,6 +4,7 @@ import { useRegisterMutation } from '../services/authApi';
 import { useDispatch } from 'react-redux';
 import { setCredentials } from '../features/auth/authSlice';
 import { useNavigate, Link } from 'react-router-dom';
+import { Activity } from 'lucide-react';
 
 const Register = () => {
     const [register, { isLoading, error }] = useRegisterMutation();
@@ -41,156 +42,93 @@ const Register = () => {
         }
     };
 
-    const inputStyle = (hasError: boolean) => ({
-        width: '100%',
-        background: '#1a1c1a',
-        border: `1px solid ${hasError ? 'rgba(139,94,60,0.5)' : 'rgba(61,74,62,0.4)'}`,
-        color: '#ede8dd',
-        fontFamily: "'DM Mono', monospace",
-        fontSize: '0.72rem',
-        padding: '12px 14px',
-        outline: 'none',
-        letterSpacing: '0.05em',
-        transition: 'border-color 0.2s',
-    } as React.CSSProperties);
-
-    const labelStyle: React.CSSProperties = {
-        display: 'block',
-        fontSize: '0.55rem',
-        letterSpacing: '0.3em',
-        textTransform: 'uppercase',
-        color: '#6b7c6a',
-        marginBottom: '8px',
-    };
-
     return (
-        <div
-            className="min-h-screen flex items-center justify-center px-4 py-12"
-            style={{ background: '#1a1c1a' }}
-        >
-            {/* Background grid */}
-            <div
-                className="fixed inset-0 pointer-events-none"
-                style={{
-                    backgroundImage: 'linear-gradient(rgba(61,74,62,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(61,74,62,0.06) 1px, transparent 1px)',
-                    backgroundSize: '48px 48px',
-                }}
-            />
+        <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-zinc-950 relative overflow-hidden">
+            {/* Background elements */}
+            <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/20 via-zinc-950 to-zinc-950 pointer-events-none" />
+            <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-[100px] pointer-events-none" />
+            <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none" />
 
-            <div className="w-full max-w-sm relative">
-
+            <div className="w-full max-w-sm relative z-10 animate-fade-in">
+                
                 {/* Brand mark */}
-                <div className="flex flex-col items-center mb-10">
-                    <div
-                        className="mb-5 flex items-center justify-center"
-                        style={{ width: 48, height: 48, borderRadius: '50%', border: '1px solid rgba(196,136,90,0.3)' }}
-                    >
-                        <div style={{ width: 14, height: 14, borderRadius: '50%', background: '#c4885a', opacity: 0.7 }} />
+                <div className="flex flex-col items-center mb-8">
+                    <div className="w-12 h-12 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center mb-4 shadow-xl shadow-indigo-500/10">
+                        <Activity className="text-indigo-500" size={24} />
                     </div>
-                    <h1
-                        className="font-light"
-                        style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '2rem', color: '#ede8dd', letterSpacing: '0.06em' }}
-                    >
-                        Gr<span style={{ fontStyle: 'italic', color: '#c4885a' }}>o</span>ve
+                    <h1 className="text-2xl font-semibold text-zinc-50 tracking-tight flex items-center gap-2">
+                        Cypher<span className="font-normal text-zinc-500 italic">Sight</span>
                     </h1>
-                    <p style={{ fontSize: '0.58rem', letterSpacing: '0.3em', textTransform: 'uppercase', color: '#6b7c6a', marginTop: '6px' }}>
-                        Portfolio Tracker
+                    <p className="text-[10px] tracking-widest uppercase text-zinc-500 mt-2 font-mono">
+                        System Initialization
                     </p>
                 </div>
 
                 {/* Card */}
-                <div style={{ background: '#2e3330', border: '1px solid rgba(61,74,62,0.35)' }}>
-
+                <div className="bg-zinc-900/50 backdrop-blur-md border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden">
+                    
                     {/* Card header */}
-                    <div
-                        className="px-8 py-5"
-                        style={{ borderBottom: '1px solid rgba(61,74,62,0.25)', background: '#2a3d2e' }}
-                    >
-                        <p style={{ fontSize: '0.55rem', letterSpacing: '0.35em', textTransform: 'uppercase', color: '#587560' }}>
+                    <div className="px-8 py-6 border-b border-zinc-800/50 bg-zinc-900/30 text-center">
+                        <p className="text-[10px] tracking-widest uppercase text-emerald-500 mb-1 font-semibold">
                             First time here
                         </p>
-                        <h2
-                            className="font-light mt-1"
-                            style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.5rem', color: '#ede8dd', letterSpacing: '0.04em' }}
-                        >
-                            Plant a <span style={{ fontStyle: 'italic', color: '#9aab97' }}>seed</span>
+                        <h2 className="text-xl font-semibold text-zinc-50 tracking-tight">
+                            Create <span className="font-normal text-zinc-500 italic">Account</span>
                         </h2>
                     </div>
 
                     {/* API error */}
                     {error && (
-                        <div
-                            className="mx-8 mt-6"
-                            style={{
-                                padding: '10px 14px',
-                                background: 'rgba(139,94,60,0.1)',
-                                border: '1px solid rgba(139,94,60,0.25)',
-                                fontSize: '0.6rem',
-                                letterSpacing: '0.1em',
-                                color: '#8b5e3c',
-                            }}
-                        >
-                            {'data' in error ? 'Registration failed. Try a different email.' : 'Something went still. Try again.'}
+                        <div className="mx-8 mt-6 px-4 py-3 bg-rose-500/10 border border-rose-500/20 rounded-lg text-xs font-mono text-rose-400 text-center">
+                            {'data' in error ? 'Registration failed. Try a different email.' : 'Something went wrong. Try again.'}
                         </div>
                     )}
 
                     {/* Form */}
-                    <form onSubmit={handleSubmit} className="px-8 py-7 space-y-6">
-
+                    <form onSubmit={handleSubmit} className="px-8 py-6 space-y-4">
+                        
                         {/* Name */}
                         <div>
-                            <label htmlFor="name" style={labelStyle}>Full Name</label>
+                            <label htmlFor="name" className="block text-[10px] tracking-widest uppercase text-zinc-500 mb-2 font-semibold">Full Name</label>
                             <input
                                 type="text" id="name" name="name"
                                 value={formData.name} onChange={handleChange}
-                                placeholder="Hana Mori"
+                                placeholder="John Doe"
                                 disabled={isLoading}
-                                style={inputStyle(!!validationErrors.name)}
-                                onFocus={e => e.currentTarget.style.borderColor = 'rgba(196,136,90,0.5)'}
-                                onBlur={e => e.currentTarget.style.borderColor = validationErrors.name ? 'rgba(139,94,60,0.5)' : 'rgba(61,74,62,0.4)'}
+                                className={`w-full bg-zinc-950/50 border text-zinc-50 font-mono text-sm py-2.5 px-4 rounded-lg focus:outline-none transition-colors placeholder-zinc-700 disabled:opacity-50 ${validationErrors.name ? 'border-rose-500/50 focus:border-rose-500' : 'border-zinc-800 focus:border-indigo-500'}`}
                             />
                             {validationErrors.name && (
-                                <p style={{ fontSize: '0.58rem', letterSpacing: '0.1em', color: '#8b5e3c', marginTop: '6px' }}>
-                                    {validationErrors.name}
-                                </p>
+                                <p className="text-[10px] text-rose-400 mt-1.5 font-mono">{validationErrors.name}</p>
                             )}
                         </div>
 
                         {/* Email */}
                         <div>
-                            <label htmlFor="email" style={labelStyle}>Email Address</label>
+                            <label htmlFor="email" className="block text-[10px] tracking-widest uppercase text-zinc-500 mb-2 font-semibold">Email Address</label>
                             <input
                                 type="email" id="email" name="email"
                                 value={formData.email} onChange={handleChange}
-                                placeholder="you@grove.studio"
+                                placeholder="you@example.com"
                                 disabled={isLoading}
-                                style={inputStyle(!!validationErrors.email)}
-                                onFocus={e => e.currentTarget.style.borderColor = 'rgba(196,136,90,0.5)'}
-                                onBlur={e => e.currentTarget.style.borderColor = validationErrors.email ? 'rgba(139,94,60,0.5)' : 'rgba(61,74,62,0.4)'}
+                                className={`w-full bg-zinc-950/50 border text-zinc-50 font-mono text-sm py-2.5 px-4 rounded-lg focus:outline-none transition-colors placeholder-zinc-700 disabled:opacity-50 ${validationErrors.email ? 'border-rose-500/50 focus:border-rose-500' : 'border-zinc-800 focus:border-indigo-500'}`}
                             />
                             {validationErrors.email && (
-                                <p style={{ fontSize: '0.58rem', letterSpacing: '0.1em', color: '#8b5e3c', marginTop: '6px' }}>
-                                    {validationErrors.email}
-                                </p>
+                                <p className="text-[10px] text-rose-400 mt-1.5 font-mono">{validationErrors.email}</p>
                             )}
                         </div>
 
                         {/* Password */}
                         <div>
-                            <label htmlFor="password" style={labelStyle}>Password</label>
+                            <label htmlFor="password" className="block text-[10px] tracking-widest uppercase text-zinc-500 mb-2 font-semibold">Password</label>
                             <input
                                 type="password" id="password" name="password"
                                 value={formData.password} onChange={handleChange}
                                 placeholder="••••••••"
                                 disabled={isLoading}
-                                style={inputStyle(!!validationErrors.password)}
-                                onFocus={e => e.currentTarget.style.borderColor = 'rgba(196,136,90,0.5)'}
-                                onBlur={e => e.currentTarget.style.borderColor = validationErrors.password ? 'rgba(139,94,60,0.5)' : 'rgba(61,74,62,0.4)'}
+                                className={`w-full bg-zinc-950/50 border text-zinc-50 font-mono text-sm py-2.5 px-4 rounded-lg focus:outline-none transition-colors placeholder-zinc-700 disabled:opacity-50 ${validationErrors.password ? 'border-rose-500/50 focus:border-rose-500' : 'border-zinc-800 focus:border-indigo-500'}`}
                             />
                             {validationErrors.password && (
-                                <p style={{ fontSize: '0.58rem', letterSpacing: '0.1em', color: '#8b5e3c', marginTop: '6px' }}>
-                                    {validationErrors.password}
-                                </p>
+                                <p className="text-[10px] text-rose-400 mt-1.5 font-mono">{validationErrors.password}</p>
                             )}
                         </div>
 
@@ -198,65 +136,32 @@ const Register = () => {
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className="w-full transition-all duration-300"
-                            style={{
-                                background: 'transparent',
-                                border: '1px solid rgba(196,136,90,0.4)',
-                                color: '#c4885a',
-                                fontFamily: "'DM Mono', monospace",
-                                fontSize: '0.6rem',
-                                letterSpacing: '0.3em',
-                                textTransform: 'uppercase',
-                                padding: '12px 0',
-                                cursor: isLoading ? 'not-allowed' : 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                gap: '10px',
-                                opacity: isLoading ? 0.5 : 1,
-                            }}
-                            onMouseEnter={e => { if (!isLoading) { e.currentTarget.style.background = '#c4885a'; e.currentTarget.style.color = '#1a1c1a'; } }}
-                            onMouseLeave={e => { if (!isLoading) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#c4885a'; } }}
+                            className="w-full mt-4 py-3 bg-indigo-500 border border-indigo-500 text-white rounded-lg text-xs font-semibold uppercase tracking-wider transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:bg-indigo-600 hover:border-indigo-600 flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/20"
                         >
                             {isLoading ? (
                                 <>
-                                    <svg style={{ width: 12, height: 12, animation: 'spin 1s linear infinite' }} viewBox="0 0 24 24" fill="none">
+                                    <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
                                         <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" strokeDasharray="40" strokeDashoffset="10" />
                                     </svg>
                                     Creating...
                                 </>
                             ) : (
-                                <>
-                                    <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '0.9rem', fontWeight: 300 }}>◎</span>
-                                    Create Account
-                                </>
+                                "Initialize"
                             )}
                         </button>
-
                     </form>
 
                     {/* Footer link */}
-                    <div
-                        className="px-8 pb-7 text-center"
-                        style={{ borderTop: '1px solid rgba(61,74,62,0.2)', paddingTop: '20px' }}
-                    >
-                        <p style={{ fontSize: '0.58rem', letterSpacing: '0.15em', color: '#6b7c6a' }}>
-                            Already rooted?{' '}
-                            <Link
-                                to="/login"
-                                style={{ color: '#9aab97', textDecoration: 'none', letterSpacing: '0.15em' }}
-                                onMouseEnter={e => e.currentTarget.style.color = '#ede8dd'}
-                                onMouseLeave={e => e.currentTarget.style.color = '#9aab97'}
-                            >
+                    <div className="px-8 pb-6 pt-4 text-center border-t border-zinc-800/50">
+                        <p className="text-xs text-zinc-500 font-medium">
+                            Already active?{' '}
+                            <Link to="/login" className="text-emerald-400 hover:text-emerald-300 transition-colors ml-1 font-semibold">
                                 Sign in →
                             </Link>
                         </p>
                     </div>
-
                 </div>
             </div>
-
-            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
         </div>
     );
 };

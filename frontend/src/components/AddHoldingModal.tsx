@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps, react-hooks/set-state-in-effect */
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../app/store";
@@ -9,6 +10,7 @@ import {
 } from "../services/portfolioApi";
 import { clearSelectedTransaction, closeAddModal } from "../features/portfolio/portfolioSlice";
 import type { TransactionType } from "../types/portfolio.types";
+import { X, Search } from "lucide-react";
 
 const AddHoldingModal = () => {
     const dispatch = useDispatch();
@@ -38,12 +40,9 @@ const AddHoldingModal = () => {
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     useEffect(() => {
-        if (!isOpen) {
-            return;
-        }
+        if (!isOpen) return;
 
         if (selectedTransaction) {
-            // eslint-disable-next-line react-hooks/set-state-in-effect
             setFormData({
                 coinId: selectedTransaction.coinId,
                 coinName: selectedTransaction.coinName,
@@ -122,131 +121,85 @@ const AddHoldingModal = () => {
         }
     };
 
-    const inputStyle: React.CSSProperties = {
-        width: "100%",
-        background: "#1a1c1a",
-        border: "1px solid rgba(61,74,62,0.4)",
-        color: "#ede8dd",
-        fontFamily: "'DM Mono', monospace",
-        fontSize: "0.72rem",
-        padding: "11px 14px",
-        outline: "none",
-        letterSpacing: "0.05em",
-    };
-
-    const labelStyle: React.CSSProperties = {
-        display: "block",
-        fontSize: "0.55rem",
-        letterSpacing: "0.3em",
-        textTransform: "uppercase",
-        color: "#6b7c6a",
-        marginBottom: "8px",
-    };
-
     return (
-        <div
-            className="fixed inset-0 flex items-center justify-center z-50 px-4"
-            style={{ background: "rgba(26,28,26,0.85)", backdropFilter: "blur(6px)" }}
-        >
-            <div className="w-full max-w-xl" style={{ background: "#2e3330", border: "1px solid rgba(61,74,62,0.35)" }}>
-                <div
-                    className="px-8 py-5 flex items-center justify-between"
-                    style={{ borderBottom: "1px solid rgba(61,74,62,0.25)", background: "#2a3d2e" }}
-                >
+        <div className="fixed inset-0 flex items-center justify-center z-[100] px-4 bg-zinc-950/80 backdrop-blur-sm animate-fade-in">
+            <div className="w-full max-w-xl bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden animate-slide-up">
+                <div className="px-8 py-5 border-b border-zinc-800 bg-zinc-900 flex items-center justify-between">
                     <div>
-                        <p style={{ fontSize: "0.55rem", letterSpacing: "0.35em", textTransform: "uppercase", color: "#587560" }}>
+                        <p className="text-[10px] tracking-widest uppercase text-indigo-400 mb-1 font-semibold">
                             Portfolio
                         </p>
-                        <h2
-                            className="font-light mt-1"
-                            style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.5rem", color: "#ede8dd", letterSpacing: "0.04em" }}
-                        >
-                            {isEditing ? "Edit" : "Add"} <span style={{ fontStyle: "italic", color: "#9aab97" }}>Transaction</span>
+                        <h2 className="font-semibold text-2xl text-zinc-50 tracking-tight flex gap-2">
+                            {isEditing ? "Edit" : "Add"} <span className="font-normal text-zinc-500 italic">Transaction</span>
                         </h2>
                     </div>
                     <button
                         onClick={handleClose}
-                        style={{ background: "none", border: "none", color: "#6b7c6a", cursor: "pointer", fontSize: "1.2rem", lineHeight: 1, padding: "4px" }}
+                        className="p-2 text-zinc-500 hover:text-zinc-50 hover:bg-zinc-800 rounded-md transition-colors"
                     >
-                        x
+                        <X size={20} />
                     </button>
                 </div>
 
                 <form onSubmit={handleSubmit} className="px-8 py-7 space-y-6">
-                    <div style={{ position: "relative", zIndex: 10 }}>
-                        <label style={labelStyle}>Coin</label>
-                        <input
-                            type="text"
-                            value={coinInput}
-                            disabled={isEditing}
-                            onChange={(e) => {
-                                setCoinInput(e.target.value);
-                                setShowDropdown(true);
-                            }}
-                            onFocus={() => {
-                                if (coinInput.length >= 2 && !isEditing) setShowDropdown(true);
-                            }}
-                            onBlur={() => {
-                                setTimeout(() => setShowDropdown(false), 150);
-                            }}
-                            autoComplete="off"
-                            style={{ ...inputStyle, opacity: isEditing ? 0.8 : 1 }}
-                        />
+                    <div className="relative z-20">
+                        <label className="block text-[10px] tracking-widest uppercase text-zinc-500 mb-2 font-semibold">Coin</label>
+                        <div className="relative">
+                            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" />
+                            <input
+                                type="text"
+                                value={coinInput}
+                                disabled={isEditing}
+                                onChange={(e) => {
+                                    setCoinInput(e.target.value);
+                                    setShowDropdown(true);
+                                }}
+                                onFocus={() => {
+                                    if (coinInput.length >= 2 && !isEditing) setShowDropdown(true);
+                                }}
+                                onBlur={() => {
+                                    setTimeout(() => setShowDropdown(false), 150);
+                                }}
+                                autoComplete="off"
+                                className="w-full bg-zinc-950 border border-zinc-800 text-zinc-50 text-sm py-2.5 pl-9 pr-4 rounded-lg focus:outline-none focus:border-indigo-500 transition-colors placeholder-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                                placeholder="Search by coin name..."
+                            />
+                        </div>
 
                         {showDropdown && coins && coins.length > 0 && (
-                            <ul
-                                style={{
-                                    position: "absolute",
-                                    top: "100%",
-                                    left: 0,
-                                    right: 0,
-                                    background: "#1a1c1a",
-                                    border: "1px solid rgba(61,74,62,0.35)",
-                                    borderTop: "none",
-                                    maxHeight: "180px",
-                                    overflowY: "auto",
-                                    zIndex: 20,
-                                    margin: 0,
-                                    padding: 0,
-                                    listStyle: "none",
-                                }}
-                            >
+                            <ul className="absolute top-full left-0 right-0 mt-1 bg-zinc-950 border border-zinc-800 rounded-lg max-h-56 overflow-y-auto shadow-xl py-1 z-30">
                                 {coins.map((coin) => (
                                     <li
                                         key={coin.id}
                                         onMouseDown={() => handleCoinSelect(coin)}
-                                        style={{
-                                            padding: "10px 14px",
-                                            borderBottom: "1px solid rgba(61,74,62,0.15)",
-                                            cursor: "pointer",
-                                            display: "flex",
-                                            alignItems: "center",
-                                            justifyContent: "space-between",
-                                        }}
+                                        className="px-4 py-2.5 hover:bg-zinc-800 cursor-pointer flex items-center justify-between transition-colors"
                                     >
-                                        <span style={{ fontSize: "0.72rem", color: "#d4cfc4", letterSpacing: "0.04em" }}>{coin.name}</span>
-                                        <span style={{ fontSize: "0.55rem", letterSpacing: "0.2em", color: "#6b7c6a" }}>{coin.symbol.toUpperCase()}</span>
+                                        <span className="text-sm text-zinc-300 font-medium">{coin.name}</span>
+                                        <span className="text-[10px] tracking-widest font-mono text-zinc-500 uppercase">{coin.symbol}</span>
                                     </li>
                                 ))}
                             </ul>
                         )}
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 relative z-10">
                         <div>
-                            <label style={labelStyle}>Type</label>
+                            <label className="block text-[10px] tracking-widest uppercase text-zinc-500 mb-3 font-semibold">Type</label>
                             <div className="flex gap-4">
                                 {(["BUY", "SELL"] as TransactionType[]).map((type) => (
-                                    <label key={type} className="flex items-center gap-2" style={{ cursor: "pointer" }}>
+                                    <label key={type} className="flex items-center gap-2 cursor-pointer group">
+                                        <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors ${formData.type === type ? (type === "BUY" ? "border-emerald-500 bg-emerald-500/10" : "border-rose-500 bg-rose-500/10") : "border-zinc-700 group-hover:border-zinc-500"}`}>
+                                            {formData.type === type && <div className={`w-2 h-2 rounded-full ${type === "BUY" ? "bg-emerald-500" : "bg-rose-500"}`} />}
+                                        </div>
                                         <input
                                             type="radio"
                                             name="type"
                                             value={type}
                                             checked={formData.type === type}
                                             onChange={() => setFormData((prev) => ({ ...prev, type }))}
-                                            style={{ accentColor: type === "BUY" ? "#587560" : "#8b5e3c" }}
+                                            className="hidden"
                                         />
-                                        <span style={{ fontSize: "0.72rem", color: formData.type === type ? (type === "BUY" ? "#587560" : "#8b5e3c") : "#6b7c6a", fontFamily: "'DM Mono', monospace" }}>
+                                        <span className={`text-xs font-semibold tracking-wider font-mono ${formData.type === type ? (type === "BUY" ? "text-emerald-500" : "text-rose-500") : "text-zinc-500 group-hover:text-zinc-300"}`}>
                                             {type}
                                         </span>
                                     </label>
@@ -255,90 +208,70 @@ const AddHoldingModal = () => {
                         </div>
 
                         <div>
-                            <label style={labelStyle}>Date</label>
+                            <label className="block text-[10px] tracking-widest uppercase text-zinc-500 mb-2 font-semibold">Date</label>
                             <input
                                 type="datetime-local"
                                 value={formData.timestamp}
                                 onChange={(e) => setFormData((prev) => ({ ...prev, timestamp: e.target.value }))}
-                                style={inputStyle}
+                                className="w-full bg-zinc-950 border border-zinc-800 text-zinc-50 font-mono text-xs py-2.5 px-3 rounded-lg focus:outline-none focus:border-indigo-500 transition-colors"
                             />
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 relative z-10">
                         <div>
-                            <label style={labelStyle}>Quantity</label>
+                            <label className="block text-[10px] tracking-widest uppercase text-zinc-500 mb-2 font-semibold">Quantity</label>
                             <input
                                 type="number"
+                                step="any"
                                 value={formData.quantity}
                                 onChange={(e) => setFormData((prev) => ({ ...prev, quantity: e.target.value }))}
                                 placeholder="0.00"
-                                style={inputStyle}
+                                className="w-full bg-zinc-950 border border-zinc-800 text-zinc-50 font-mono text-sm py-2.5 px-3 rounded-lg focus:outline-none focus:border-indigo-500 transition-colors placeholder-zinc-700"
                             />
                         </div>
                         <div>
-                            <label style={labelStyle}>Price / USD</label>
+                            <label className="block text-[10px] tracking-widest uppercase text-zinc-500 mb-2 font-semibold">Price / USD</label>
                             <input
                                 type="number"
+                                step="any"
                                 value={formData.price}
                                 onChange={(e) => setFormData((prev) => ({ ...prev, price: e.target.value }))}
                                 placeholder="0.00"
-                                style={inputStyle}
+                                className="w-full bg-zinc-950 border border-zinc-800 text-zinc-50 font-mono text-sm py-2.5 px-3 rounded-lg focus:outline-none focus:border-indigo-500 transition-colors placeholder-zinc-700"
                             />
                         </div>
                         <div>
-                            <label style={labelStyle}>Fee / USD</label>
+                            <label className="block text-[10px] tracking-widest uppercase text-zinc-500 mb-2 font-semibold">Fee / USD</label>
                             <input
                                 type="number"
+                                step="any"
                                 value={formData.fee}
                                 onChange={(e) => setFormData((prev) => ({ ...prev, fee: e.target.value }))}
                                 placeholder="0.00"
-                                style={inputStyle}
+                                className="w-full bg-zinc-950 border border-zinc-800 text-zinc-50 font-mono text-sm py-2.5 px-3 rounded-lg focus:outline-none focus:border-indigo-500 transition-colors placeholder-zinc-700"
                             />
                         </div>
                     </div>
 
                     {errorMessage && (
-                        <div style={{ color: "#8b5e3c", fontSize: "0.65rem", letterSpacing: "0.05em", marginTop: "10px" }}>
+                        <div className="text-rose-500 text-xs font-mono bg-rose-500/10 border border-rose-500/20 px-3 py-2 rounded-lg">
                             {errorMessage}
                         </div>
                     )}
 
-                    <div className="flex justify-end gap-3" style={{ borderTop: "1px solid rgba(61,74,62,0.2)", paddingTop: "20px" }}>
+                    <div className="flex justify-end gap-3 pt-6 border-t border-zinc-800 relative z-10">
                         <button
                             type="button"
                             onClick={handleClose}
-                            style={{
-                                background: "transparent",
-                                border: "1px solid rgba(107,124,106,0.25)",
-                                color: "#6b7c6a",
-                                fontFamily: "'DM Mono', monospace",
-                                fontSize: "0.58rem",
-                                letterSpacing: "0.25em",
-                                textTransform: "uppercase",
-                                padding: "9px 22px",
-                                cursor: "pointer",
-                            }}
+                            className="px-6 py-2.5 bg-zinc-950 border border-zinc-800 text-zinc-400 hover:text-zinc-50 hover:bg-zinc-800 rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
                             disabled={isLoading}
-                            style={{
-                                background: "transparent",
-                                border: "1px solid rgba(196,136,90,0.4)",
-                                color: "#c4885a",
-                                fontFamily: "'DM Mono', monospace",
-                                fontSize: "0.58rem",
-                                letterSpacing: "0.25em",
-                                textTransform: "uppercase",
-                                padding: "9px 22px",
-                                cursor: isLoading ? "not-allowed" : "pointer",
-                                display: "inline-flex",
-                                alignItems: "center",
-                                gap: "8px",
-                            }}
+                            className="px-6 py-2.5 bg-indigo-500 border border-indigo-500 text-white hover:bg-indigo-600 hover:border-indigo-600 rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-md shadow-indigo-500/20"
                         >
                             {isLoading ? "Saving..." : isEditing ? "Save Changes" : "Add Transaction"}
                         </button>

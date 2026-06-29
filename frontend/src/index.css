@@ -1,19 +1,45 @@
 @import "tailwindcss";
 
+@theme {
+  --color-zinc-950: #09090b;
+  --color-zinc-900: #18181b;
+  --color-zinc-800: #27272a;
+  --color-zinc-400: #a1a1aa;
+  --color-zinc-50: #fafafa;
+  --color-emerald-500: #10b981;
+  --color-rose-500: #f43f5e;
+  --color-indigo-600: #4f46e5;
+  --color-cyan-500: #06b6d4;
+
+  --font-sans: "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-zinc-950);
+    color: var(--color-zinc-50);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Subtle inner text-shadow / color pulse instead of background flash */
 @keyframes flashGreen {
-  0% { background-color: rgba(88, 117, 96, 0.45); }
-  100% { background-color: transparent; }
+  0% { color: var(--color-emerald-500); text-shadow: 0 0 12px rgba(16, 185, 129, 0.8); }
+  100% { color: inherit; text-shadow: none; }
 }
 
 @keyframes flashRed {
-  0% { background-color: rgba(139, 94, 60, 0.45); }
-  100% { background-color: transparent; }
+  0% { color: var(--color-rose-500); text-shadow: 0 0 12px rgba(244, 63, 94, 0.8); }
+  100% { color: inherit; text-shadow: none; }
 }
 
 .flash-up {
-  animation: flashGreen 1s ease-out forwards;
+  animation: flashGreen 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .flash-down {
-  animation: flashRed 1s ease-out forwards;
+  animation: flashRed 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }

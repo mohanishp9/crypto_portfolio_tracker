@@ -13,45 +13,51 @@ const HoldingsTable = ({ statsData, onSelectCoin, isLoading }: HoldingsTableProp
     const { livePrices } = useLivePrices();
 
     return (
-        <div
-            className="overflow-hidden mt-1 rounded-sm"
-            style={{ background: "#2e3330", border: "1px solid rgba(61,74,62,0.3)" }}
-        >
-            <div className="p-6 flex flex-wrap items-start justify-between gap-4">
-                <div>
-                    <h3
-                        className="font-light tracking-wide"
-                        style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.4rem", color: "#ede8dd" }}
-                    >
-                        Portfolio Holdings
-                    </h3>
-                    <p
-                        className="mt-1"
-                        style={{ fontSize: "0.6rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "#6b7c6a" }}
-                    >
-                        Allocation, cost basis, and return by coin
-                    </p>
-                </div>
+        <div className="overflow-hidden rounded-xl bg-zinc-900 border border-zinc-800 shadow-sm">
+            <div className="p-5 border-b border-zinc-800">
+                <h3 className="font-semibold text-lg text-zinc-50 tracking-tight">
+                    Portfolio Holdings
+                </h3>
+                <p className="mt-1 text-xs text-zinc-400">
+                    Allocation, cost basis, and return by coin
+                </p>
             </div>
 
             <div className="overflow-x-auto">
                 <table className="min-w-full">
                     <thead>
-                        <tr style={{ borderBottom: "1px solid rgba(61,74,62,0.3)" }}>
-                            {["Coin", "Quantity", "Avg Cost", "Current Price", "Allocation", "Value", "Unrealized PnL", "Realized PnL", "Return"].map((h) => (
-                                <th
-                                    key={h}
-                                    scope="col"
-                                    className="px-6 py-4 text-left font-normal"
-                                    style={{ fontSize: "0.55rem", letterSpacing: "0.3em", textTransform: "uppercase", color: "#6b7c6a" }}
-                                >
-                                    {h}
-                                </th>
-                            ))}
+                        <tr className="border-b border-zinc-800 bg-zinc-900/50">
+                            <th scope="col" className="px-5 py-3 text-left text-xs font-medium text-zinc-400 uppercase tracking-wider">
+                                Coin
+                            </th>
+                            <th scope="col" className="px-5 py-3 text-right text-xs font-medium text-zinc-400 uppercase tracking-wider">
+                                Quantity
+                            </th>
+                            <th scope="col" className="px-5 py-3 text-right text-xs font-medium text-zinc-400 uppercase tracking-wider">
+                                Avg Cost
+                            </th>
+                            <th scope="col" className="px-5 py-3 text-right text-xs font-medium text-zinc-400 uppercase tracking-wider">
+                                Current Price
+                            </th>
+                            <th scope="col" className="px-5 py-3 text-right text-xs font-medium text-zinc-400 uppercase tracking-wider">
+                                Allocation
+                            </th>
+                            <th scope="col" className="px-5 py-3 text-right text-xs font-medium text-zinc-400 uppercase tracking-wider">
+                                Value
+                            </th>
+                            <th scope="col" className="px-5 py-3 text-right text-xs font-medium text-zinc-400 uppercase tracking-wider">
+                                Unrealized PnL
+                            </th>
+                            <th scope="col" className="px-5 py-3 text-right text-xs font-medium text-zinc-400 uppercase tracking-wider">
+                                Realized PnL
+                            </th>
+                            <th scope="col" className="px-5 py-3 text-right text-xs font-medium text-zinc-400 uppercase tracking-wider">
+                                Return
+                            </th>
                         </tr>
                     </thead>
 
-                    <tbody>
+                    <tbody className="divide-y divide-zinc-800/50">
                         {isLoading ? (
                             <>
                                 <TableRowSkeleton columnsCount={9} />
@@ -66,119 +72,78 @@ const HoldingsTable = ({ statsData, onSelectCoin, isLoading }: HoldingsTableProp
                                     const priceChange24h = liveData ? liveData.priceChange24h : holding.priceChange24h;
                                     const value = holding.quantity * currentPrice;
                                     const unrealizedProfit = value - holding.totalCost;
-                                    const isProfit = unrealizedProfit > 0;
-                                    const isLoss = unrealizedProfit < 0;
-                                    const isRealizedProfit = (holding.realizedProfit ?? 0) > 0;
-                                    const isRealizedLoss = (holding.realizedProfit ?? 0) < 0;
+                                    const isProfit = unrealizedProfit >= 0;
+                                    const isRealizedProfit = (holding.realizedProfit ?? 0) >= 0;
                                     const totalReturn = holding.totalCost > 0 ? (unrealizedProfit / holding.totalCost) * 100 : 0;
 
                                     return (
                                         <tr
                                             key={holding.coinId}
-                                            className="group transition-colors duration-300"
-                                            style={{ borderBottom: "1px solid rgba(61,74,62,0.15)" }}
-                                            onMouseEnter={(e) => {
-                                                e.currentTarget.style.background = "rgba(42,61,46,0.5)";
-                                            }}
-                                            onMouseLeave={(e) => {
-                                                e.currentTarget.style.background = "transparent";
-                                            }}
+                                            className="group transition-colors duration-150 hover:bg-zinc-800/40"
                                         >
-                                            <td className="px-6 py-5 whitespace-nowrap">
+                                            <td className="px-5 py-3 whitespace-nowrap">
                                                 <button
                                                     type="button"
                                                     onClick={() => onSelectCoin(holding.coinId)}
-                                                    style={{ background: "transparent", border: "none", padding: 0, textAlign: "left", cursor: "pointer" }}
+                                                    className="flex flex-col text-left focus:outline-none"
                                                 >
-                                                    <div
-                                                        className="font-light"
-                                                        style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.1rem", color: "#ede8dd", letterSpacing: "0.04em" }}
-                                                    >
+                                                    <span className="font-medium text-sm text-zinc-50 group-hover:text-white transition-colors">
                                                         {holding.coinName}
-                                                    </div>
-                                                    <div style={{ fontSize: "0.52rem", letterSpacing: "0.2em", color: "#6b7c6a", textTransform: "uppercase" }}>
+                                                    </span>
+                                                    <span className="text-xs font-mono text-zinc-500 uppercase mt-0.5">
                                                         {holding.coinSymbol}
-                                                    </div>
+                                                    </span>
                                                 </button>
                                             </td>
 
-                                            <td className="px-6 py-5 whitespace-nowrap" style={{ fontSize: "0.7rem", letterSpacing: "0.06em", color: "#9aab97" }}>
+                                            <td className="px-5 py-3 whitespace-nowrap text-right font-mono text-sm text-zinc-300">
                                                 {holding.quantity.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })}
                                             </td>
 
-                                            <td className="px-6 py-5 whitespace-nowrap" style={{ fontSize: "0.7rem", letterSpacing: "0.06em", color: "#9aab97" }}>
-                                                ${holding.avgBuyPrice.toFixed(2)}
+                                            <td className="px-5 py-3 whitespace-nowrap text-right font-mono text-sm text-zinc-300">
+                                                ${holding.avgBuyPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })}
                                             </td>
 
                                             <td
                                                 key={`${holding.coinId}-${liveData?.updateKey ?? 0}`}
-                                                className={`px-6 py-5 whitespace-nowrap ${liveData?.direction === "up" ? "flash-up" : liveData?.direction === "down" ? "flash-down" : ""}`}
+                                                className="px-5 py-3 whitespace-nowrap text-right"
                                             >
-                                                <div style={{ fontSize: "0.7rem", letterSpacing: "0.06em", color: "#9aab97" }}>
-                                                    ${currentPrice.toFixed(2)}
+                                                <div className={`font-mono text-sm text-zinc-50 ${liveData?.direction === "up" ? "flash-up" : liveData?.direction === "down" ? "flash-down" : ""}`}>
+                                                    ${currentPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })}
                                                 </div>
-                                                <div style={{ fontSize: "0.5rem", letterSpacing: "0.15em", color: priceChange24h >= 0 ? "#587560" : "#8b5e3c" }}>
+                                                <div className={`font-mono text-xs mt-0.5 ${priceChange24h >= 0 ? "text-emerald-500" : "text-rose-500"}`}>
                                                     {priceChange24h >= 0 ? "+" : ""}
-                                                    {priceChange24h.toFixed(2)}% 24H
+                                                    {priceChange24h.toFixed(2)}%
                                                 </div>
                                             </td>
 
-                                            <td className="px-6 py-5 whitespace-nowrap" style={{ fontSize: "0.68rem", color: "#d4cfc4" }}>
+                                            <td className="px-5 py-3 whitespace-nowrap text-right font-mono text-sm text-zinc-400">
                                                 {holding.allocationPercent.toFixed(1)}%
                                             </td>
 
-                                            <td className="px-6 py-5 whitespace-nowrap">
-                                                <span
-                                                    className="font-light"
-                                                    style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.05rem", color: "#d4cfc4", letterSpacing: "0.04em" }}
-                                                >
+                                            <td className="px-5 py-3 whitespace-nowrap text-right">
+                                                <span className="font-mono text-sm font-medium text-zinc-50">
                                                     ${value.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                                                 </span>
                                             </td>
 
-                                            <td className="px-6 py-5 whitespace-nowrap">
-                                                <span
-                                                    className="inline-flex items-center gap-1 px-3 py-1"
-                                                    style={{
-                                                        fontSize: "0.6rem",
-                                                        letterSpacing: "0.15em",
-                                                        fontFamily: "'DM Mono', monospace",
-                                                        background: isProfit
-                                                            ? "rgba(88,117,96,0.15)"
-                                                            : isLoss
-                                                                ? "rgba(139,94,60,0.15)"
-                                                                : "rgba(107,124,106,0.1)",
-                                                        color: isProfit ? "#587560" : isLoss ? "#8b5e3c" : "#6b7c6a",
-                                                        border: `1px solid ${isProfit ? "rgba(88,117,96,0.3)" : isLoss ? "rgba(139,94,60,0.3)" : "rgba(107,124,106,0.2)"}`,
-                                                    }}
-                                                >
-                                                    {unrealizedProfit >= 0 ? "+" : "-"}${Math.abs(unrealizedProfit).toFixed(2)}
+                                            <td className="px-5 py-3 whitespace-nowrap text-right">
+                                                <span className={`inline-flex items-center px-2 py-0.5 rounded-md font-mono text-xs font-medium bg-zinc-950 border ${isProfit ? "text-emerald-400 border-emerald-500/20" : "text-rose-400 border-rose-500/20"}`}>
+                                                    {isProfit ? "+" : "-"}${Math.abs(unrealizedProfit).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                                 </span>
                                             </td>
 
-                                            <td className="px-6 py-5 whitespace-nowrap">
-                                                <span
-                                                    className="inline-flex items-center gap-1 px-3 py-1"
-                                                    style={{
-                                                        fontSize: "0.6rem",
-                                                        letterSpacing: "0.15em",
-                                                        fontFamily: "'DM Mono', monospace",
-                                                        background: isRealizedProfit
-                                                            ? "rgba(88,117,96,0.15)"
-                                                            : isRealizedLoss
-                                                                ? "rgba(139,94,60,0.15)"
-                                                                : "rgba(107,124,106,0.1)",
-                                                        color: isRealizedProfit ? "#587560" : isRealizedLoss ? "#8b5e3c" : "#6b7c6a",
-                                                        border: `1px solid ${isRealizedProfit ? "rgba(88,117,96,0.3)" : isRealizedLoss ? "rgba(139,94,60,0.3)" : "rgba(107,124,106,0.2)"}`,
-                                                    }}
-                                                >
-                                                    {(holding.realizedProfit ?? 0) >= 0 ? "+" : "-"}${Math.abs(holding.realizedProfit ?? 0).toFixed(2)}
+                                            <td className="px-5 py-3 whitespace-nowrap text-right">
+                                                <span className={`inline-flex items-center px-2 py-0.5 rounded-md font-mono text-xs font-medium bg-zinc-950 border ${isRealizedProfit ? "text-emerald-400 border-emerald-500/20" : "text-rose-400 border-rose-500/20"}`}>
+                                                    {isRealizedProfit ? "+" : "-"}${Math.abs(holding.realizedProfit ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                                 </span>
                                             </td>
 
-                                            <td className="px-6 py-5 whitespace-nowrap" style={{ fontSize: "0.68rem", color: totalReturn >= 0 ? "#587560" : "#8b5e3c" }}>
-                                                {totalReturn >= 0 ? "+" : ""}
-                                                {totalReturn.toFixed(2)}%
+                                            <td className="px-5 py-3 whitespace-nowrap text-right">
+                                                <span className={`font-mono text-sm font-medium ${totalReturn >= 0 ? "text-emerald-500" : "text-rose-500"}`}>
+                                                    {totalReturn >= 0 ? "+" : ""}
+                                                    {totalReturn.toFixed(2)}%
+                                                </span>
                                             </td>
                                         </tr>
                                     );
@@ -186,14 +151,11 @@ const HoldingsTable = ({ statsData, onSelectCoin, isLoading }: HoldingsTableProp
 
                                 {holdings.length === 0 && (
                                     <tr>
-                                        <td colSpan={9} className="px-6 py-20 text-center">
-                                            <p
-                                                className="font-light"
-                                                style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.3rem", color: "#6b7c6a", letterSpacing: "0.05em" }}
-                                            >
+                                        <td colSpan={9} className="px-5 py-16 text-center">
+                                            <p className="text-lg font-medium text-zinc-500">
                                                 No holdings yet
                                             </p>
-                                            <p style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#3d4a3e", marginTop: "8px" }}>
+                                            <p className="text-sm text-zinc-600 mt-2">
                                                 Add a transaction or import your CSV to unlock allocation and performance views
                                             </p>
                                         </td>

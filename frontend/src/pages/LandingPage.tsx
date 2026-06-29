@@ -141,8 +141,8 @@ const LandingPage = () => {
     const [activeChartTab, setActiveChartTab] = useState('bitcoin');
 
     const fetchMarketData = useCallback(async () => {
-        const cachedCoins = coinsCache || getCachedItem<CoinMarket[]>('grove_coins');
-        const cachedGlobal = globalCache || getCachedItem<GlobalData>('grove_global');
+        const cachedCoins = coinsCache || getCachedItem<CoinMarket[]>('cyphersight_coins');
+        const cachedGlobal = globalCache || getCachedItem<GlobalData>('cyphersight_global');
 
         // Return cached data if fresh
         if (isFresh(cachedCoins) && isFresh(cachedGlobal)) {
@@ -194,8 +194,8 @@ const LandingPage = () => {
             const now = Date.now();
             coinsCache = { data: parsedCoins, timestamp: now };
             globalCache = { data: parsedGlobal, timestamp: now };
-            setCachedItem('grove_coins', coinsCache);
-            setCachedItem('grove_global', globalCache);
+            setCachedItem('cyphersight_coins', coinsCache);
+            setCachedItem('cyphersight_global', globalCache);
 
             setCoins(parsedCoins);
             setGlobalData(parsedGlobal);
@@ -219,7 +219,7 @@ const LandingPage = () => {
     }, [fetchMarketData]);
 
     const fetchChartsData = useCallback(async () => {
-        const cachedCharts = chartsCache || getCachedItem<CoinCharts>('grove_charts');
+        const cachedCharts = chartsCache || getCachedItem<CoinCharts>('cyphersight_charts');
         
         if (isFresh(cachedCharts)) {
             chartsCache = cachedCharts;
@@ -246,7 +246,7 @@ const LandingPage = () => {
                 }));
             }
             chartsCache = { data: newChartData, timestamp: Date.now() };
-            setCachedItem('grove_charts', chartsCache);
+            setCachedItem('cyphersight_charts', chartsCache);
             setChartData(newChartData);
         } catch (err) {
             console.warn('Failed to fetch chart data, using fallback data', err);
@@ -270,7 +270,7 @@ const LandingPage = () => {
         fontSize: '0.5rem',
         letterSpacing: '0.35em',
         textTransform: 'uppercase',
-        color: '#587560',
+        color: '#818cf8',
     };
 
     const monoStyle: React.CSSProperties = {
@@ -282,14 +282,14 @@ const LandingPage = () => {
     // ── Render ──────────────────────────────────────────────────
 
     return (
-        <div style={{ background: '#1a1c1a', minHeight: '100vh', color: '#ede8dd' }}>
+        <div style={{ background: '#09090b', minHeight: '100vh', color: '#fafafa' }}>
 
             {/* Subtle background grid — same as Login page */}
             <div
                 className="fixed inset-0 pointer-events-none"
                 style={{
                     backgroundImage:
-                        'linear-gradient(rgba(61,74,62,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(61,74,62,0.06) 1px, transparent 1px)',
+                        'linear-gradient(rgba(63, 63, 70,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(63, 63, 70,0.06) 1px, transparent 1px)',
                     backgroundSize: '48px 48px',
                 }}
             />
@@ -297,9 +297,9 @@ const LandingPage = () => {
             {/* ─── Navbar ─── */}
             <nav
                 style={{
-                    background: 'rgba(26,28,26,0.92)',
+                    background: 'rgba(9, 9, 11, 0.92)',
                     backdropFilter: 'blur(12px)',
-                    borderBottom: '1px solid rgba(61,74,62,0.3)',
+                    borderBottom: '1px solid rgba(63, 63, 70,0.3)',
                     position: 'sticky',
                     top: 0,
                     zIndex: 50,
@@ -315,7 +315,7 @@ const LandingPage = () => {
                                     width: 28,
                                     height: 28,
                                     borderRadius: '50%',
-                                    border: '1px solid rgba(196,136,90,0.5)',
+                                    border: '1px solid rgba(129, 140, 248,0.5)',
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
@@ -327,7 +327,7 @@ const LandingPage = () => {
                                         width: 8,
                                         height: 8,
                                         borderRadius: '50%',
-                                        background: '#c4885a',
+                                        background: '#818cf8',
                                         opacity: 0.8,
                                     }}
                                 />
@@ -335,14 +335,14 @@ const LandingPage = () => {
                             <span
                                 className="font-light"
                                 style={{
-                                    fontFamily: "'Cormorant Garamond', serif",
+                                    fontFamily: "ui-sans-serif, system-ui, sans-serif",
                                     fontSize: 'clamp(1.1rem, 2.5vw, 1.6rem)',
-                                    color: '#ede8dd',
+                                    color: '#fafafa',
                                     letterSpacing: '0.06em',
                                 }}
                             >
-                                Grove{' '}
-                                <span style={{ color: '#c4885a', fontStyle: 'italic' }}>Portfolio</span>
+                                CypherSight{' '}
+                                <span style={{ color: '#818cf8', fontStyle: 'italic' }}>Portfolio</span>
                             </span>
                         </Link>
 
@@ -353,8 +353,8 @@ const LandingPage = () => {
                                     to="/dashboard"
                                     className="transition-all duration-300"
                                     style={{
-                                        border: '1px solid rgba(196,136,90,0.4)',
-                                        color: '#c4885a',
+                                        border: '1px solid rgba(129, 140, 248,0.4)',
+                                        color: '#818cf8',
                                         fontFamily: "'DM Mono', monospace",
                                         fontSize: '0.6rem',
                                         letterSpacing: '0.25em',
@@ -366,15 +366,15 @@ const LandingPage = () => {
                                         gap: '8px',
                                     }}
                                     onMouseEnter={e => {
-                                        e.currentTarget.style.background = '#c4885a';
-                                        e.currentTarget.style.color = '#1a1c1a';
+                                        e.currentTarget.style.background = '#818cf8';
+                                        e.currentTarget.style.color = '#09090b';
                                     }}
                                     onMouseLeave={e => {
                                         e.currentTarget.style.background = 'transparent';
-                                        e.currentTarget.style.color = '#c4885a';
+                                        e.currentTarget.style.color = '#818cf8';
                                     }}
                                 >
-                                    <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '0.9rem', fontWeight: 300 }}>→</span>
+                                    <span style={{ fontFamily: "ui-sans-serif, system-ui, sans-serif", fontSize: '0.9rem', fontWeight: 300 }}>→</span>
                                     Dashboard
                                 </Link>
                             ) : (
@@ -387,29 +387,29 @@ const LandingPage = () => {
                                             fontSize: '0.6rem',
                                             letterSpacing: '0.25em',
                                             textTransform: 'uppercase',
-                                            color: '#9aab97',
+                                            color: '#a1a1aa',
                                             fontFamily: "'DM Mono', monospace",
                                             textDecoration: 'none',
                                             padding: '6px 0',
                                             transition: 'color 0.2s',
                                         }}
-                                        onMouseEnter={e => (e.currentTarget.style.color = '#ede8dd')}
-                                        onMouseLeave={e => (e.currentTarget.style.color = '#9aab97')}
+                                        onMouseEnter={e => (e.currentTarget.style.color = '#fafafa')}
+                                        onMouseLeave={e => (e.currentTarget.style.color = '#a1a1aa')}
                                     >
                                         Login
                                     </Link>
 
                                     <div
                                         className="hidden sm:block"
-                                        style={{ width: 1, height: 20, background: 'rgba(61,74,62,0.5)' }}
+                                        style={{ width: 1, height: 20, background: 'rgba(63, 63, 70,0.5)' }}
                                     />
 
                                     <Link
                                         to="/register"
                                         className="transition-all duration-300"
                                         style={{
-                                            border: '1px solid rgba(196,136,90,0.4)',
-                                            color: '#c4885a',
+                                            border: '1px solid rgba(129, 140, 248,0.4)',
+                                            color: '#818cf8',
                                             fontFamily: "'DM Mono', monospace",
                                             fontSize: '0.6rem',
                                             letterSpacing: '0.25em',
@@ -421,15 +421,15 @@ const LandingPage = () => {
                                             gap: '8px',
                                         }}
                                         onMouseEnter={e => {
-                                            e.currentTarget.style.background = '#c4885a';
-                                            e.currentTarget.style.color = '#1a1c1a';
+                                            e.currentTarget.style.background = '#818cf8';
+                                            e.currentTarget.style.color = '#09090b';
                                         }}
                                         onMouseLeave={e => {
                                             e.currentTarget.style.background = 'transparent';
-                                            e.currentTarget.style.color = '#c4885a';
+                                            e.currentTarget.style.color = '#818cf8';
                                         }}
                                     >
-                                        <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '0.9rem', fontWeight: 300 }}>→</span>
+                                        <span style={{ fontFamily: "ui-sans-serif, system-ui, sans-serif", fontSize: '0.9rem', fontWeight: 300 }}>→</span>
                                         Sign Up
                                     </Link>
                                 </>
@@ -442,8 +442,8 @@ const LandingPage = () => {
             {/* ─── Market Stats Bar ─── */}
             <div
                 style={{
-                    borderBottom: '1px solid rgba(61,74,62,0.2)',
-                    background: 'rgba(42,61,46,0.12)',
+                    borderBottom: '1px solid rgba(63, 63, 70,0.2)',
+                    background: 'rgba(39, 39, 42, 0.5)',
                 }}
             >
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -459,15 +459,15 @@ const LandingPage = () => {
                                 ))}
                             </>
                         ) : error ? (
-                            <span style={{ ...monoStyle, color: '#8b5e3c', fontSize: '0.55rem' }}>
+                            <span style={{ ...monoStyle, color: '#f43f5e', fontSize: '0.55rem' }}>
                                 Market data unavailable
                             </span>
                         ) : globalData ? (
                             <>
                                 <StatItem label="Market Cap" value={fmtUsd(globalData.total_market_cap)} labelStyle={labelStyle} monoStyle={monoStyle} />
-                                <div style={{ width: 1, height: 16, background: 'rgba(61,74,62,0.3)' }} />
+                                <div style={{ width: 1, height: 16, background: 'rgba(63, 63, 70,0.3)' }} />
                                 <StatItem label="24h Volume" value={fmtUsd(globalData.total_volume_24h)} labelStyle={labelStyle} monoStyle={monoStyle} />
-                                <div className="hidden sm:block" style={{ width: 1, height: 16, background: 'rgba(61,74,62,0.3)' }} />
+                                <div className="hidden sm:block" style={{ width: 1, height: 16, background: 'rgba(63, 63, 70,0.3)' }} />
                                 <StatItem label="BTC Dominance" value={`${globalData.btc_dominance.toFixed(1)}%`} labelStyle={labelStyle} monoStyle={monoStyle} className="hidden sm:flex" />
                             </>
                         ) : null}
@@ -485,7 +485,7 @@ const LandingPage = () => {
                         width: '520px',
                         height: '520px',
                         borderRadius: '50%',
-                        background: 'radial-gradient(circle, rgba(196,136,90,0.06) 0%, transparent 70%)',
+                        background: 'radial-gradient(circle, rgba(129, 140, 248,0.06) 0%, transparent 70%)',
                         top: '5%',
                         left: '50%',
                         transform: 'translateX(-50%)',
@@ -499,13 +499,13 @@ const LandingPage = () => {
                             width: 64,
                             height: 64,
                             borderRadius: '50%',
-                            border: '1px solid rgba(196,136,90,0.3)',
+                            border: '1px solid rgba(129, 140, 248,0.3)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                         }}
                     >
-                        <div style={{ width: 20, height: 20, borderRadius: '50%', background: '#c4885a', opacity: 0.7 }} />
+                        <div style={{ width: 20, height: 20, borderRadius: '50%', background: '#818cf8', opacity: 0.7 }} />
                     </div>
                 </div>
 
@@ -514,12 +514,12 @@ const LandingPage = () => {
                     className="mb-6"
                     style={{
                         padding: '6px 16px',
-                        border: '1px solid rgba(61,74,62,0.35)',
-                        background: 'rgba(42,61,46,0.25)',
+                        border: '1px solid rgba(63, 63, 70,0.35)',
+                        background: 'rgba(39, 39, 42, 0.5)',
                         fontSize: '0.55rem',
                         letterSpacing: '0.35em',
                         textTransform: 'uppercase',
-                        color: '#587560',
+                        color: '#818cf8',
                         animation: 'heroFadeIn 0.8s ease-out 0.15s both',
                     }}
                 >
@@ -530,9 +530,9 @@ const LandingPage = () => {
                 <h1
                     className="font-light text-center"
                     style={{
-                        fontFamily: "'Cormorant Garamond', serif",
+                        fontFamily: "ui-sans-serif, system-ui, sans-serif",
                         fontSize: 'clamp(2.2rem, 6vw, 4rem)',
-                        color: '#ede8dd',
+                        color: '#fafafa',
                         letterSpacing: '0.04em',
                         lineHeight: 1.15,
                         maxWidth: '720px',
@@ -540,7 +540,7 @@ const LandingPage = () => {
                     }}
                 >
                     Cultivate your{' '}
-                    <span style={{ fontStyle: 'italic', color: '#c4885a' }}>crypto</span>
+                    <span style={{ fontStyle: 'italic', color: '#818cf8' }}>crypto</span>
                     <br />
                     portfolio with clarity
                 </h1>
@@ -552,7 +552,7 @@ const LandingPage = () => {
                         fontFamily: "'DM Mono', monospace",
                         fontSize: '0.68rem',
                         letterSpacing: '0.12em',
-                        color: '#6b7c6a',
+                        color: '#71717a',
                         maxWidth: '480px',
                         lineHeight: 1.8,
                         animation: 'heroFadeIn 0.8s ease-out 0.45s both',
@@ -571,9 +571,9 @@ const LandingPage = () => {
                             to="/dashboard"
                             className="transition-all duration-300"
                             style={{
-                                border: '1px solid rgba(196,136,90,0.4)',
-                                background: '#c4885a',
-                                color: '#1a1c1a',
+                                border: '1px solid rgba(129, 140, 248,0.4)',
+                                background: '#818cf8',
+                                color: '#09090b',
                                 fontFamily: "'DM Mono', monospace",
                                 fontSize: '0.62rem',
                                 letterSpacing: '0.3em',
@@ -586,14 +586,14 @@ const LandingPage = () => {
                             }}
                             onMouseEnter={e => {
                                 e.currentTarget.style.background = 'transparent';
-                                e.currentTarget.style.color = '#c4885a';
+                                e.currentTarget.style.color = '#818cf8';
                             }}
                             onMouseLeave={e => {
-                                e.currentTarget.style.background = '#c4885a';
-                                e.currentTarget.style.color = '#1a1c1a';
+                                e.currentTarget.style.background = '#818cf8';
+                                e.currentTarget.style.color = '#09090b';
                             }}
                         >
-                            <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1rem', fontWeight: 300 }}>→</span>
+                            <span style={{ fontFamily: "ui-sans-serif, system-ui, sans-serif", fontSize: '1rem', fontWeight: 300 }}>→</span>
                             Go to Dashboard
                         </Link>
                     ) : (
@@ -604,9 +604,9 @@ const LandingPage = () => {
                                 id="hero-cta-register"
                                 className="transition-all duration-300"
                                 style={{
-                                    border: '1px solid rgba(196,136,90,0.4)',
-                                    background: '#c4885a',
-                                    color: '#1a1c1a',
+                                    border: '1px solid rgba(129, 140, 248,0.4)',
+                                    background: '#818cf8',
+                                    color: '#09090b',
                                     fontFamily: "'DM Mono', monospace",
                                     fontSize: '0.62rem',
                                     letterSpacing: '0.3em',
@@ -619,14 +619,14 @@ const LandingPage = () => {
                                 }}
                                 onMouseEnter={e => {
                                     e.currentTarget.style.background = 'transparent';
-                                    e.currentTarget.style.color = '#c4885a';
+                                    e.currentTarget.style.color = '#818cf8';
                                 }}
                                 onMouseLeave={e => {
-                                    e.currentTarget.style.background = '#c4885a';
-                                    e.currentTarget.style.color = '#1a1c1a';
+                                    e.currentTarget.style.background = '#818cf8';
+                                    e.currentTarget.style.color = '#09090b';
                                 }}
                             >
-                                <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1rem', fontWeight: 300 }}>→</span>
+                                <span style={{ fontFamily: "ui-sans-serif, system-ui, sans-serif", fontSize: '1rem', fontWeight: 300 }}>→</span>
                                 Get Started
                             </Link>
 
@@ -636,9 +636,9 @@ const LandingPage = () => {
                                 id="hero-cta-login"
                                 className="transition-all duration-300"
                                 style={{
-                                    border: '1px solid rgba(61,74,62,0.4)',
+                                    border: '1px solid rgba(63, 63, 70,0.4)',
                                     background: 'transparent',
-                                    color: '#9aab97',
+                                    color: '#a1a1aa',
                                     fontFamily: "'DM Mono', monospace",
                                     fontSize: '0.62rem',
                                     letterSpacing: '0.3em',
@@ -651,11 +651,11 @@ const LandingPage = () => {
                                 }}
                                 onMouseEnter={e => {
                                     e.currentTarget.style.borderColor = 'rgba(154,171,151,0.5)';
-                                    e.currentTarget.style.color = '#ede8dd';
+                                    e.currentTarget.style.color = '#fafafa';
                                 }}
                                 onMouseLeave={e => {
-                                    e.currentTarget.style.borderColor = 'rgba(61,74,62,0.4)';
-                                    e.currentTarget.style.color = '#9aab97';
+                                    e.currentTarget.style.borderColor = 'rgba(63, 63, 70,0.4)';
+                                    e.currentTarget.style.color = '#a1a1aa';
                                 }}
                             >
                                 Login
@@ -671,19 +671,19 @@ const LandingPage = () => {
 
                     {/* Section header */}
                     <div className="flex items-center gap-4 mb-8">
-                        <div style={{ width: 24, height: 1, background: 'rgba(196,136,90,0.3)' }} />
+                        <div style={{ width: 24, height: 1, background: 'rgba(129, 140, 248,0.3)' }} />
                         <h2
                             className="font-light"
                             style={{
-                                fontFamily: "'Cormorant Garamond', serif",
+                                fontFamily: "ui-sans-serif, system-ui, sans-serif",
                                 fontSize: '1.5rem',
-                                color: '#ede8dd',
+                                color: '#fafafa',
                                 letterSpacing: '0.04em',
                             }}
                         >
-                            Top <span style={{ fontStyle: 'italic', color: '#c4885a' }}>10</span> by Market Cap
+                            Top <span style={{ fontStyle: 'italic', color: '#818cf8' }}>10</span> by Market Cap
                         </h2>
-                        <div style={{ flex: 1, height: 1, background: 'rgba(61,74,62,0.2)' }} />
+                        <div style={{ flex: 1, height: 1, background: 'rgba(63, 63, 70,0.2)' }} />
                     </div>
 
                     {/* Error state */}
@@ -691,11 +691,11 @@ const LandingPage = () => {
                         <div
                             style={{
                                 padding: '16px 20px',
-                                background: 'rgba(139,94,60,0.1)',
-                                border: '1px solid rgba(139,94,60,0.25)',
+                                background: 'rgba(244, 63, 94,0.1)',
+                                border: '1px solid rgba(244, 63, 94,0.25)',
                                 ...monoStyle,
                                 fontSize: '0.6rem',
-                                color: '#8b5e3c',
+                                color: '#f43f5e',
                                 letterSpacing: '0.1em',
                                 textAlign: 'center',
                             }}
@@ -706,8 +706,8 @@ const LandingPage = () => {
                                 style={{
                                     marginLeft: 12,
                                     background: 'transparent',
-                                    border: '1px solid rgba(139,94,60,0.35)',
-                                    color: '#c4885a',
+                                    border: '1px solid rgba(244, 63, 94,0.35)',
+                                    color: '#818cf8',
                                     fontFamily: "'DM Mono', monospace",
                                     fontSize: '0.55rem',
                                     letterSpacing: '0.2em',
@@ -723,10 +723,10 @@ const LandingPage = () => {
 
                     {/* Loading skeleton */}
                     {loading && (
-                        <div style={{ background: '#2e3330', border: '1px solid rgba(61,74,62,0.3)', overflowX: 'auto' }}>
+                        <div style={{ background: '#18181b', border: '1px solid rgba(63, 63, 70,0.3)', overflowX: 'auto' }}>
                             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '600px' }}>
                                 <thead>
-                                    <tr style={{ borderBottom: '1px solid rgba(61,74,62,0.3)', background: 'rgba(42,61,46,0.15)' }}>
+                                    <tr style={{ borderBottom: '1px solid rgba(63, 63, 70,0.3)', background: 'rgba(39, 39, 42, 0.5)' }}>
                                         <th style={{ padding: '16px', ...labelStyle, width: '60px' }}>#</th>
                                         <th style={{ padding: '16px', ...labelStyle }}>Name</th>
                                         <th style={{ padding: '16px', ...labelStyle, textAlign: 'right' }}>Price</th>
@@ -739,7 +739,7 @@ const LandingPage = () => {
                                         <tr
                                             key={i}
                                             style={{
-                                                borderBottom: '1px solid rgba(61,74,62,0.15)',
+                                                borderBottom: '1px solid rgba(63, 63, 70,0.15)',
                                                 animation: `skeletonPulse 1.6s ease-in-out infinite ${i * 0.08}s`,
                                             }}
                                         >
@@ -770,10 +770,10 @@ const LandingPage = () => {
 
                     {/* Coin table */}
                     {!loading && !error && coins.length > 0 && (
-                        <div style={{ background: '#2e3330', border: '1px solid rgba(61,74,62,0.3)', overflowX: 'auto' }}>
+                        <div style={{ background: '#18181b', border: '1px solid rgba(63, 63, 70,0.3)', overflowX: 'auto' }}>
                             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '600px' }}>
                                 <thead>
-                                    <tr style={{ borderBottom: '1px solid rgba(61,74,62,0.3)', background: 'rgba(42,61,46,0.15)' }}>
+                                    <tr style={{ borderBottom: '1px solid rgba(63, 63, 70,0.3)', background: 'rgba(39, 39, 42, 0.5)' }}>
                                         <th style={{ padding: '16px', ...labelStyle, width: '60px' }}>#</th>
                                         <th style={{ padding: '16px', ...labelStyle }}>Name</th>
                                         <th style={{ padding: '16px', ...labelStyle, textAlign: 'right' }}>Price</th>
@@ -789,14 +789,14 @@ const LandingPage = () => {
                                                 key={coin.id}
                                                 className="transition-colors duration-200"
                                                 style={{
-                                                    borderBottom: '1px solid rgba(61,74,62,0.15)',
+                                                    borderBottom: '1px solid rgba(63, 63, 70,0.15)',
                                                     animation: `heroFadeIn 0.5s ease-out ${idx * 0.04}s both`,
                                                 }}
-                                                onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'rgba(61,74,62,0.1)')}
+                                                onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'rgba(63, 63, 70,0.1)')}
                                                 onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
                                             >
                                                 {/* Rank */}
-                                                <td style={{ padding: '16px', ...monoStyle, color: '#6b7c6a' }}>
+                                                <td style={{ padding: '16px', ...monoStyle, color: '#71717a' }}>
                                                     {coin.market_cap_rank}
                                                 </td>
 
@@ -808,12 +808,12 @@ const LandingPage = () => {
                                                                 width: 24,
                                                                 height: 24,
                                                                 borderRadius: '50%',
-                                                                border: '1px solid rgba(61,74,62,0.25)',
+                                                                border: '1px solid rgba(63, 63, 70,0.25)',
                                                                 overflow: 'hidden',
                                                                 display: 'flex',
                                                                 alignItems: 'center',
                                                                 justifyContent: 'center',
-                                                                background: '#1a1c1a',
+                                                                background: '#09090b',
                                                                 flexShrink: 0,
                                                             }}
                                                         >
@@ -828,9 +828,9 @@ const LandingPage = () => {
                                                         <div className="flex items-baseline gap-2 min-w-0">
                                                             <span
                                                                 style={{
-                                                                    fontFamily: "'Cormorant Garamond', serif",
+                                                                    fontFamily: "ui-sans-serif, system-ui, sans-serif",
                                                                     fontSize: '0.9rem',
-                                                                    color: '#ede8dd',
+                                                                    color: '#fafafa',
                                                                     whiteSpace: 'nowrap',
                                                                     overflow: 'hidden',
                                                                     textOverflow: 'ellipsis',
@@ -838,7 +838,7 @@ const LandingPage = () => {
                                                             >
                                                                 {coin.name}
                                                             </span>
-                                                            <span style={{ ...labelStyle, fontSize: '0.45rem', color: '#6b7c6a' }}>
+                                                            <span style={{ ...labelStyle, fontSize: '0.45rem', color: '#71717a' }}>
                                                                 {coin.symbol.toUpperCase()}
                                                             </span>
                                                         </div>
@@ -852,7 +852,7 @@ const LandingPage = () => {
                                                         textAlign: 'right',
                                                         fontFamily: "'DM Mono', monospace",
                                                         fontSize: '0.72rem',
-                                                        color: '#ede8dd',
+                                                        color: '#fafafa',
                                                     }}
                                                 >
                                                     {fmtPrice(coin.current_price)}
@@ -865,7 +865,7 @@ const LandingPage = () => {
                                                         textAlign: 'right',
                                                         fontFamily: "'DM Mono', monospace",
                                                         fontSize: '0.72rem',
-                                                        color: isPositive ? '#6b9a6b' : '#a85c4a',
+                                                        color: isPositive ? '#10b981' : '#f43f5e',
                                                     }}
                                                 >
                                                     {fmtPct(coin.price_change_percentage_24h)}
@@ -877,7 +877,7 @@ const LandingPage = () => {
                                                         padding: '16px',
                                                         textAlign: 'right',
                                                         ...monoStyle,
-                                                        color: '#9aab97',
+                                                        color: '#a1a1aa',
                                                     }}
                                                 >
                                                     {fmtUsd(coin.market_cap)}
@@ -894,28 +894,28 @@ const LandingPage = () => {
             </section>
 
             {/* ─── Live Market Overview (Charts) ─── */}
-            <section className="relative px-4 py-20" style={{ borderTop: '1px solid rgba(61,74,62,0.15)' }}>
+            <section className="relative px-4 py-20" style={{ borderTop: '1px solid rgba(63, 63, 70,0.15)' }}>
                 <div className="max-w-5xl mx-auto">
                     {/* Section header */}
                     <div className="flex items-center gap-4 mb-10">
-                        <div style={{ width: 24, height: 1, background: 'rgba(196,136,90,0.3)' }} />
-                        <h2 className="font-light" style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.5rem', color: '#ede8dd', letterSpacing: '0.04em' }}>
-                            Live Market <span style={{ fontStyle: 'italic', color: '#c4885a' }}>Overview</span>
+                        <div style={{ width: 24, height: 1, background: 'rgba(129, 140, 248,0.3)' }} />
+                        <h2 className="font-light" style={{ fontFamily: "ui-sans-serif, system-ui, sans-serif", fontSize: '1.5rem', color: '#fafafa', letterSpacing: '0.04em' }}>
+                            Live Market <span style={{ fontStyle: 'italic', color: '#818cf8' }}>Overview</span>
                         </h2>
-                        <div style={{ flex: 1, height: 1, background: 'rgba(61,74,62,0.2)' }} />
+                        <div style={{ flex: 1, height: 1, background: 'rgba(63, 63, 70,0.2)' }} />
                     </div>
 
                     {/* Top Row: 7-day Line Chart */}
-                    <div style={{ background: '#2e3330', border: '1px solid rgba(61,74,62,0.3)', padding: '24px', marginBottom: '24px' }}>
-                        <div className="flex flex-wrap gap-2 mb-6 border-b border-[rgba(61,74,62,0.3)] pb-4">
+                    <div style={{ background: '#18181b', border: '1px solid rgba(63, 63, 70,0.3)', padding: '24px', marginBottom: '24px' }}>
+                        <div className="flex flex-wrap gap-2 mb-6 border-b border-[rgba(63, 63, 70,0.3)] pb-4">
                             {CHART_COINS.map(c => (
                                 <button
                                     key={c.id}
                                     onClick={() => setActiveChartTab(c.id)}
                                     style={{
-                                        background: activeChartTab === c.id ? 'rgba(61,74,62,0.3)' : 'transparent',
-                                        border: `1px solid ${activeChartTab === c.id ? c.color : 'rgba(61,74,62,0.2)'}`,
-                                        color: activeChartTab === c.id ? '#ede8dd' : '#9aab97',
+                                        background: activeChartTab === c.id ? 'rgba(63, 63, 70,0.3)' : 'transparent',
+                                        border: `1px solid ${activeChartTab === c.id ? c.color : 'rgba(63, 63, 70,0.2)'}`,
+                                        color: activeChartTab === c.id ? '#fafafa' : '#a1a1aa',
                                         padding: '6px 12px',
                                         fontFamily: "'DM Mono', monospace",
                                         fontSize: '0.65rem',
@@ -935,27 +935,27 @@ const LandingPage = () => {
                         </div>
                         <div style={{ height: 300 }}>
                             {chartLoading ? (
-                                <div className="w-full h-full flex items-center justify-center" style={{ background: 'rgba(61,74,62,0.1)', animation: 'skeletonPulse 1.6s ease-in-out infinite' }}>
-                                    <span style={{ fontFamily: "'DM Mono', monospace", fontSize: '0.7rem', color: '#6b7c6a' }}>Loading chart...</span>
+                                <div className="w-full h-full flex items-center justify-center" style={{ background: 'rgba(63, 63, 70,0.1)', animation: 'skeletonPulse 1.6s ease-in-out infinite' }}>
+                                    <span style={{ fontFamily: "'DM Mono', monospace", fontSize: '0.7rem', color: '#71717a' }}>Loading chart...</span>
                                 </div>
                             ) : (
                                 <ResponsiveContainer width="100%" height="100%">
                                     <AreaChart data={chartData[activeChartTab] || []} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                                         <defs>
                                             <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
-                                                <stop offset="5%" stopColor={CHART_COINS.find(c => c.id === activeChartTab)?.color || '#c4885a'} stopOpacity={0.3}/>
-                                                <stop offset="95%" stopColor={CHART_COINS.find(c => c.id === activeChartTab)?.color || '#c4885a'} stopOpacity={0}/>
+                                                <stop offset="5%" stopColor={CHART_COINS.find(c => c.id === activeChartTab)?.color || '#818cf8'} stopOpacity={0.3}/>
+                                                <stop offset="95%" stopColor={CHART_COINS.find(c => c.id === activeChartTab)?.color || '#818cf8'} stopOpacity={0}/>
                                             </linearGradient>
                                         </defs>
-                                        <XAxis dataKey="timestamp" tickFormatter={formatAxisDate} tick={{ fill: '#6b7c6a', fontSize: 10, fontFamily: "'DM Mono', monospace" }} axisLine={false} tickLine={false} minTickGap={30} />
-                                        <YAxis tickFormatter={(val) => `$${val >= 1000 ? (val / 1000).toFixed(1) + 'K' : val}`} tick={{ fill: '#6b7c6a', fontSize: 10, fontFamily: "'DM Mono', monospace" }} axisLine={false} tickLine={false} domain={['auto', 'auto']} />
+                                        <XAxis dataKey="timestamp" tickFormatter={formatAxisDate} tick={{ fill: '#71717a', fontSize: 10, fontFamily: "'DM Mono', monospace" }} axisLine={false} tickLine={false} minTickGap={30} />
+                                        <YAxis tickFormatter={(val) => `$${val >= 1000 ? (val / 1000).toFixed(1) + 'K' : val}`} tick={{ fill: '#71717a', fontSize: 10, fontFamily: "'DM Mono', monospace" }} axisLine={false} tickLine={false} domain={['auto', 'auto']} />
                                         <Tooltip 
-                                            contentStyle={{ background: '#1a1c1a', border: '1px solid rgba(61,74,62,0.5)', borderRadius: '4px', fontFamily: "'DM Mono', monospace", fontSize: '0.7rem' }}
+                                            contentStyle={{ background: '#09090b', border: '1px solid rgba(63, 63, 70,0.5)', borderRadius: '4px', fontFamily: "'DM Mono', monospace", fontSize: '0.7rem' }}
                                             labelFormatter={(l) => formatTooltipDate(l as number)}
-                                            itemStyle={{ color: '#ede8dd' }}
+                                            itemStyle={{ color: '#fafafa' }}
                                             formatter={(val: number) => [fmtPrice(val), 'Price']}
                                         />
-                                        <Area type="monotone" dataKey="price" stroke={CHART_COINS.find(c => c.id === activeChartTab)?.color || '#c4885a'} fillOpacity={1} fill="url(#colorPrice)" strokeWidth={2} isAnimationActive={true} />
+                                        <Area type="monotone" dataKey="price" stroke={CHART_COINS.find(c => c.id === activeChartTab)?.color || '#818cf8'} fillOpacity={1} fill="url(#colorPrice)" strokeWidth={2} isAnimationActive={true} />
                                     </AreaChart>
                                 </ResponsiveContainer>
                             )}
@@ -965,8 +965,8 @@ const LandingPage = () => {
                     {/* Bottom Row: Donut & Bar Charts */}
                     <div className="flex flex-col md:flex-row gap-6">
                         {/* Donut Chart: Market Cap */}
-                        <div style={{ background: '#2e3330', border: '1px solid rgba(61,74,62,0.3)', padding: '24px', flex: 1 }}>
-                            <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.2rem', color: '#ede8dd', letterSpacing: '0.04em', marginBottom: '16px' }}>Market Cap Distribution</h3>
+                        <div style={{ background: '#18181b', border: '1px solid rgba(63, 63, 70,0.3)', padding: '24px', flex: 1 }}>
+                            <h3 style={{ fontFamily: "ui-sans-serif, system-ui, sans-serif", fontSize: '1.2rem', color: '#fafafa', letterSpacing: '0.04em', marginBottom: '16px' }}>Market Cap Distribution</h3>
                             <div style={{ height: 250 }}>
                                 {!loading && coins.length > 0 ? (
                                     <ResponsiveContainer width="100%" height="100%">
@@ -992,47 +992,47 @@ const LandingPage = () => {
                                                 })}
                                             </Pie>
                                             <Tooltip
-                                                contentStyle={{ background: '#1a1c1a', border: '1px solid rgba(61,74,62,0.5)', borderRadius: '4px', fontFamily: "'DM Mono', monospace", fontSize: '0.7rem' }}
-                                                itemStyle={{ color: '#ede8dd' }}
+                                                contentStyle={{ background: '#09090b', border: '1px solid rgba(63, 63, 70,0.5)', borderRadius: '4px', fontFamily: "'DM Mono', monospace", fontSize: '0.7rem' }}
+                                                itemStyle={{ color: '#fafafa' }}
                                                 formatter={(val: number, name: string) => [fmtUsd(val), name.toUpperCase()]}
                                             />
                                         </PieChart>
                                     </ResponsiveContainer>
                                 ) : (
-                                    <div className="w-full h-full flex items-center justify-center" style={{ background: 'rgba(61,74,62,0.1)', animation: 'skeletonPulse 1.6s ease-in-out infinite' }} />
+                                    <div className="w-full h-full flex items-center justify-center" style={{ background: 'rgba(63, 63, 70,0.1)', animation: 'skeletonPulse 1.6s ease-in-out infinite' }} />
                                 )}
                             </div>
                         </div>
 
                         {/* Bar Chart: 24h Performance */}
-                        <div style={{ background: '#2e3330', border: '1px solid rgba(61,74,62,0.3)', padding: '24px', flex: 1 }}>
-                            <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.2rem', color: '#ede8dd', letterSpacing: '0.04em', marginBottom: '16px' }}>24h Performance</h3>
+                        <div style={{ background: '#18181b', border: '1px solid rgba(63, 63, 70,0.3)', padding: '24px', flex: 1 }}>
+                            <h3 style={{ fontFamily: "ui-sans-serif, system-ui, sans-serif", fontSize: '1.2rem', color: '#fafafa', letterSpacing: '0.04em', marginBottom: '16px' }}>24h Performance</h3>
                             <div style={{ height: 250 }}>
                                 {!loading && coins.length > 0 ? (
                                     <ResponsiveContainer width="100%" height="100%">
                                         <BarChart layout="vertical" data={coins} margin={{ top: 0, right: 40, left: 0, bottom: 0 }}>
                                             <XAxis type="number" hide domain={['dataMin - 2', 'dataMax + 2']} />
-                                            <YAxis type="category" dataKey="symbol" tickFormatter={(val) => val.toUpperCase()} tick={{ fill: '#6b7c6a', fontSize: 10, fontFamily: "'DM Mono', monospace" }} axisLine={false} tickLine={false} width={40} />
+                                            <YAxis type="category" dataKey="symbol" tickFormatter={(val) => val.toUpperCase()} tick={{ fill: '#71717a', fontSize: 10, fontFamily: "'DM Mono', monospace" }} axisLine={false} tickLine={false} width={40} />
                                             <Tooltip
-                                                cursor={{ fill: 'rgba(61,74,62,0.2)' }}
-                                                contentStyle={{ background: '#1a1c1a', border: '1px solid rgba(61,74,62,0.5)', borderRadius: '4px', fontFamily: "'DM Mono', monospace", fontSize: '0.7rem' }}
+                                                cursor={{ fill: 'rgba(63, 63, 70,0.2)' }}
+                                                contentStyle={{ background: '#09090b', border: '1px solid rgba(63, 63, 70,0.5)', borderRadius: '4px', fontFamily: "'DM Mono', monospace", fontSize: '0.7rem' }}
                                                 formatter={(val: number) => [fmtPct(val), '24h Change']}
                                             />
                                             <Bar dataKey="price_change_percentage_24h" radius={[0, 4, 4, 0]} isAnimationActive={true} barSize={12}>
                                                 {coins.map((coin, index) => (
-                                                    <Cell key={`cell-${index}`} fill={coin.price_change_percentage_24h >= 0 ? '#6b9a6b' : '#a85c4a'} />
+                                                    <Cell key={`cell-${index}`} fill={coin.price_change_percentage_24h >= 0 ? '#10b981' : '#f43f5e'} />
                                                 ))}
                                                 <LabelList 
                                                     dataKey="price_change_percentage_24h" 
                                                     position="right" 
                                                     formatter={(val: unknown) => fmtPct(Number(val))} 
-                                                    style={{ fill: '#9aab97', fontSize: 9, fontFamily: "'DM Mono', monospace" }}
+                                                    style={{ fill: '#a1a1aa', fontSize: 9, fontFamily: "'DM Mono', monospace" }}
                                                 />
                                             </Bar>
                                         </BarChart>
                                     </ResponsiveContainer>
                                 ) : (
-                                    <div className="w-full h-full flex items-center justify-center" style={{ background: 'rgba(61,74,62,0.1)', animation: 'skeletonPulse 1.6s ease-in-out infinite' }} />
+                                    <div className="w-full h-full flex items-center justify-center" style={{ background: 'rgba(63, 63, 70,0.1)', animation: 'skeletonPulse 1.6s ease-in-out infinite' }} />
                                 )}
                             </div>
                         </div>
@@ -1041,26 +1041,26 @@ const LandingPage = () => {
             </section>
 
             {/* ─── Features Section ─── */}
-            <section className="relative px-4 py-20" style={{ borderTop: '1px solid rgba(61,74,62,0.15)' }}>
+            <section className="relative px-4 py-20" style={{ borderTop: '1px solid rgba(63, 63, 70,0.15)' }}>
                 <div className="max-w-5xl mx-auto">
 
                     {/* Section header */}
                     <div className="flex items-center gap-4 mb-4">
-                        <div style={{ width: 24, height: 1, background: 'rgba(196,136,90,0.3)' }} />
-                        <span style={{ fontSize: '0.5rem', letterSpacing: '0.35em', textTransform: 'uppercase', color: '#587560' }}>
+                        <div style={{ width: 24, height: 1, background: 'rgba(129, 140, 248,0.3)' }} />
+                        <span style={{ fontSize: '0.5rem', letterSpacing: '0.35em', textTransform: 'uppercase', color: '#818cf8' }}>
                             What you get
                         </span>
                     </div>
                     <h2
                         className="font-light mb-12"
                         style={{
-                            fontFamily: "'Cormorant Garamond', serif",
+                            fontFamily: "ui-sans-serif, system-ui, sans-serif",
                             fontSize: 'clamp(1.4rem, 3vw, 2rem)',
-                            color: '#ede8dd',
+                            color: '#fafafa',
                             letterSpacing: '0.04em',
                         }}
                     >
-                        Everything to <span style={{ fontStyle: 'italic', color: '#c4885a' }}>grow</span> your portfolio
+                        Everything to <span style={{ fontStyle: 'italic', color: '#818cf8' }}>grow</span> your portfolio
                     </h2>
 
                     {/* Feature cards grid */}
@@ -1069,7 +1069,7 @@ const LandingPage = () => {
                             display: 'grid',
                             gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
                             gap: '1px',
-                            background: 'rgba(61,74,62,0.15)',
+                            background: 'rgba(63, 63, 70,0.15)',
                         }}
                     >
                         {FEATURES.map((feat, idx) => (
@@ -1080,7 +1080,7 @@ const LandingPage = () => {
             </section>
 
             {/* ─── How It Works Section ─── */}
-            <section className="relative px-4 py-20" style={{ borderTop: '1px solid rgba(61,74,62,0.15)' }}>
+            <section className="relative px-4 py-20" style={{ borderTop: '1px solid rgba(63, 63, 70,0.15)' }}>
                 <div className="max-w-3xl mx-auto">
 
                     {/* Section header */}
@@ -1089,12 +1089,12 @@ const LandingPage = () => {
                             style={{
                                 display: 'inline-block',
                                 padding: '6px 16px',
-                                border: '1px solid rgba(61,74,62,0.35)',
-                                background: 'rgba(42,61,46,0.25)',
+                                border: '1px solid rgba(63, 63, 70,0.35)',
+                                background: 'rgba(39, 39, 42, 0.5)',
                                 fontSize: '0.5rem',
                                 letterSpacing: '0.35em',
                                 textTransform: 'uppercase',
-                                color: '#587560',
+                                color: '#818cf8',
                                 marginBottom: '16px',
                             }}
                         >
@@ -1103,13 +1103,13 @@ const LandingPage = () => {
                         <h2
                             className="font-light"
                             style={{
-                                fontFamily: "'Cormorant Garamond', serif",
+                                fontFamily: "ui-sans-serif, system-ui, sans-serif",
                                 fontSize: 'clamp(1.4rem, 3vw, 2rem)',
-                                color: '#ede8dd',
+                                color: '#fafafa',
                                 letterSpacing: '0.04em',
                             }}
                         >
-                            Three steps to <span style={{ fontStyle: 'italic', color: '#c4885a' }}>clarity</span>
+                            Three steps to <span style={{ fontStyle: 'italic', color: '#818cf8' }}>clarity</span>
                         </h2>
                     </div>
 
@@ -1127,9 +1127,9 @@ const LandingPage = () => {
                             id="how-it-works-cta"
                             className="transition-all duration-300"
                             style={{
-                                border: '1px solid rgba(196,136,90,0.4)',
-                                background: '#c4885a',
-                                color: '#1a1c1a',
+                                border: '1px solid rgba(129, 140, 248,0.4)',
+                                background: '#818cf8',
+                                color: '#09090b',
                                 fontFamily: "'DM Mono', monospace",
                                 fontSize: '0.62rem',
                                 letterSpacing: '0.3em',
@@ -1142,25 +1142,25 @@ const LandingPage = () => {
                             }}
                             onMouseEnter={e => {
                                 e.currentTarget.style.background = 'transparent';
-                                e.currentTarget.style.color = '#c4885a';
+                                e.currentTarget.style.color = '#818cf8';
                             }}
                             onMouseLeave={e => {
-                                e.currentTarget.style.background = '#c4885a';
-                                e.currentTarget.style.color = '#1a1c1a';
+                                e.currentTarget.style.background = '#818cf8';
+                                e.currentTarget.style.color = '#09090b';
                             }}
                         >
-                            <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1rem', fontWeight: 300 }}>→</span>
+                            <span style={{ fontFamily: "ui-sans-serif, system-ui, sans-serif", fontSize: '1rem', fontWeight: 300 }}>→</span>
                             {isAuthenticated ? "Go to Dashboard" : "Start Tracking Free"}
                         </Link>
 
-                        <div className="mt-10" style={{ width: 40, height: 1, background: 'rgba(196,136,90,0.25)' }} />
+                        <div className="mt-10" style={{ width: 40, height: 1, background: 'rgba(129, 140, 248,0.25)' }} />
                         <p
                             className="mt-4"
                             style={{
                                 fontSize: '0.5rem',
                                 letterSpacing: '0.4em',
                                 textTransform: 'uppercase',
-                                color: '#3d4a3e',
+                                color: '#52525b',
                             }}
                         >
                             Free to use · No credit card required
@@ -1170,23 +1170,23 @@ const LandingPage = () => {
             </section>
 
             {/* ─── Trending Coins Section ─── */}
-            <section className="relative px-4 py-20" style={{ borderTop: '1px solid rgba(61,74,62,0.15)' }}>
+            <section className="relative px-4 py-20" style={{ borderTop: '1px solid rgba(63, 63, 70,0.15)' }}>
                 <div className="max-w-5xl mx-auto">
                     {/* Section header */}
                     <div className="flex items-center gap-4 mb-8">
-                        <div style={{ width: 24, height: 1, background: 'rgba(196,136,90,0.3)' }} />
+                        <div style={{ width: 24, height: 1, background: 'rgba(129, 140, 248,0.3)' }} />
                         <h2
                             className="font-light"
                             style={{
-                                fontFamily: "'Cormorant Garamond', serif",
+                                fontFamily: "ui-sans-serif, system-ui, sans-serif",
                                 fontSize: '1.5rem',
-                                color: '#ede8dd',
+                                color: '#fafafa',
                                 letterSpacing: '0.04em',
                             }}
                         >
-                            Trending <span style={{ fontStyle: 'italic', color: '#c4885a' }}>Movers</span>
+                            Trending <span style={{ fontStyle: 'italic', color: '#818cf8' }}>Movers</span>
                         </h2>
-                        <div style={{ flex: 1, height: 1, background: 'rgba(61,74,62,0.2)' }} />
+                        <div style={{ flex: 1, height: 1, background: 'rgba(63, 63, 70,0.2)' }} />
                     </div>
                     
                     {/* Horizontal scrollable row */}
@@ -1199,14 +1199,14 @@ const LandingPage = () => {
                                         key={coin.id}
                                         className="transition-all duration-200 flex-shrink-0 w-48 sm:w-auto"
                                         style={{
-                                            background: '#2e3330',
-                                            border: '1px solid rgba(61,74,62,0.3)',
+                                            background: '#18181b',
+                                            border: '1px solid rgba(63, 63, 70,0.3)',
                                             padding: '16px',
                                             cursor: 'default',
                                             animation: `heroFadeIn 0.5s ease-out ${idx * 0.05}s both`,
                                         }}
                                         onMouseEnter={e => (e.currentTarget.style.background = '#343a36')}
-                                        onMouseLeave={e => (e.currentTarget.style.background = '#2e3330')}
+                                        onMouseLeave={e => (e.currentTarget.style.background = '#18181b')}
                                     >
                                         <div className="flex items-center gap-3 mb-3">
                                             <div
@@ -1214,27 +1214,27 @@ const LandingPage = () => {
                                                     width: 28,
                                                     height: 28,
                                                     borderRadius: '50%',
-                                                    border: '1px solid rgba(61,74,62,0.3)',
+                                                    border: '1px solid rgba(63, 63, 70,0.3)',
                                                     overflow: 'hidden',
                                                     display: 'flex',
                                                     alignItems: 'center',
                                                     justifyContent: 'center',
-                                                    background: '#1a1c1a',
+                                                    background: '#09090b',
                                                 }}
                                             >
                                                 <img src={coin.image} alt={coin.name} width={16} height={16} loading="lazy" style={{ borderRadius: '50%' }} />
                                             </div>
                                             <div style={{ minWidth: 0 }}>
-                                                <div style={{ ...monoStyle, fontSize: '0.68rem', color: '#ede8dd', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                <div style={{ ...monoStyle, fontSize: '0.68rem', color: '#fafafa', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                                     {coin.name}
                                                 </div>
                                             </div>
                                         </div>
-                                        <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.2rem', fontWeight: 300, color: '#ede8dd', letterSpacing: '0.02em', marginBottom: 8 }}>
+                                        <div style={{ fontFamily: "ui-sans-serif, system-ui, sans-serif", fontSize: '1.2rem', fontWeight: 300, color: '#fafafa', letterSpacing: '0.02em', marginBottom: 8 }}>
                                             {fmtPrice(coin.current_price)}
                                         </div>
-                                        <div style={{ display: 'inline-block', padding: '2px 6px', background: isPositive ? 'rgba(107,154,107,0.1)' : 'rgba(168,92,74,0.1)', border: `1px solid ${isPositive ? 'rgba(107,154,107,0.2)' : 'rgba(168,92,74,0.2)'}`, borderRadius: '2px' }}>
-                                            <span style={{ ...monoStyle, fontSize: '0.55rem', color: isPositive ? '#6b9a6b' : '#a85c4a', letterSpacing: '0.08em' }}>
+                                        <div style={{ display: 'inline-block', padding: '2px 6px', background: isPositive ? 'rgba(16, 185, 129,0.1)' : 'rgba(244, 63, 94,0.1)', border: `1px solid ${isPositive ? 'rgba(16, 185, 129,0.2)' : 'rgba(244, 63, 94,0.2)'}`, borderRadius: '2px' }}>
+                                            <span style={{ ...monoStyle, fontSize: '0.55rem', color: isPositive ? '#10b981' : '#f43f5e', letterSpacing: '0.08em' }}>
                                                 {fmtPct(coin.price_change_percentage_24h)}
                                             </span>
                                         </div>
@@ -1243,7 +1243,7 @@ const LandingPage = () => {
                             })}
                         </div>
                     ) : (
-                        <div style={{ ...monoStyle, fontSize: '0.6rem', color: '#6b7c6a' }}>
+                        <div style={{ ...monoStyle, fontSize: '0.6rem', color: '#71717a' }}>
                             {loading ? 'Loading trending coins...' : 'No data available'}
                         </div>
                     )}
@@ -1251,21 +1251,21 @@ const LandingPage = () => {
             </section>
 
             {/* ─── Footer ─── */}
-            <footer style={{ borderTop: '1px solid rgba(61,74,62,0.3)', background: '#1a1c1a' }}>
+            <footer style={{ borderTop: '1px solid rgba(63, 63, 70,0.3)', background: '#09090b' }}>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
                     <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start gap-6">
                         
                         {/* Brand & Tagline */}
                         <div className="text-center sm:text-left">
                             <div className="flex items-center justify-center sm:justify-start gap-2 mb-2">
-                                <div style={{ width: 16, height: 16, borderRadius: '50%', border: '1px solid rgba(196,136,90,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    <div style={{ width: 4, height: 4, borderRadius: '50%', background: '#c4885a', opacity: 0.8 }} />
+                                <div style={{ width: 16, height: 16, borderRadius: '50%', border: '1px solid rgba(129, 140, 248,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <div style={{ width: 4, height: 4, borderRadius: '50%', background: '#818cf8', opacity: 0.8 }} />
                                 </div>
-                                <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.2rem', color: '#ede8dd', letterSpacing: '0.06em' }}>
-                                    Grove
+                                <span style={{ fontFamily: "ui-sans-serif, system-ui, sans-serif", fontSize: '1.2rem', color: '#fafafa', letterSpacing: '0.06em' }}>
+                                    CypherSight
                                 </span>
                             </div>
-                            <p style={{ fontFamily: "'DM Mono', monospace", fontSize: '0.55rem', letterSpacing: '0.12em', color: '#6b7c6a', textTransform: 'uppercase' }}>
+                            <p style={{ fontFamily: "'DM Mono', monospace", fontSize: '0.55rem', letterSpacing: '0.12em', color: '#71717a', textTransform: 'uppercase' }}>
                                 A refined crypto portfolio tracker.
                             </p>
                         </div>
@@ -1273,30 +1273,30 @@ const LandingPage = () => {
                         {/* Links */}
                         <div className="flex items-center gap-6">
                             {isAuthenticated ? (
-                                <Link to="/dashboard" style={{ fontSize: '0.55rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#9aab97', fontFamily: "'DM Mono', monospace", textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#ede8dd'} onMouseLeave={e => e.currentTarget.style.color = '#9aab97'}>
+                                <Link to="/dashboard" style={{ fontSize: '0.55rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#a1a1aa', fontFamily: "'DM Mono', monospace", textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fafafa'} onMouseLeave={e => e.currentTarget.style.color = '#a1a1aa'}>
                                     Dashboard
                                 </Link>
                             ) : (
                                 <>
-                                    <Link to="/login" style={{ fontSize: '0.55rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#9aab97', fontFamily: "'DM Mono', monospace", textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#ede8dd'} onMouseLeave={e => e.currentTarget.style.color = '#9aab97'}>
+                                    <Link to="/login" style={{ fontSize: '0.55rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#a1a1aa', fontFamily: "'DM Mono', monospace", textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fafafa'} onMouseLeave={e => e.currentTarget.style.color = '#a1a1aa'}>
                                         Login
                                     </Link>
-                                    <Link to="/register" style={{ fontSize: '0.55rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#9aab97', fontFamily: "'DM Mono', monospace", textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#ede8dd'} onMouseLeave={e => e.currentTarget.style.color = '#9aab97'}>
+                                    <Link to="/register" style={{ fontSize: '0.55rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#a1a1aa', fontFamily: "'DM Mono', monospace", textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fafafa'} onMouseLeave={e => e.currentTarget.style.color = '#a1a1aa'}>
                                         Sign Up
                                     </Link>
                                 </>
                             )}
-                            <a href="https://github.com/mohanishp9/crypto_portfolio_tracker" target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.55rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#9aab97', fontFamily: "'DM Mono', monospace", textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#ede8dd'} onMouseLeave={e => e.currentTarget.style.color = '#9aab97'}>
+                            <a href="https://github.com/mohanishp9/crypto_portfolio_tracker" target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.55rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#a1a1aa', fontFamily: "'DM Mono', monospace", textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fafafa'} onMouseLeave={e => e.currentTarget.style.color = '#a1a1aa'}>
                                 GitHub
                             </a>
                         </div>
                         
                         {/* Credits */}
                         <div className="text-center sm:text-right mt-2 sm:mt-0">
-                            <p style={{ fontFamily: "'DM Mono', monospace", fontSize: '0.5rem', letterSpacing: '0.1em', color: '#587560', textTransform: 'uppercase' }}>
+                            <p style={{ fontFamily: "'DM Mono', monospace", fontSize: '0.5rem', letterSpacing: '0.1em', color: '#818cf8', textTransform: 'uppercase' }}>
                                 Data provided by
                             </p>
-                            <a href="https://www.coingecko.com/" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', marginTop: '4px', fontFamily: "'DM Mono', monospace", fontSize: '0.6rem', color: '#9aab97', textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#8dc63f'} onMouseLeave={e => e.currentTarget.style.color = '#9aab97'}>
+                            <a href="https://www.coingecko.com/" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', marginTop: '4px', fontFamily: "'DM Mono', monospace", fontSize: '0.6rem', color: '#a1a1aa', textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#8dc63f'} onMouseLeave={e => e.currentTarget.style.color = '#a1a1aa'}>
                                 CoinGecko
                             </a>
                         </div>
@@ -1322,7 +1322,7 @@ const LandingPage = () => {
 // ── Sub-components ─────────────────────────────────────────────
 
 const skeletonBlock: React.CSSProperties = {
-    background: 'rgba(61,74,62,0.25)',
+    background: 'rgba(63, 63, 70,0.25)',
     borderRadius: 2,
 };
 
@@ -1337,7 +1337,7 @@ interface StatItemProps {
 const StatItem = ({ label, value, labelStyle, monoStyle, className }: StatItemProps) => (
     <div className={`flex items-center gap-2 ${className ?? ''}`}>
         <span style={labelStyle}>{label}</span>
-        <span style={{ ...monoStyle, color: '#9aab97' }}>{value}</span>
+        <span style={{ ...monoStyle, color: '#a1a1aa' }}>{value}</span>
     </div>
 );
 
@@ -1410,33 +1410,33 @@ const FeatureCard = ({ feature, index }: { feature: Feature; index: number }) =>
         <div
             className="transition-colors duration-200"
             style={{
-                background: '#2e3330',
+                background: '#18181b',
                 padding: '28px 24px',
                 animation: `heroFadeIn 0.5s ease-out ${index * 0.06}s both`,
             }}
             onMouseEnter={e => (e.currentTarget.style.background = '#343a36')}
-            onMouseLeave={e => (e.currentTarget.style.background = '#2e3330')}
+            onMouseLeave={e => (e.currentTarget.style.background = '#18181b')}
         >
             <div
                 style={{
                     width: 36,
                     height: 36,
                     borderRadius: '50%',
-                    border: '1px solid rgba(196,136,90,0.25)',
+                    border: '1px solid rgba(129, 140, 248,0.25)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     marginBottom: 16,
                 }}
             >
-                <Icon size={16} strokeWidth={1.2} color="#c4885a" />
+                <Icon size={16} strokeWidth={1.2} color="#818cf8" />
             </div>
             <h3
                 style={{
-                    fontFamily: "'Cormorant Garamond', serif",
+                    fontFamily: "ui-sans-serif, system-ui, sans-serif",
                     fontSize: '1.05rem',
                     fontWeight: 400,
-                    color: '#ede8dd',
+                    color: '#fafafa',
                     letterSpacing: '0.03em',
                     marginBottom: 8,
                 }}
@@ -1448,7 +1448,7 @@ const FeatureCard = ({ feature, index }: { feature: Feature; index: number }) =>
                     fontFamily: "'DM Mono', monospace",
                     fontSize: '0.6rem',
                     letterSpacing: '0.06em',
-                    color: '#6b7c6a',
+                    color: '#71717a',
                     lineHeight: 1.7,
                 }}
             >
@@ -1470,14 +1470,14 @@ const StepItem = ({ step, index, isLast }: { step: Step; index: number; isLast: 
                     width: 36,
                     height: 36,
                     borderRadius: '50%',
-                    border: '1px solid rgba(196,136,90,0.35)',
+                    border: '1px solid rgba(129, 140, 248,0.35)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontFamily: "'Cormorant Garamond', serif",
+                    fontFamily: "ui-sans-serif, system-ui, sans-serif",
                     fontSize: '1rem',
                     fontWeight: 300,
-                    color: '#c4885a',
+                    color: '#818cf8',
                     flexShrink: 0,
                 }}
             >
@@ -1489,7 +1489,7 @@ const StepItem = ({ step, index, isLast }: { step: Step; index: number; isLast: 
                         width: 1,
                         flex: 1,
                         minHeight: 32,
-                        background: 'rgba(61,74,62,0.3)',
+                        background: 'rgba(63, 63, 70,0.3)',
                     }}
                 />
             )}
@@ -1499,10 +1499,10 @@ const StepItem = ({ step, index, isLast }: { step: Step; index: number; isLast: 
         <div style={{ paddingBottom: isLast ? 0 : 32 }}>
             <h3
                 style={{
-                    fontFamily: "'Cormorant Garamond', serif",
+                    fontFamily: "ui-sans-serif, system-ui, sans-serif",
                     fontSize: '1.15rem',
                     fontWeight: 400,
-                    color: '#ede8dd',
+                    color: '#fafafa',
                     letterSpacing: '0.03em',
                     marginBottom: 6,
                 }}
@@ -1514,7 +1514,7 @@ const StepItem = ({ step, index, isLast }: { step: Step; index: number; isLast: 
                     fontFamily: "'DM Mono', monospace",
                     fontSize: '0.6rem',
                     letterSpacing: '0.06em',
-                    color: '#6b7c6a',
+                    color: '#71717a',
                     lineHeight: 1.7,
                 }}
             >

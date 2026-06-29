@@ -9,6 +9,7 @@ import {
     useSearchCoinsQuery,
 } from "../services/portfolioApi";
 import { WatchlistSkeleton } from "./common/Skeleton";
+import { Bell, Trash2, TrendingUp, TrendingDown, Search, Plus } from "lucide-react";
 
 // ─── Isolated alert form ────────────────────────────────────────────────────
 // Kept as a separate memo'd component so it NEVER re-renders when live prices
@@ -37,59 +38,34 @@ const AlertInlineForm = memo(({ coinName, initialPrice, onSubmit, onCancel }: Al
     };
 
     return (
-        <div
-            style={{
-                background: "#1a1d1a",
-                border: "1px solid rgba(196,136,90,0.25)",
-                borderTop: "none",
-                padding: "14px 16px",
-            }}
-        >
-            <p style={{ fontSize: "0.5rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "#c4885a", marginBottom: "12px" }}>
+        <div className="bg-zinc-950/80 border border-t-0 border-indigo-500/20 px-4 py-4 rounded-b-lg">
+            <p className="text-[10px] tracking-widest uppercase text-indigo-400 mb-3 font-semibold">
                 Set Price Alert — {coinName}
             </p>
 
             {/* Direction toggle */}
-            <div style={{ display: "flex", gap: "8px", marginBottom: "12px" }}>
+            <div className="flex gap-2 mb-3">
                 {(["ABOVE", "BELOW"] as const).map((dir) => (
                     <button
                         key={dir}
                         type="button"
                         onClick={() => setDirection(dir)}
-                        style={{
-                            flex: 1,
-                            padding: "8px",
-                            fontSize: "0.5rem",
-                            letterSpacing: "0.2em",
-                            textTransform: "uppercase",
-                            fontFamily: "'DM Mono', monospace",
-                            cursor: "pointer",
-                            background: direction === dir ? "rgba(196,136,90,0.15)" : "transparent",
-                            border: direction === dir
-                                ? "1px solid rgba(196,136,90,0.5)"
-                                : "1px solid rgba(107,124,106,0.25)",
-                            color: direction === dir ? "#c4885a" : "#6b7c6a",
-                            transition: "all 0.15s ease",
-                        }}
+                        className={`flex-1 py-2 text-[10px] tracking-widest uppercase font-mono rounded-md border transition-all duration-150 flex items-center justify-center gap-1.5 ${
+                            direction === dir 
+                                ? "bg-indigo-500/10 border-indigo-500/30 text-indigo-400 font-semibold" 
+                                : "bg-transparent border-zinc-800 text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/50"
+                        }`}
                     >
-                        {dir === "ABOVE" ? "▲ Above" : "▼ Below"}
+                        {dir === "ABOVE" ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                        {dir}
                     </button>
                 ))}
             </div>
 
             {/* Target price input */}
-            <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                <div style={{ position: "relative", flex: 1 }}>
-                    <span style={{
-                        position: "absolute",
-                        left: "10px",
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        color: "#6b7c6a",
-                        fontSize: "0.65rem",
-                        fontFamily: "'DM Mono', monospace",
-                        pointerEvents: "none",
-                    }}>$</span>
+            <div className="flex gap-2 items-center">
+                <div className="relative flex-1">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 font-mono text-sm pointer-events-none">$</span>
                     <input
                         type="text"
                         inputMode="decimal"
@@ -102,43 +78,26 @@ const AlertInlineForm = memo(({ coinName, initialPrice, onSubmit, onCancel }: Al
                                 setTargetPrice(val);
                             }
                         }}
-                        style={{
-                            width: "100%",
-                            background: "#1a1c1a",
-                            border: "1px solid rgba(61,74,62,0.4)",
-                            color: "#ede8dd",
-                            fontFamily: "'DM Mono', monospace",
-                            fontSize: "0.68rem",
-                            padding: "11px 14px 11px 22px",
-                            outline: "none",
-                        }}
+                        className="w-full bg-zinc-900 border border-zinc-700 text-zinc-50 font-mono text-sm py-2 pl-7 pr-3 rounded-md focus:outline-none focus:border-indigo-500 transition-colors"
                     />
                 </div>
                 <button
                     type="button"
                     disabled={saving || !targetPrice || parseFloat(targetPrice) <= 0}
                     onClick={handleSubmit}
-                    style={{
-                        ...smallButtonStyle,
-                        padding: "10px 14px",
-                        color: "#c4885a",
-                        borderColor: "rgba(196,136,90,0.4)",
-                        opacity: saving ? 0.5 : 1,
-                        cursor: saving ? "not-allowed" : "pointer",
-                        whiteSpace: "nowrap",
-                    }}
+                    className="px-4 py-2 bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 hover:bg-indigo-500/20 disabled:opacity-50 disabled:cursor-not-allowed rounded-md text-xs font-semibold uppercase tracking-wider transition-colors whitespace-nowrap"
                 >
                     {saving ? "Saving..." : "Set Alert"}
                 </button>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "8px" }}>
-                <p style={{ color: "#4a5a48", fontSize: "0.5rem" }}>
-                    Current price: ${initialPrice.toFixed(2)}
+            <div className="flex justify-between items-center mt-3">
+                <p className="text-[10px] font-mono text-zinc-500">
+                    Current: ${initialPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })}
                 </p>
                 <button
                     type="button"
                     onClick={onCancel}
-                    style={{ ...smallButtonStyle, fontSize: "0.45rem", padding: "4px 8px", color: "#6b7c6a" }}
+                    className="text-[10px] uppercase tracking-wider text-zinc-500 hover:text-zinc-300 transition-colors"
                 >
                     Cancel
                 </button>
@@ -191,22 +150,25 @@ const WatchlistPanel = ({ onSelectCoin }: { onSelectCoin: (coinId: string) => vo
     };
 
     return (
-        <div className="p-6" style={{ background: "#2e3330", border: "1px solid rgba(61,74,62,0.3)" }}>
+        <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl shadow-sm">
             <div className="flex items-start justify-between gap-4">
                 <div>
-                    <p style={{ fontSize: "0.55rem", letterSpacing: "0.3em", textTransform: "uppercase", color: "#6b7c6a" }}>
+                    <p className="text-[10px] tracking-widest uppercase text-zinc-500">
                         Watchlist
                     </p>
-                    <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.5rem", color: "#ede8dd", marginTop: "12px" }}>
+                    <h3 className="font-semibold text-lg text-zinc-50 tracking-tight mt-2">
                         Track Before You Buy
                     </h3>
                 </div>
-                <p style={{ fontSize: "0.55rem", letterSpacing: "0.15em", color: "#9aab97" }}>
-                    {data?.items.length ?? 0} coins
+                <p className="text-xs font-mono text-zinc-500 bg-zinc-950 px-2 py-1 rounded-md border border-zinc-800">
+                    {data?.items.length ?? 0} <span className="text-zinc-600">COINS</span>
                 </p>
             </div>
 
-            <div style={{ position: "relative", marginTop: "20px" }}>
+            <div className="relative mt-5">
+                <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                    <Search size={14} className="text-zinc-500" />
+                </div>
                 <input
                     value={coinInput}
                     onChange={(e) => {
@@ -221,27 +183,11 @@ const WatchlistPanel = ({ onSelectCoin }: { onSelectCoin: (coinId: string) => vo
                         setTimeout(() => setShowDropdown(false), 150);
                     }}
                     placeholder="Search by coin name"
-                    style={inputStyle}
+                    className="w-full bg-zinc-950 border border-zinc-800 text-zinc-50 text-sm py-2.5 pl-9 pr-4 rounded-lg focus:outline-none focus:border-indigo-500 transition-colors placeholder-zinc-600"
                 />
 
                 {showDropdown && (searchResults?.length ?? 0) > 0 && (
-                    <ul
-                        style={{
-                            position: "absolute",
-                            top: "100%",
-                            left: 0,
-                            right: 0,
-                            background: "#1a1c1a",
-                            border: "1px solid rgba(61,74,62,0.35)",
-                            borderTop: "none",
-                            maxHeight: "220px",
-                            overflowY: "auto",
-                            zIndex: 20,
-                            margin: 0,
-                            padding: 0,
-                            listStyle: "none",
-                        }}
-                    >
+                    <ul className="absolute top-full left-0 right-0 mt-1 bg-zinc-950 border border-zinc-800 rounded-lg max-h-56 overflow-y-auto z-20 shadow-xl py-1">
                         {searchResults?.map((coin) => (
                             <li
                                 key={coin.id}
@@ -250,17 +196,10 @@ const WatchlistPanel = ({ onSelectCoin }: { onSelectCoin: (coinId: string) => vo
                                     setCoinInput(coin.name);
                                     setShowDropdown(false);
                                 }}
-                                style={{
-                                    padding: "10px 14px",
-                                    borderBottom: "1px solid rgba(61,74,62,0.15)",
-                                    cursor: "pointer",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "space-between",
-                                }}
+                                className="px-4 py-2.5 hover:bg-zinc-800 cursor-pointer flex items-center justify-between transition-colors"
                             >
-                                <span style={{ fontSize: "0.72rem", color: "#d4cfc4", letterSpacing: "0.04em" }}>{coin.name}</span>
-                                <span style={{ fontSize: "0.55rem", letterSpacing: "0.2em", color: "#6b7c6a" }}>{coin.symbol.toUpperCase()}</span>
+                                <span className="text-sm text-zinc-300 font-medium">{coin.name}</span>
+                                <span className="text-[10px] tracking-widest font-mono text-zinc-500 uppercase">{coin.symbol}</span>
                             </li>
                         ))}
                     </ul>
@@ -271,14 +210,12 @@ const WatchlistPanel = ({ onSelectCoin }: { onSelectCoin: (coinId: string) => vo
                 type="button"
                 onClick={handleAdd}
                 disabled={!selectedCoin}
-                style={{ ...buttonStyle, opacity: selectedCoin ? 1 : 0.6, cursor: selectedCoin ? "pointer" : "not-allowed" }}
+                className="w-full mt-3 flex items-center justify-center gap-2 py-2.5 rounded-lg border text-xs font-semibold uppercase tracking-wider transition-all duration-200 
+                disabled:opacity-50 disabled:cursor-not-allowed disabled:border-zinc-800 disabled:text-zinc-600 disabled:bg-zinc-950
+                border-indigo-500/30 text-indigo-400 bg-indigo-500/10 hover:bg-indigo-500/20"
             >
-                Add watchlist coin
+                <Plus size={14} /> Add to Watchlist
             </button>
-
-            <p style={{ color: "#6b7c6a", fontSize: "0.68rem", marginTop: "10px", lineHeight: 1.7 }}>
-                Search by coin name only. The app fills in the CoinGecko id and symbol automatically.
-            </p>
 
             <div className="space-y-3 mt-6">
                 {isLoading ? (
@@ -293,42 +230,43 @@ const WatchlistPanel = ({ onSelectCoin }: { onSelectCoin: (coinId: string) => vo
                             const currentPrice = liveData ? liveData.price : item.currentPrice;
                             const priceChange24h = liveData ? liveData.priceChange24h : item.priceChange24h;
                             const isAlertOpen = alertOpenCoinId === item.coinId;
+                            const isUp = priceChange24h >= 0;
 
                             return (
                                 // Key is stable (item._id only) — no updateKey, so the row
                                 // never unmounts/remounts due to price ticks
-                                <div key={item._id}>
+                                <div key={item._id} className="relative">
                                     <div
-                                        className={`flex items-center justify-between gap-4 p-3 ${liveData?.direction === "up" ? "flash-up" : liveData?.direction === "down" ? "flash-down" : ""}`}
-                                        style={{ background: "#1f2320", border: "1px solid rgba(61,74,62,0.25)" }}
+                                        className={`flex items-center justify-between gap-4 p-4 rounded-lg bg-zinc-950 border transition-colors ${isAlertOpen ? 'border-indigo-500/30 rounded-b-none' : 'border-zinc-800 hover:border-zinc-700'} ${liveData?.direction === "up" ? "flash-up" : liveData?.direction === "down" ? "flash-down" : ""}`}
                                     >
-                                        <button type="button" onClick={() => onSelectCoin(item.coinId)} style={{ background: "transparent", border: "none", textAlign: "left", cursor: "pointer", flex: 1 }}>
-                                            <div style={{ color: "#ede8dd", fontFamily: "'Cormorant Garamond', serif", fontSize: "1.1rem" }}>{item.coinName}</div>
-                                            <div style={{ color: "#6b7c6a", fontSize: "0.55rem", letterSpacing: "0.2em", textTransform: "uppercase" }}>{item.coinSymbol}</div>
+                                        <button type="button" onClick={() => onSelectCoin(item.coinId)} className="flex-1 text-left focus:outline-none group">
+                                            <div className="font-medium text-sm text-zinc-50 group-hover:text-white transition-colors">{item.coinName}</div>
+                                            <div className="text-[10px] font-mono tracking-widest text-zinc-500 uppercase mt-0.5">{item.coinSymbol}</div>
                                         </button>
-                                        <div style={{ textAlign: "right" }}>
-                                            <div style={{ color: "#d4cfc4", fontSize: "0.75rem" }}>${currentPrice.toFixed(2)}</div>
-                                            <div style={{ color: priceChange24h >= 0 ? "#587560" : "#8b5e3c", fontSize: "0.58rem" }}>
-                                                {priceChange24h >= 0 ? "+" : ""}{priceChange24h.toFixed(2)}%
+                                        <div className="text-right">
+                                            <div className="font-mono text-sm font-medium text-zinc-300">
+                                                ${currentPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })}
+                                            </div>
+                                            <div className={`font-mono text-[10px] mt-0.5 ${isUp ? 'text-emerald-500' : 'text-rose-500'}`}>
+                                                {isUp ? "+" : ""}{priceChange24h.toFixed(2)}%
                                             </div>
                                         </div>
-                                        <div className="flex flex-col gap-2">
+                                        <div className="flex flex-col gap-2 shrink-0 border-l border-zinc-800 pl-3 ml-1">
                                             <button
                                                 type="button"
-                                                style={{
-                                                    ...smallButtonStyle,
-                                                    ...(isAlertOpen ? { color: "#c4885a", borderColor: "rgba(196,136,90,0.4)" } : {}),
-                                                }}
+                                                className={`p-1.5 rounded-md transition-colors flex items-center justify-center ${isAlertOpen ? 'bg-indigo-500/20 text-indigo-400' : 'text-zinc-500 hover:text-indigo-400 hover:bg-zinc-800'}`}
                                                 onClick={() => setAlertOpenCoinId(isAlertOpen ? null : item.coinId)}
+                                                title="Set Alert"
                                             >
-                                                {isAlertOpen ? "✕" : "Alert"}
+                                                <Bell size={14} />
                                             </button>
                                             <button
                                                 type="button"
-                                                style={{ ...smallButtonStyle, color: "#8b5e3c", borderColor: "rgba(139,94,60,0.25)" }}
+                                                className="p-1.5 rounded-md text-zinc-500 hover:text-rose-500 hover:bg-zinc-800 transition-colors flex items-center justify-center"
                                                 onClick={() => deleteFromWatchlist(item.coinId)}
+                                                title="Remove"
                                             >
-                                                Remove
+                                                <Trash2 size={14} />
                                             </button>
                                         </div>
                                     </div>
@@ -350,8 +288,8 @@ const WatchlistPanel = ({ onSelectCoin }: { onSelectCoin: (coinId: string) => vo
                             );
                         })}
                         {(data?.items.length ?? 0) === 0 && (
-                            <p style={{ color: "#6b7c6a", fontSize: "0.75rem", lineHeight: 1.8 }}>
-                                Search by coin name and add a few coins here to make the dashboard feel alive even before they become holdings.
+                            <p className="text-sm text-zinc-500 text-center py-4 px-2 border border-dashed border-zinc-800 rounded-lg">
+                                Search and add coins to track them before buying.
                             </p>
                         )}
                     </>
@@ -359,41 +297,6 @@ const WatchlistPanel = ({ onSelectCoin }: { onSelectCoin: (coinId: string) => vo
             </div>
         </div>
     );
-};
-
-const inputStyle: React.CSSProperties = {
-    width: "100%",
-    background: "#1a1c1a",
-    border: "1px solid rgba(61,74,62,0.4)",
-    color: "#ede8dd",
-    fontFamily: "'DM Mono', monospace",
-    fontSize: "0.7rem",
-    padding: "11px 14px",
-    outline: "none",
-};
-
-const buttonStyle: React.CSSProperties = {
-    marginTop: "12px",
-    background: "transparent",
-    border: "1px solid rgba(196,136,90,0.35)",
-    color: "#c4885a",
-    padding: "10px 14px",
-    fontSize: "0.58rem",
-    letterSpacing: "0.25em",
-    textTransform: "uppercase",
-    fontFamily: "'DM Mono', monospace",
-};
-
-const smallButtonStyle: React.CSSProperties = {
-    background: "transparent",
-    border: "1px solid rgba(107,124,106,0.25)",
-    color: "#9aab97",
-    padding: "8px 10px",
-    fontSize: "0.5rem",
-    letterSpacing: "0.18em",
-    textTransform: "uppercase",
-    fontFamily: "'DM Mono', monospace",
-    cursor: "pointer",
 };
 
 export default WatchlistPanel;

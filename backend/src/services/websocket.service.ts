@@ -47,7 +47,7 @@ export const initWebSocketServer = (server: HttpServer): void => {
     const connectToBinance = () => {
         console.log("[WebSocket] Connecting to Binance public WebSocket feed...");
         const streams = Object.keys(SYMBOL_MAP).map(s => `${s.toLowerCase()}@ticker`).join("/");
-        binanceWs = new WebSocket(`wss://stream.binance.com:9443/ws/${streams}`);
+        binanceWs = new WebSocket(`wss://stream.binance.us:9443/ws/${streams}`);
 
         binanceWs.on("open", () => {
             console.log("[WebSocket] Connected to Binance stream successfully.");
@@ -91,6 +91,7 @@ export const initWebSocketServer = (server: HttpServer): void => {
         });
     };
 
-    // Commented out because Render's US IPs get blocked by Binance (451 Unavailable For Legal Reasons).
-    // connectToBinance();
+    // Render's US IPs get blocked by Binance (451 Unavailable For Legal Reasons).
+    // Switching to Binance.US API bypassing this limitation while keeping identical payload shapes.
+    connectToBinance();
 };

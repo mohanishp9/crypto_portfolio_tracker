@@ -86,56 +86,54 @@ const Dashboard = () => {
     };
   }, [statsData]);
 
-  // Full page loader removed to allow individual widget skeleton loaders to shine
-
   if (error && !("status" in error && error.status === 401)) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4" style={{ background: "#1a1c1a" }}>
-        <div className="w-full max-w-sm text-center p-10" style={{ background: "#2e3330", border: "1px solid rgba(139,94,60,0.25)" }}>
-          <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.4rem", color: "#ede8dd" }}>Something went still</h3>
-          <p style={{ marginTop: "12px", color: "#6b7c6a" }}>We couldn't load your data. Please try again later.</p>
+      <div className="min-h-screen flex items-center justify-center px-4">
+        <div className="w-full max-w-sm text-center p-10 bg-zinc-900 border border-zinc-800 rounded-xl shadow-lg">
+          <h3 className="text-xl font-semibold text-zinc-50">Something went wrong</h3>
+          <p className="mt-3 text-zinc-400">We couldn't load your data. Please try again later.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen" style={{ background: "#1a1c1a" }}>
+    <div className="min-h-screen">
       <Navbar email={data?.user.email} handleLogout={handleLogout} isLoggingOut={isLoggingOut} />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="mb-8 p-8" style={{ background: "#2a3d2e", borderBottom: "1px solid rgba(88,117,96,0.2)" }}>
-          <p style={{ fontSize: "0.58rem", letterSpacing: "0.35em", textTransform: "uppercase", color: "#587560", marginBottom: "10px" }}>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div className="mb-8 p-8 bg-zinc-900 border border-zinc-800 rounded-xl shadow-sm relative overflow-hidden">
+          {/* Subtle background glow effect */}
+          <div className="absolute -top-24 -right-24 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+          
+          <p className="text-xs tracking-widest uppercase text-zinc-500 mb-3">
             Welcome back
           </p>
-          <h2
-            className="font-light flex items-center gap-2"
-            style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(1.8rem, 4vw, 2.8rem)", color: "#ede8dd", letterSpacing: "0.04em", lineHeight: 1.1 }}
-          >
+          <h2 className="text-3xl md:text-4xl font-semibold text-zinc-50 tracking-tight flex items-center gap-3">
             {isLoading ? (
               <Skeleton className="w-48 h-8 my-1" />
             ) : (
               data?.user.name
             )}
-            <span style={{ fontStyle: "italic", color: "#9aab97", fontSize: "70%", marginLeft: "12px" }}>
-              your grove
+            <span className="text-lg font-normal text-zinc-500 italic hidden sm:inline-block">
+              your cyphersight
             </span>
           </h2>
-          <p style={{ color: "#9aab97", fontSize: "0.75rem", marginTop: "12px", letterSpacing: "0.08em" }}>
+          <p className="text-xs text-zinc-400 mt-4 font-mono">
             Polling every {(pollingInterval / 1000).toFixed(0)}s while this tab stays open.
           </p>
         </div>
 
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-3 mb-6">
           <button
             onClick={() => dispatch(openAddModal())}
-            style={primaryButton}
+            className="bg-zinc-50 text-zinc-950 hover:bg-zinc-200 px-5 py-2 rounded-md text-sm font-semibold transition-colors shadow-sm"
           >
             Add Transaction
           </button>
           <button
             onClick={refetchPortfolio}
-            style={secondaryButton}
+            className="bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-zinc-50 hover:bg-zinc-800/70 px-5 py-2 rounded-md text-sm font-medium transition-colors"
           >
             Refresh Prices
           </button>
@@ -197,66 +195,42 @@ const MarketPulse = ({
   tone: "up" | "down";
   isLoading?: boolean;
 }) => (
-  <div className="p-6" style={{ background: "#2e3330", border: "1px solid rgba(61,74,62,0.3)" }}>
-    <p style={{ fontSize: "0.55rem", letterSpacing: "0.3em", textTransform: "uppercase", color: "#6b7c6a" }}>{title}</p>
-    <div className="space-y-3 mt-5">
+  <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl shadow-sm">
+    <p className="text-xs tracking-widest uppercase text-zinc-500">{title}</p>
+    <div className="space-y-4 mt-5">
       {isLoading ? (
         <>
           <div className="flex items-center justify-between">
             <div>
-              <Skeleton className="w-16 h-3.5 mb-1" />
-              <Skeleton className="w-8 h-2" />
+              <Skeleton className="w-16 h-4 mb-1" />
+              <Skeleton className="w-8 h-3" />
             </div>
-            <Skeleton className="w-12 h-3.5" />
+            <Skeleton className="w-12 h-4" />
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <Skeleton className="w-20 h-3.5 mb-1" />
-              <Skeleton className="w-10 h-2" />
+              <Skeleton className="w-20 h-4 mb-1" />
+              <Skeleton className="w-10 h-3" />
             </div>
-            <Skeleton className="w-10 h-3.5" />
+            <Skeleton className="w-10 h-4" />
           </div>
         </>
       ) : items.length > 0 ? items.map((item) => (
-        <div key={item.coinSymbol} className="flex items-center justify-between" style={{ color: "#d4cfc4" }}>
+        <div key={item.coinSymbol} className="flex items-center justify-between group">
           <div>
-            <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.1rem", color: "#ede8dd" }}>{item.coinName}</div>
-            <div style={{ fontSize: "0.52rem", letterSpacing: "0.2em", color: "#6b7c6a", textTransform: "uppercase" }}>{item.coinSymbol}</div>
+            <div className="text-sm font-medium text-zinc-50 group-hover:text-white transition-colors">{item.coinName}</div>
+            <div className="text-xs font-mono text-zinc-500 uppercase mt-0.5">{item.coinSymbol}</div>
           </div>
-          <div style={{ color: tone === "up" ? "#587560" : "#8b5e3c", fontSize: "0.72rem" }}>
+          <div className={`font-mono text-sm font-medium ${tone === "up" ? "text-emerald-500" : "text-rose-500"}`}>
             {item.priceChange24h >= 0 ? "+" : ""}
             {item.priceChange24h.toFixed(2)}%
           </div>
         </div>
       )) : (
-        <p style={{ color: "#6b7c6a", fontSize: "0.75rem" }}>Add holdings to unlock this view.</p>
+        <p className="text-sm text-zinc-500">Add holdings to unlock this view.</p>
       )}
     </div>
   </div>
 );
-
-const primaryButton: React.CSSProperties = {
-  background: "transparent",
-  border: "1px solid rgba(196,136,90,0.4)",
-  color: "#c4885a",
-  padding: "10px 28px",
-  fontSize: "0.6rem",
-  letterSpacing: "0.3em",
-  textTransform: "uppercase",
-  fontFamily: "'DM Mono', monospace",
-  cursor: "pointer",
-};
-
-const secondaryButton: React.CSSProperties = {
-  background: "transparent",
-  border: "1px solid rgba(107,124,106,0.35)",
-  color: "#9aab97",
-  padding: "10px 22px",
-  fontSize: "0.6rem",
-  letterSpacing: "0.25em",
-  textTransform: "uppercase",
-  fontFamily: "'DM Mono', monospace",
-  cursor: "pointer",
-};
 
 export default Dashboard;

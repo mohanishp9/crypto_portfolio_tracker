@@ -6,28 +6,28 @@ interface PortfolioStatsProps {
     isLoading?: boolean;
 }
 
-const accentFor = (value: number) => (value < 0 ? "#8b5e3c" : "#587560");
+const accentFor = (value: number) => (value < 0 ? "text-rose-500" : "text-emerald-500");
 
 const MetricCard = ({
     label,
     value,
     caption,
-    accent,
+    accentClass,
 }: {
     label: string;
     value: string;
     caption: string;
-    accent?: string;
+    accentClass?: string;
 }) => (
-    <div className="bg-[#2e3330] p-6 group hover:bg-[#2a3d2e] transition-colors duration-500">
-        <h3 className="text-[10px] tracking-[0.3em] uppercase text-[#6b7c6a] mb-4 flex items-center gap-2">
-            <span className="block w-4 h-px bg-[#6b7c6a]/50" />
+    <div className="bg-zinc-900/80 p-6 flex flex-col justify-center group hover:bg-zinc-800/60 transition-colors duration-300">
+        <h3 className="text-[10px] tracking-widest uppercase text-zinc-500 mb-3 flex items-center gap-2">
+            <span className="block w-2 h-2 rounded-full bg-indigo-500/50" />
             {label}
         </h3>
-        <p className="font-light text-2xl tracking-wide" style={{ fontFamily: "'Cormorant Garamond', serif", color: accent ?? "#ede8dd" }}>
+        <p className={`font-mono text-3xl font-semibold tracking-tight ${accentClass ?? "text-zinc-50"}`}>
             {value}
         </p>
-        <span className="mt-3 block text-[10px] tracking-[0.2em] text-[#3d4a3e] group-hover:text-[#587560] uppercase">
+        <span className="mt-3 block text-[10px] tracking-widest text-zinc-600 uppercase group-hover:text-zinc-400 transition-colors">
             {caption}
         </span>
     </div>
@@ -42,15 +42,15 @@ const InsightCard = ({
     holding?: { coinName: string; coinSymbol: string } | null;
     value: string;
 }) => (
-    <div className="p-5" style={{ background: "#2e3330", border: "1px solid rgba(61,74,62,0.25)" }}>
-        <p style={{ fontSize: "0.52rem", letterSpacing: "0.3em", textTransform: "uppercase", color: "#6b7c6a" }}>{title}</p>
-        <div className="mt-3" style={{ color: "#ede8dd", fontFamily: "'Cormorant Garamond', serif", fontSize: "1.3rem" }}>
+    <div className="p-5 bg-zinc-900 border border-zinc-800 rounded-xl shadow-sm">
+        <p className="text-[10px] tracking-widest uppercase text-zinc-500 mb-4">{title}</p>
+        <div className="font-semibold text-xl text-zinc-50">
             {holding?.coinName ?? "Waiting for data"}
         </div>
-        <div style={{ fontSize: "0.52rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#9aab97", marginTop: "4px" }}>
+        <div className="text-xs tracking-wider uppercase text-zinc-500 font-mono mt-1">
             {holding?.coinSymbol ?? "N/A"}
         </div>
-        <div style={{ fontSize: "0.72rem", color: "#d4cfc4", marginTop: "12px" }}>{value}</div>
+        <div className="text-sm text-zinc-300 mt-4 font-mono font-medium">{value}</div>
     </div>
 );
 
@@ -58,13 +58,13 @@ const PortfolioStats = ({ statsData, isLoading }: PortfolioStatsProps) => {
     if (isLoading) {
         return (
             <div className="space-y-4 mt-8">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-[#3d4a3e]/20 rounded-sm overflow-hidden">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-zinc-800 rounded-xl overflow-hidden shadow-sm">
                     <CardSkeleton />
                     <CardSkeleton />
                     <CardSkeleton />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-[#3d4a3e]/20 rounded-sm overflow-hidden">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-zinc-800 rounded-xl overflow-hidden shadow-sm">
                     <CardSkeleton />
                     <CardSkeleton />
                     <CardSkeleton />
@@ -80,46 +80,47 @@ const PortfolioStats = ({ statsData, isLoading }: PortfolioStatsProps) => {
     }
 
     const insights = statsData?.insights;
+    const profitLoss = statsData?.profitLoss ?? 0;
 
     return (
         <div className="space-y-4 mt-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-[#3d4a3e]/20 rounded-sm overflow-hidden">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-zinc-800 rounded-xl overflow-hidden shadow-sm border border-zinc-800">
                 <MetricCard
                     label="Total Value"
-                    value={`$${statsData?.currentValue?.toFixed(2) ?? "0.00"}`}
+                    value={`$${statsData?.currentValue?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) ?? "0.00"}`}
                     caption="Portfolio worth"
                 />
                 <MetricCard
                     label="Total Investment"
-                    value={`$${statsData?.investment?.toFixed(2) ?? "0.00"}`}
+                    value={`$${statsData?.investment?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) ?? "0.00"}`}
                     caption="Active capital cost"
                 />
                 <MetricCard
                     label="Net Profit / Loss"
-                    value={`${(statsData?.profitLoss ?? 0) >= 0 ? "+" : ""}$${statsData?.profitLoss?.toFixed(2) ?? "0.00"}`}
+                    value={`${profitLoss >= 0 ? "+" : ""}$${Math.abs(profitLoss).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                     caption="Total performance"
-                    accent={accentFor(statsData?.profitLoss ?? 0)}
+                    accentClass={accentFor(profitLoss)}
                 />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-[#3d4a3e]/20 rounded-sm overflow-hidden">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-zinc-800 rounded-xl overflow-hidden shadow-sm border border-zinc-800">
                 <MetricCard
                     label="Unrealized PnL"
-                    value={`${(statsData?.unrealizedProfit ?? 0) >= 0 ? "+" : ""}$${statsData?.unrealizedProfit?.toFixed(2) ?? "0.00"}`}
+                    value={`${(statsData?.unrealizedProfit ?? 0) >= 0 ? "+" : ""}$${Math.abs(statsData?.unrealizedProfit ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                     caption="Paper gains / losses"
-                    accent={accentFor(statsData?.unrealizedProfit ?? 0)}
+                    accentClass={accentFor(statsData?.unrealizedProfit ?? 0)}
                 />
                 <MetricCard
                     label="Realized PnL"
-                    value={`${(statsData?.realizedProfit ?? 0) >= 0 ? "+" : ""}$${statsData?.realizedProfit?.toFixed(2) ?? "0.00"}`}
+                    value={`${(statsData?.realizedProfit ?? 0) >= 0 ? "+" : ""}$${Math.abs(statsData?.realizedProfit ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                     caption="Locked-in gains / losses"
-                    accent={accentFor(statsData?.realizedProfit ?? 0)}
+                    accentClass={accentFor(statsData?.realizedProfit ?? 0)}
                 />
                 <MetricCard
                     label="Total ROI"
-                    value={`${(statsData?.profitPercentage ?? 0) >= 0 ? "+" : ""}${statsData?.profitPercentage?.toFixed(2) ?? "0.00"}%`}
+                    value={`${(statsData?.profitPercentage ?? 0) >= 0 ? "+" : ""}${(statsData?.profitPercentage ?? 0).toFixed(2)}%`}
                     caption="Since inception"
-                    accent={accentFor(statsData?.profitPercentage ?? 0)}
+                    accentClass={accentFor(statsData?.profitPercentage ?? 0)}
                 />
             </div>
 
@@ -132,7 +133,7 @@ const PortfolioStats = ({ statsData, isLoading }: PortfolioStatsProps) => {
                 <InsightCard
                     title="Best Performer"
                     holding={insights?.bestPerformer}
-                    value={insights?.bestPerformer ? `${insights.bestPerformer.totalReturn.toFixed(2)}% total return` : "Your strongest winner will show here."}
+                    value={insights?.bestPerformer ? `${insights.bestPerformer.totalReturn >= 0 ? "+" : ""}${insights.bestPerformer.totalReturn.toFixed(2)}% total return` : "Your strongest winner will show here."}
                 />
                 <InsightCard
                     title="Watch Concentration"

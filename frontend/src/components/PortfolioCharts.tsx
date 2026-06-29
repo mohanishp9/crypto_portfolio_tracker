@@ -13,7 +13,8 @@ import {
 import type { PortfolioStatsResponse } from "../types/portfolio.types";
 import { ChartSkeleton } from "./common/Skeleton";
 
-const colors = ["#587560", "#c4885a", "#9aab97", "#8b5e3c", "#d4cfc4"];
+// Modern Fintech Palette: Emerald, Cyan, Indigo, Violet, Rose
+const colors = ["#10b981", "#06b6d4", "#4f46e5", "#8b5cf6", "#f43f5e"];
 
 const currency = (value: number) =>
     `$${value.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
@@ -40,59 +41,96 @@ const PortfolioCharts = ({ statsData, isLoading }: { statsData?: PortfolioStatsR
 
     return (
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mt-8">
-            <div className="p-6" style={{ background: "#2e3330", border: "1px solid rgba(61,74,62,0.3)" }}>
-                <p style={{ fontSize: "0.55rem", letterSpacing: "0.3em", textTransform: "uppercase", color: "#6b7c6a" }}>
+            <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl shadow-sm">
+                <p className="text-[10px] tracking-widest uppercase text-zinc-500">
                     Allocation
                 </p>
-                <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.5rem", color: "#ede8dd", marginTop: "12px" }}>
+                <h3 className="font-semibold text-lg text-zinc-50 tracking-tight mt-2">
                     Portfolio Mix
                 </h3>
-                <div style={{ height: 280, marginTop: "20px" }}>
+                <div className="h-72 mt-6">
                     {allocationData.length > 0 ? (
                         <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
-                                <Pie data={allocationData} dataKey="value" nameKey="name" innerRadius={58} outerRadius={90} paddingAngle={2}>
+                                <Pie 
+                                    data={allocationData} 
+                                    dataKey="value" 
+                                    nameKey="name" 
+                                    innerRadius={70} 
+                                    outerRadius={100} 
+                                    paddingAngle={3}
+                                    stroke="none"
+                                >
                                     {allocationData.map((entry, index) => (
                                         <Cell key={entry.name} fill={colors[index % colors.length]} />
                                     ))}
                                 </Pie>
-                                <Tooltip formatter={(value: number) => `${value.toFixed(2)}%`} />
+                                <Tooltip 
+                                    formatter={(value: number) => `${value.toFixed(2)}%`}
+                                    contentStyle={{ backgroundColor: '#09090b', borderColor: '#27272a', color: '#fafafa', borderRadius: '8px' }}
+                                    itemStyle={{ color: '#fafafa' }}
+                                />
                             </PieChart>
                         </ResponsiveContainer>
                     ) : (
-                        <div style={{ color: "#6b7c6a", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <div className="h-full flex items-center justify-center text-sm text-zinc-500">
                             Allocation appears after your first holding.
                         </div>
                     )}
                 </div>
             </div>
 
-            <div className="p-6" style={{ background: "#2e3330", border: "1px solid rgba(61,74,62,0.3)" }}>
-                <p style={{ fontSize: "0.55rem", letterSpacing: "0.3em", textTransform: "uppercase", color: "#6b7c6a" }}>
+            <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl shadow-sm">
+                <p className="text-[10px] tracking-widest uppercase text-zinc-500">
                     Performance
                 </p>
-                <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.5rem", color: "#ede8dd", marginTop: "12px" }}>
+                <h3 className="font-semibold text-lg text-zinc-50 tracking-tight mt-2">
                     Value Over Time
                 </h3>
-                <div style={{ height: 280, marginTop: "20px" }}>
+                <div className="h-72 mt-6">
                     {chartData.length > 0 ? (
                         <ResponsiveContainer width="100%" height="100%">
                             <AreaChart data={chartData}>
                                 <defs>
                                     <linearGradient id="portfolioValue" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#587560" stopOpacity={0.7} />
-                                        <stop offset="95%" stopColor="#587560" stopOpacity={0} />
+                                        <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.5} />
+                                        <stop offset="95%" stopColor="#4f46e5" stopOpacity={0} />
                                     </linearGradient>
                                 </defs>
-                                <CartesianGrid stroke="rgba(107,124,106,0.15)" vertical={false} />
-                                <XAxis dataKey="label" stroke="#6b7c6a" tick={{ fontSize: 10 }} />
-                                <YAxis stroke="#6b7c6a" tick={{ fontSize: 10 }} tickFormatter={currency} />
-                                <Tooltip formatter={(value: number) => currency(value)} />
-                                <Area type="monotone" dataKey="currentValue" stroke="#587560" fillOpacity={1} fill="url(#portfolioValue)" />
+                                <CartesianGrid stroke="#27272a" strokeDasharray="3 3" vertical={false} />
+                                <XAxis 
+                                    dataKey="label" 
+                                    stroke="#a1a1aa" 
+                                    tick={{ fontSize: 11, fill: '#71717a' }} 
+                                    axisLine={false}
+                                    tickLine={false}
+                                    dy={10}
+                                />
+                                <YAxis 
+                                    stroke="#a1a1aa" 
+                                    tick={{ fontSize: 11, fill: '#71717a' }} 
+                                    tickFormatter={currency} 
+                                    axisLine={false}
+                                    tickLine={false}
+                                    dx={-10}
+                                />
+                                <Tooltip 
+                                    formatter={(value: number) => currency(value)}
+                                    contentStyle={{ backgroundColor: '#09090b', borderColor: '#27272a', color: '#fafafa', borderRadius: '8px' }}
+                                    itemStyle={{ color: '#4f46e5', fontWeight: 600 }}
+                                />
+                                <Area 
+                                    type="monotone" 
+                                    dataKey="currentValue" 
+                                    stroke="#4f46e5" 
+                                    strokeWidth={2}
+                                    fillOpacity={1} 
+                                    fill="url(#portfolioValue)" 
+                                />
                             </AreaChart>
                         </ResponsiveContainer>
                     ) : (
-                        <div style={{ color: "#6b7c6a", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <div className="h-full flex items-center justify-center text-sm text-zinc-500">
                             Snapshot history will accumulate as you keep using the dashboard.
                         </div>
                     )}

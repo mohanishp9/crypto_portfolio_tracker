@@ -1,3 +1,5 @@
+import { RefreshCw } from "lucide-react";
+
 const MarketStaleBanner = ({
     lastUpdated,
     staleReason,
@@ -10,15 +12,12 @@ const MarketStaleBanner = ({
     if (!staleReason && !lastUpdated) return null;
 
     return (
-        <div
-            className="mt-6 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
-            style={{ background: "rgba(196,136,90,0.08)", border: "1px solid rgba(196,136,90,0.2)" }}
-        >
+        <div className="mb-6 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-                <p style={{ fontSize: "0.55rem", letterSpacing: "0.3em", textTransform: "uppercase", color: "#c4885a" }}>
-                    Market freshness
+                <p className="text-[10px] tracking-widest uppercase text-amber-500 font-semibold flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" /> Market Freshness
                 </p>
-                <p style={{ color: "#d4cfc4", fontSize: "0.82rem", marginTop: "8px", lineHeight: 1.7 }}>
+                <p className="text-sm text-amber-200/80 mt-1.5">
                     {staleReason || "Market data is current."}
                     {lastUpdated ? ` Last sync ${new Date(lastUpdated).toLocaleString()}.` : ""}
                 </p>
@@ -26,19 +25,9 @@ const MarketStaleBanner = ({
             <button
                 type="button"
                 onClick={onRefresh}
-                style={{
-                    background: "transparent",
-                    border: "1px solid rgba(196,136,90,0.35)",
-                    color: "#c4885a",
-                    padding: "10px 16px",
-                    fontSize: "0.58rem",
-                    letterSpacing: "0.25em",
-                    textTransform: "uppercase",
-                    fontFamily: "'DM Mono', monospace",
-                    cursor: "pointer",
-                }}
+                className="shrink-0 flex items-center gap-2 px-4 py-2 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-500 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors"
             >
-                Refresh now
+                <RefreshCw size={14} /> Refresh now
             </button>
         </div>
     );
