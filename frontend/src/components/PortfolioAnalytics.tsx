@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useGetPortfolioAnalyticsQuery } from "../services/portfolioApi";
 import { TableRowSkeleton } from "./common/Skeleton";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 const PortfolioAnalytics = () => {
     const { data, isLoading } = useGetPortfolioAnalyticsQuery();
@@ -8,26 +9,23 @@ const PortfolioAnalytics = () => {
 
     if (isLoading) {
         return (
-            <div className="mt-8 bg-[#2e3330] border border-[rgba(61,74,62,0.35)] overflow-hidden">
-                <div className="p-6 bg-[#2a3d2e] flex items-center justify-between border-b border-[rgba(61,74,62,0.25)]">
-                    <div>
-                        <p style={{ fontSize: "0.52rem", letterSpacing: "0.35em", textTransform: "uppercase", color: "#587560", marginBottom: "4px" }}>
-                            Aggregated Data
-                        </p>
-                        <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.3rem", fontWeight: 300, color: "#ede8dd", letterSpacing: "0.04em" }}>
-                            MongoDB <span style={{ fontStyle: "italic", color: "#9aab97" }}>Aggregation Pipeline Analytics</span>
-                        </h3>
-                    </div>
+            <div className="mt-8 bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-sm">
+                <div className="p-6 bg-zinc-900 border-b border-zinc-800">
+                    <p className="text-[10px] tracking-widest uppercase text-zinc-500 mb-2">
+                        Aggregated Data
+                    </p>
+                    <h3 className="font-semibold text-lg text-zinc-50 tracking-tight flex items-center gap-2">
+                        MongoDB <span className="font-normal text-zinc-500 italic">Aggregation Pipeline Analytics</span>
+                    </h3>
                 </div>
                 <div className="p-6 overflow-x-auto">
                     <table className="min-w-full">
                         <thead>
-                            <tr style={{ borderBottom: "1px solid rgba(61,74,62,0.3)" }}>
+                            <tr className="border-b border-zinc-800">
                                 {["Asset", "Tx Count", "Total Bought", "Total Sold", "Net Position", "Avg Buy Price", "Avg Sell Price", "Traded Period"].map((h) => (
                                     <th
                                         key={h}
-                                        className="px-4 py-3 text-left font-normal"
-                                        style={{ fontSize: "0.52rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "#6b7c6a" }}
+                                        className="px-4 py-3 text-right text-xs font-medium text-zinc-400 uppercase tracking-wider first:text-left"
                                     >
                                         {h}
                                     </th>
@@ -52,80 +50,81 @@ const PortfolioAnalytics = () => {
     }
 
     return (
-        <div className="mt-8 bg-[#2e3330] border border-[rgba(61,74,62,0.35)]">
+        <div className="mt-8 bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-sm transition-all duration-300">
             <button
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
-                className="w-full flex items-center justify-between p-6 bg-[#2a3d2e] hover:bg-[#344d3a] transition-colors duration-300 text-left focus:outline-none"
+                className="w-full flex items-center justify-between p-6 bg-zinc-900 hover:bg-zinc-800/80 transition-colors text-left focus:outline-none"
             >
                 <div>
-                    <p style={{ fontSize: "0.52rem", letterSpacing: "0.35em", textTransform: "uppercase", color: "#587560", marginBottom: "4px" }}>
+                    <p className="text-[10px] tracking-widest uppercase text-indigo-500 mb-2 font-semibold">
                         Aggregated Data
                     </p>
-                    <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.3rem", fontWeight: 300, color: "#ede8dd", letterSpacing: "0.04em" }}>
-                        MongoDB <span style={{ fontStyle: "italic", color: "#9aab97" }}>Aggregation Pipeline Analytics</span>
+                    <h3 className="font-semibold text-lg text-zinc-50 tracking-tight flex items-center gap-2">
+                        MongoDB <span className="font-normal text-zinc-500 italic">Pipeline Analytics</span>
                     </h3>
                 </div>
-                <span style={{ fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#9aab97", fontFamily: "'DM Mono', monospace" }}>
-                    {isOpen ? "Collapse [-]" : "Expand [+]"}
-                </span>
+                <div className="text-zinc-500 hover:text-zinc-300 transition-colors flex items-center gap-2 text-sm font-medium">
+                    {isOpen ? "Collapse" : "Expand"}
+                    {isOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                </div>
             </button>
 
             {isOpen && (
-                <div className="p-6 overflow-x-auto">
+                <div className="overflow-x-auto border-t border-zinc-800 bg-zinc-950/50">
                     <table className="min-w-full">
                         <thead>
-                            <tr style={{ borderBottom: "1px solid rgba(61,74,62,0.3)" }}>
+                            <tr className="border-b border-zinc-800">
                                 {["Asset", "Tx Count", "Total Bought", "Total Sold", "Net Position", "Avg Buy Price", "Avg Sell Price", "Traded Period"].map((h) => (
                                     <th
                                         key={h}
-                                        className="px-4 py-3 text-left font-normal"
-                                        style={{ fontSize: "0.52rem", letterSpacing: "0.25em", textTransform: "uppercase", color: "#6b7c6a" }}
+                                        className="px-5 py-3 text-right text-[10px] font-semibold text-zinc-500 uppercase tracking-widest first:text-left"
                                     >
                                         {h}
                                     </th>
                                 ))}
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody className="divide-y divide-zinc-800/50">
                             {items.map((item) => {
                                 const firstDate = new Date(item.firstTransaction).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "2-digit" });
                                 const lastDate = new Date(item.lastTransaction).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "2-digit" });
                                 return (
                                     <tr
                                         key={item.coinId}
-                                        style={{ borderBottom: "1px solid rgba(61,74,62,0.15)" }}
-                                        className="hover:bg-[rgba(42,61,46,0.3)] transition-colors duration-300"
+                                        className="hover:bg-zinc-800/40 transition-colors duration-150"
                                     >
-                                        <td className="px-4 py-4 whitespace-nowrap">
-                                            <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.1rem", color: "#ede8dd" }}>
+                                        <td className="px-5 py-4 whitespace-nowrap text-left">
+                                            <div className="font-medium text-sm text-zinc-50">
                                                 {item.coinName}
                                             </div>
-                                            <div style={{ fontSize: "0.52rem", letterSpacing: "0.2em", color: "#6b7c6a", textTransform: "uppercase" }}>
+                                            <div className="text-xs font-mono text-zinc-500 uppercase mt-0.5">
                                                 {item.coinSymbol}
                                             </div>
                                         </td>
-                                        <td className="px-4 py-4 whitespace-nowrap text-xs text-[#9aab97]" style={{ fontFamily: "'DM Mono', monospace" }}>
-                                            {item.transactionCount} trades
+                                        <td className="px-5 py-4 whitespace-nowrap text-right font-mono text-sm text-zinc-300">
+                                            {item.transactionCount}
                                         </td>
-                                        <td className="px-4 py-4 whitespace-nowrap text-xs text-[#9aab97]">
-                                            <div style={{ fontFamily: "'DM Mono', monospace" }}>{item.totalBought.toLocaleString(undefined, { maximumFractionDigits: 4 })} {item.coinSymbol.toUpperCase()}</div>
-                                            <div className="text-[10px] text-[#6b7c6a]" style={{ fontFamily: "'DM Mono', monospace" }}>${item.totalBuyValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                                        <td className="px-5 py-4 whitespace-nowrap text-right">
+                                            <div className="font-mono text-sm text-zinc-300">{item.totalBought.toLocaleString(undefined, { maximumFractionDigits: 4 })}</div>
+                                            <div className="text-[10px] font-mono text-zinc-500 mt-1">${item.totalBuyValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                                         </td>
-                                        <td className="px-4 py-4 whitespace-nowrap text-xs text-[#9aab97]">
-                                            <div style={{ fontFamily: "'DM Mono', monospace" }}>{item.totalSold.toLocaleString(undefined, { maximumFractionDigits: 4 })} {item.coinSymbol.toUpperCase()}</div>
-                                            <div className="text-[10px] text-[#6b7c6a]" style={{ fontFamily: "'DM Mono', monospace" }}>${item.totalSellValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                                        <td className="px-5 py-4 whitespace-nowrap text-right">
+                                            <div className="font-mono text-sm text-zinc-300">{item.totalSold.toLocaleString(undefined, { maximumFractionDigits: 4 })}</div>
+                                            <div className="text-[10px] font-mono text-zinc-500 mt-1">${item.totalSellValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                                         </td>
-                                        <td className="px-4 py-4 whitespace-nowrap text-xs" style={{ color: item.netQuantity > 0 ? "#587560" : item.netQuantity === 0 ? "#9aab97" : "#8b5e3c", fontFamily: "'DM Mono', monospace" }}>
-                                            {item.netQuantity.toLocaleString(undefined, { maximumFractionDigits: 4 })} {item.coinSymbol.toUpperCase()}
+                                        <td className="px-5 py-4 whitespace-nowrap text-right font-mono text-sm font-medium">
+                                            <span className={item.netQuantity > 0 ? "text-emerald-500" : item.netQuantity === 0 ? "text-zinc-500" : "text-rose-500"}>
+                                                {item.netQuantity.toLocaleString(undefined, { maximumFractionDigits: 4 })}
+                                            </span>
                                         </td>
-                                        <td className="px-4 py-4 whitespace-nowrap text-xs text-[#9aab97]" style={{ fontFamily: "'DM Mono', monospace" }}>
+                                        <td className="px-5 py-4 whitespace-nowrap text-right font-mono text-sm text-zinc-300">
                                             ${item.avgBuyPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                         </td>
-                                        <td className="px-4 py-4 whitespace-nowrap text-xs text-[#9aab97]" style={{ fontFamily: "'DM Mono', monospace" }}>
+                                        <td className="px-5 py-4 whitespace-nowrap text-right font-mono text-sm text-zinc-300">
                                             {item.totalSold > 0 ? `$${item.avgSellPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : "N/A"}
                                         </td>
-                                        <td className="px-4 py-4 whitespace-nowrap text-[10px] text-[#6b7c6a]" style={{ fontFamily: "'DM Mono', monospace" }}>
+                                        <td className="px-5 py-4 whitespace-nowrap text-right text-xs text-zinc-500 font-mono">
                                             {firstDate} - {lastDate}
                                         </td>
                                     </tr>

@@ -4,6 +4,7 @@ import { useDispatch } from "react-redux";
 import { logout as logoutAction } from "../features/auth/authSlice";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import { User, Activity, Wallet, Hash, ActivitySquare } from "lucide-react";
 
 const Profile = () => {
     const { data: userData, isLoading: userLoading, error: userError } = useGetCurrentUserQuery();
@@ -25,39 +26,13 @@ const Profile = () => {
 
     if (userLoading || statsLoading || transactionsLoading) {
         return (
-            <div
-                className="min-h-screen flex items-center justify-center"
-                style={{ background: "#1a1c1a" }}
-            >
+            <div className="min-h-screen flex items-center justify-center bg-zinc-950">
                 <div className="flex flex-col items-center gap-6">
-                    <div
-                        className="rounded-full"
-                        style={{
-                            width: 56, height: 56,
-                            border: "1px solid rgba(196,136,90,0.3)",
-                            display: "flex", alignItems: "center", justifyContent: "center",
-                            animation: "pulse 2s ease-in-out infinite",
-                        }}
-                    >
-                        <div
-                            className="rounded-full"
-                            style={{
-                                width: 20, height: 20,
-                                background: "rgba(196,136,90,0.5)",
-                                animation: "pulse 2s ease-in-out infinite",
-                            }}
-                        />
+                    <div className="w-14 h-14 rounded-full border border-indigo-500/30 flex items-center justify-center animate-pulse shadow-xl shadow-indigo-500/10">
+                        <div className="w-5 h-5 rounded-full bg-indigo-500/50 animate-pulse" />
                     </div>
-                    <p
-                        style={{
-                            fontFamily: "'Cormorant Garamond', serif",
-                            fontSize: "1.1rem",
-                            fontWeight: 300,
-                            color: "#6b7c6a",
-                            letterSpacing: "0.15em",
-                        }}
-                    >
-                        gathering your profile...
+                    <p className="text-zinc-500 text-sm tracking-widest font-mono uppercase">
+                        Gathering identity...
                     </p>
                 </div>
             </div>
@@ -66,9 +41,9 @@ const Profile = () => {
 
     if (userError) {
         return (
-            <div className="min-h-screen flex items-center justify-center px-4" style={{ background: "#1a1c1a" }}>
-                <div className="text-center p-10" style={{ background: "#2e3330", border: "1px solid rgba(139,94,60,0.25)" }}>
-                    <p style={{ color: "#c4885a", fontSize: "0.8rem", letterSpacing: "0.2em", textTransform: "uppercase" }}>Error loading profile</p>
+            <div className="min-h-screen flex items-center justify-center px-4 bg-zinc-950">
+                <div className="text-center p-10 bg-zinc-900 border border-zinc-800 rounded-2xl">
+                    <p className="text-rose-500 text-xs font-mono tracking-widest uppercase">Error loading profile</p>
                 </div>
             </div>
         );
@@ -80,7 +55,7 @@ const Profile = () => {
     const isProfit = (statsData?.profitLoss || 0) >= 0;
 
     return (
-        <div className="min-h-screen" style={{ background: "#1a1c1a" }}>
+        <div className="min-h-screen bg-zinc-950">
             <Navbar
                 email={userData?.user.email}
                 handleLogout={handleLogout}
@@ -88,94 +63,76 @@ const Profile = () => {
             />
 
             <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                <div
-                    className="mb-8 p-8"
-                    style={{
-                        background: "#2a3d2e",
-                        borderBottom: "1px solid rgba(88,117,96,0.2)",
-                    }}
-                >
-                    <p
-                        style={{
-                            fontSize: "0.58rem",
-                            letterSpacing: "0.35em",
-                            textTransform: "uppercase",
-                            color: "#587560",
-                            marginBottom: "10px",
-                        }}
-                    >
-                        Investor Profile
-                    </p>
-                    <h2
-                        className="font-light"
-                        style={{
-                            fontFamily: "'Cormorant Garamond', serif",
-                            fontSize: "clamp(1.8rem, 4vw, 2.8rem)",
-                            color: "#ede8dd",
-                            letterSpacing: "0.04em",
-                            lineHeight: 1.1,
-                        }}
-                    >
-                        {userData?.user.name}
-                    </h2>
-                    <p
-                        style={{
-                            fontSize: "0.75rem",
-                            letterSpacing: "0.15em",
-                            color: "#9aab97",
-                            fontFamily: "'DM Mono', monospace",
-                            marginTop: "12px",
-                        }}
-                    >
-                        {userData?.user.email}
-                    </p>
+                
+                {/* Profile Header */}
+                <div className="mb-8 p-8 bg-zinc-900/50 border border-zinc-800 rounded-2xl flex flex-col md:flex-row items-center md:items-start gap-6 backdrop-blur-md relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-[100px] pointer-events-none" />
+                    
+                    <div className="w-24 h-24 rounded-full bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center shrink-0">
+                        <User size={40} className="text-indigo-400" />
+                    </div>
+                    
+                    <div className="text-center md:text-left flex-1">
+                        <p className="text-[10px] tracking-widest uppercase text-indigo-400 mb-2 font-semibold">
+                            Investor Profile
+                        </p>
+                        <h2 className="text-4xl font-semibold text-zinc-50 tracking-tight">
+                            {userData?.user.name}
+                        </h2>
+                        <p className="text-sm text-zinc-400 font-mono mt-2">
+                            {userData?.user.email}
+                        </p>
+                    </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* User Details */}
-                    <div className="p-8" style={{ background: "#2e3330", border: "1px solid rgba(61,74,62,0.3)" }}>
-                        <h3 className="mb-6 font-light tracking-wide" style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.4rem", color: "#ede8dd" }}>
-                            Account Details
+                    <div className="p-8 bg-zinc-900 border border-zinc-800 rounded-2xl shadow-sm">
+                        <h3 className="mb-6 font-semibold text-xl text-zinc-50 tracking-tight flex items-center gap-2">
+                            <ActivitySquare className="text-zinc-500" size={20} /> Account Details
                         </h3>
                         <div className="space-y-6">
                             <div>
-                                <p style={{ fontSize: "0.55rem", letterSpacing: "0.3em", textTransform: "uppercase", color: "#6b7c6a", marginBottom: "4px" }}>User ID</p>
-                                <p style={{ fontSize: "0.8rem", color: "#d4cfc4", fontFamily: "'DM Mono', monospace", letterSpacing: "0.05em" }}>{userData?.user._id}</p>
+                                <p className="text-[10px] tracking-widest uppercase text-zinc-500 mb-2">System ID</p>
+                                <p className="text-sm text-zinc-300 font-mono bg-zinc-950 px-3 py-2 rounded-lg border border-zinc-800 break-all">
+                                    {userData?.user._id}
+                                </p>
                             </div>
                             <div>
-                                <p style={{ fontSize: "0.55rem", letterSpacing: "0.3em", textTransform: "uppercase", color: "#6b7c6a", marginBottom: "4px" }}>Status</p>
-                                <p style={{ fontSize: "0.75rem", color: "#587560", textTransform: "uppercase", letterSpacing: "0.2em", display: "flex", alignItems: "center", gap: "6px" }}>
-                                    <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#587560" }}></span> Active
-                                </p>
+                                <p className="text-[10px] tracking-widest uppercase text-zinc-500 mb-2">Status</p>
+                                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+                                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                                    <span className="text-[10px] text-emerald-500 uppercase tracking-widest font-semibold">Active</span>
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     {/* Profile Stats */}
-                    <div className="p-8" style={{ background: "#2e3330", border: "1px solid rgba(61,74,62,0.3)" }}>
-                        <h3 className="mb-6 font-light tracking-wide" style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.4rem", color: "#ede8dd" }}>
-                            Your Grove Statistics
+                    <div className="p-8 bg-zinc-900 border border-zinc-800 rounded-2xl shadow-sm">
+                        <h3 className="mb-6 font-semibold text-xl text-zinc-50 tracking-tight flex items-center gap-2">
+                            <Activity className="text-indigo-400" size={20} /> CypherSight Statistics
                         </h3>
                         <div className="grid grid-cols-2 gap-6">
-                            <div>
-                                <p style={{ fontSize: "0.55rem", letterSpacing: "0.3em", textTransform: "uppercase", color: "#6b7c6a", marginBottom: "4px" }}>Current Balance</p>
-                                <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.6rem", color: "#ede8dd", letterSpacing: "0.04em" }}>
+                            <div className="col-span-2 bg-zinc-950 p-6 rounded-xl border border-zinc-800">
+                                <p className="text-[10px] tracking-widest uppercase text-zinc-500 mb-2 flex items-center gap-1.5"><Wallet size={14}/> Current Balance</p>
+                                <p className="text-4xl font-semibold text-zinc-50 font-mono tracking-tight">
                                     ${totalValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                 </p>
                             </div>
-                            <div>
-                                <p style={{ fontSize: "0.55rem", letterSpacing: "0.3em", textTransform: "uppercase", color: "#6b7c6a", marginBottom: "4px" }}>Total PnL</p>
-                                <p style={{ fontFamily: "'DM Mono', monospace", fontSize: "1rem", color: isProfit ? "#587560" : "#8b5e3c", letterSpacing: "0.05em" }}>
+                            <div className="col-span-2 bg-zinc-950 p-6 rounded-xl border border-zinc-800">
+                                <p className="text-[10px] tracking-widest uppercase text-zinc-500 mb-2">Total PnL</p>
+                                <p className={`text-3xl font-mono tracking-tight font-medium ${isProfit ? "text-emerald-500" : "text-rose-500"}`}>
                                     {isProfit ? "+" : "-"}${Math.abs(statsData?.profitLoss || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                 </p>
                             </div>
-                            <div>
-                                <p style={{ fontSize: "0.55rem", letterSpacing: "0.3em", textTransform: "uppercase", color: "#6b7c6a", marginBottom: "4px" }}>Active Assets</p>
-                                <p style={{ fontSize: "1.1rem", color: "#d4cfc4", fontFamily: "'DM Mono', monospace" }}>{uniqueAssets}</p>
+                            <div className="bg-zinc-950 p-4 rounded-xl border border-zinc-800">
+                                <p className="text-[10px] tracking-widest uppercase text-zinc-500 mb-2 flex items-center gap-1.5"><Hash size={12}/> Active Assets</p>
+                                <p className="text-lg text-zinc-300 font-mono">{uniqueAssets}</p>
                             </div>
-                            <div>
-                                <p style={{ fontSize: "0.55rem", letterSpacing: "0.3em", textTransform: "uppercase", color: "#6b7c6a", marginBottom: "4px" }}>Transactions</p>
-                                <p style={{ fontSize: "1.1rem", color: "#d4cfc4", fontFamily: "'DM Mono', monospace" }}>{totalTransactions}</p>
+                            <div className="bg-zinc-950 p-4 rounded-xl border border-zinc-800">
+                                <p className="text-[10px] tracking-widest uppercase text-zinc-500 mb-2">Transactions</p>
+                                <p className="text-lg text-zinc-300 font-mono">{totalTransactions}</p>
                             </div>
                         </div>
                     </div>
