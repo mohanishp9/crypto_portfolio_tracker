@@ -7,10 +7,11 @@ import { Request, Response } from "express";
 
 const setRefreshTokenCookie = (res: Response, token: string) => {
     const days = parseInt(process.env.REFRESH_TOKEN_EXPIRES_IN_DAYS || "7", 10);
+    const isProd = process.env.NODE_ENV === "production";
     res.cookie("refreshToken", token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV !== "development", // Using secure in prod
-        sameSite: "strict",
+        secure: isProd, 
+        sameSite: isProd ? "none" : "strict",
         maxAge: days * 24 * 60 * 60 * 1000,
     });
 };
@@ -118,9 +119,16 @@ const logoutUserController = asyncHandler(async (req: Request, res: Response) =>
         await RefreshToken.findOneAndDelete({ tokenHash });
     }
 
-    res.clearCookie("refreshToken");
+    const isProd = process.env.NODE_ENV === "production";
+    const cookieOptions = {
+        httpOnly: true,
+        secure: isProd,
+        sameSite: isProd ? "none" : "strict",
+    } as const;
+
+    res.clearCookie("refreshToken", cookieOptions);
     // Clear old token cookie in case users still have it from the previous system
-    res.clearCookie("token");
+    res.clearCookie("token", cookieOptions);
 
     res.status(200).json({
         success: true,
