@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import useDebounce from "../hooks/useDebounce";
 import { useGetCurrentUserQuery, useLogoutMutation } from "../services/authApi";
 import type { RootState } from "../app/store";
 import {
@@ -9,6 +10,7 @@ import {
     setSelectedTransaction,
 } from "../features/portfolio/portfolioSlice";
 import { logout as logoutAction } from "../features/auth/authSlice";
+import type { Transaction } from "../types/portfolio.types";
 import { usePortfolioData } from "../hooks/usePortfolioData";
 import Navbar from "../components/Navbar";
 import PortfolioStats from "../components/PortfolioStats";
@@ -18,11 +20,13 @@ import TopCoinsList from "../components/TopCoinsList";
 import AddHoldingModal from "../components/AddHoldingModal";
 import DeleteConfirmModal from "../components/DeleteConfirmModal";
 import PortfolioCharts from "../components/PortfolioCharts";
+import PortfolioAnalytics from "../components/PortfolioAnalytics";
 import MarketStaleBanner from "../components/MarketStaleBanner";
 import WatchlistPanel from "../components/WatchlistPanel";
 import AlertsPanel from "../components/AlertsPanel";
 import CoinDetailDrawer from "../components/CoinDetailDrawer";
 import ImportExportPanel from "../components/ImportExportPanel";
+import { Skeleton } from "../components/common/Skeleton";
 
 const Dashboard = () => {
   const { data, isLoading, error } = useGetCurrentUserQuery();
@@ -30,6 +34,13 @@ const Dashboard = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [selectedCoinId, setSelectedCoinId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 300);
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch]);
 
   const { isAddModalOpen, isDeleteModalOpen } = useSelector((state: RootState) => state.portfolio);
   const {
@@ -39,7 +50,7 @@ const Dashboard = () => {
     statsLoading,
     refetchPortfolio,
     pollingInterval,
-  } = usePortfolioData();
+  } = usePortfolioData({ page, limit: 10, search: debouncedSearch });
 
   useEffect(() => {
     if (error && "status" in error && error.status === 401) {
@@ -57,12 +68,12 @@ const Dashboard = () => {
     }
   };
 
-  const handleDelete = (transaction: any) => {
+  const handleDelete = (transaction: Transaction) => {
     dispatch(setSelectedTransaction(transaction));
     dispatch(openDeleteModal());
   };
 
-  const handleEdit = (transaction: any) => {
+  const handleEdit = (transaction: Transaction) => {
     dispatch(setSelectedTransaction(transaction));
     dispatch(openAddModal());
   };
@@ -75,13 +86,7 @@ const Dashboard = () => {
     };
   }, [statsData]);
 
-  if (isLoading || transactionsLoading || statsLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "#1a1c1a" }}>
-        <p style={{ color: "#9aab97", letterSpacing: "0.2em", textTransform: "uppercase" }}>Loading dashboard...</p>
-      </div>
-    );
-  }
+  // Full page loader removed to allow individual widget skeleton loaders to shine
 
   if (error && !("status" in error && error.status === 401)) {
     return (
@@ -104,10 +109,14 @@ const Dashboard = () => {
             Welcome back
           </p>
           <h2
-            className="font-light"
+            className="font-light flex items-center gap-2"
             style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(1.8rem, 4vw, 2.8rem)", color: "#ede8dd", letterSpacing: "0.04em", lineHeight: 1.1 }}
           >
-            {data?.user.name}
+            {isLoading ? (
+              <Skeleton className="w-48 h-8 my-1" />
+            ) : (
+              data?.user.name
+            )}
             <span style={{ fontStyle: "italic", color: "#9aab97", fontSize: "70%", marginLeft: "12px" }}>
               your grove
             </span>
@@ -138,16 +147,24 @@ const Dashboard = () => {
           onRefresh={refetchPortfolio}
         />
 
-        <PortfolioStats statsData={statsData} />
-        <PortfolioCharts statsData={statsData} />
+        <PortfolioStats statsData={statsData} isLoading={statsLoading} />
+        <PortfolioCharts statsData={statsData} isLoading={statsLoading} />
+        <PortfolioAnalytics />
 
         <div className="grid grid-cols-1 xl:grid-cols-[1.8fr_1fr] gap-6 mt-8">
           <div className="space-y-6 min-w-0">
-            <HoldingsTable statsData={statsData} onSelectCoin={setSelectedCoinId} />
+            <HoldingsTable statsData={statsData} onSelectCoin={setSelectedCoinId} isLoading={statsLoading} />
             <TransactionsTable
               transactions={transactionsData?.transactions || []}
               handleEdit={handleEdit}
               handleDelete={handleDelete}
+              currentPage={transactionsData?.currentPage ?? 1}
+              totalPages={transactionsData?.totalPages ?? 1}
+              totalCount={transactionsData?.totalCount ?? 0}
+              onPageChange={setPage}
+              searchQuery={search}
+              onSearchChange={setSearch}
+              isLoading={transactionsLoading}
             />
             <ImportExportPanel />
           </div>
@@ -156,8 +173,8 @@ const Dashboard = () => {
             <TopCoinsList onSelectCoin={setSelectedCoinId} />
             <WatchlistPanel onSelectCoin={setSelectedCoinId} />
             <AlertsPanel />
-            <MarketPulse title="Strongest 24H Movers" items={topMovers.gainers} tone="up" />
-            <MarketPulse title="Weakest 24H Movers" items={topMovers.losers} tone="down" />
+            <MarketPulse title="Strongest 24H Movers" items={topMovers.gainers} tone="up" isLoading={statsLoading} />
+            <MarketPulse title="Weakest 24H Movers" items={topMovers.losers} tone="down" isLoading={statsLoading} />
           </div>
         </div>
       </main>
@@ -173,15 +190,34 @@ const MarketPulse = ({
   title,
   items,
   tone,
+  isLoading,
 }: {
   title: string;
   items: Array<{ coinName: string; coinSymbol: string; priceChange24h: number }>;
   tone: "up" | "down";
+  isLoading?: boolean;
 }) => (
   <div className="p-6" style={{ background: "#2e3330", border: "1px solid rgba(61,74,62,0.3)" }}>
     <p style={{ fontSize: "0.55rem", letterSpacing: "0.3em", textTransform: "uppercase", color: "#6b7c6a" }}>{title}</p>
     <div className="space-y-3 mt-5">
-      {items.length > 0 ? items.map((item) => (
+      {isLoading ? (
+        <>
+          <div className="flex items-center justify-between">
+            <div>
+              <Skeleton className="w-16 h-3.5 mb-1" />
+              <Skeleton className="w-8 h-2" />
+            </div>
+            <Skeleton className="w-12 h-3.5" />
+          </div>
+          <div className="flex items-center justify-between">
+            <div>
+              <Skeleton className="w-20 h-3.5 mb-1" />
+              <Skeleton className="w-10 h-2" />
+            </div>
+            <Skeleton className="w-10 h-3.5" />
+          </div>
+        </>
+      ) : items.length > 0 ? items.map((item) => (
         <div key={item.coinSymbol} className="flex items-center justify-between" style={{ color: "#d4cfc4" }}>
           <div>
             <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.1rem", color: "#ede8dd" }}>{item.coinName}</div>

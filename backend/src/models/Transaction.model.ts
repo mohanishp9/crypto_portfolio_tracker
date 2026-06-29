@@ -44,7 +44,10 @@ const transcationSchema = new Schema<ITransaction>(
         },
     },
     { timestamps: true }
-)
+);
+
+transcationSchema.index({ user: 1, timestamp: -1 });
+transcationSchema.index({ user: 1, coinId: 1 });
 
 const Transaction = mongoose.model<ITransaction>("Transaction", transcationSchema);
 

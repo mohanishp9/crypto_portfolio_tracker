@@ -3,6 +3,7 @@ import {
     getPortfolioController,
     addTransactionController,
     getPortfolioStatsController,
+    getPortfolioAnalyticsController,
     deleteTransactionController,
     exportTransactionsController,
     importTransactionsController,
@@ -17,6 +18,7 @@ router.post("/transactions", protect, addTransactionController);
 router.get("/transactions", protect, getPortfolioController);
 router.patch("/transactions/:id", protect, updateTransactionController);
 router.get("/stats", protect, getPortfolioStatsController);
+router.get("/analytics", protect, getPortfolioAnalyticsController);
 router.delete("/transactions/:id", protect, deleteTransactionController);
 router.get("/search", protect, searchCoinsController);
 router.get("/export", protect, exportTransactionsController);

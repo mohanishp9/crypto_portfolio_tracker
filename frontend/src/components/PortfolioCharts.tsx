@@ -11,13 +11,23 @@ import {
     Cell,
 } from "recharts";
 import type { PortfolioStatsResponse } from "../types/portfolio.types";
+import { ChartSkeleton } from "./common/Skeleton";
 
 const colors = ["#587560", "#c4885a", "#9aab97", "#8b5e3c", "#d4cfc4"];
 
 const currency = (value: number) =>
     `$${value.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
 
-const PortfolioCharts = ({ statsData }: { statsData?: PortfolioStatsResponse }) => {
+const PortfolioCharts = ({ statsData, isLoading }: { statsData?: PortfolioStatsResponse; isLoading?: boolean }) => {
+    if (isLoading) {
+        return (
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mt-8">
+                <ChartSkeleton />
+                <ChartSkeleton />
+            </div>
+        );
+    }
+
     const allocationData = (statsData?.portfolio ?? []).slice(0, 5).map((item) => ({
         name: item.coinSymbol.toUpperCase(),
         value: Number(item.allocationPercent.toFixed(2)),

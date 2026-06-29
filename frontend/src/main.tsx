@@ -6,13 +6,16 @@ import { BrowserRouter } from 'react-router-dom'
 import './index.css'
 import App from './App.tsx'
 import ToastContainer from './components/ToastContainer.tsx'
+import { LivePriceProvider } from './context/LivePriceContext.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <Provider store={store}>
       <BrowserRouter>
-        <App />
-        <ToastContainer />
+        <LivePriceProvider>
+          <App />
+          <ToastContainer />
+        </LivePriceProvider>
       </BrowserRouter>
     </Provider>
   </StrictMode>,

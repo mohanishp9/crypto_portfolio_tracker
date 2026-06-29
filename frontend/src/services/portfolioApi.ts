@@ -9,6 +9,7 @@ import type {
     CoinDetailResponse,
     PortfolioMutationResponse,
     PortfolioStatsResponse,
+    PortfolioAnalyticsResponse,
     PriceAlert,
     Transaction,
     TransactionsResponse,
@@ -20,8 +21,13 @@ export const portfolioApi = createApi({
     baseQuery: baseQueryWithReauth, // Automatically handles 401s and token rotation
     tagTypes: ["Portfolio", "Watchlist", "Alerts", "Market"],
     endpoints: (builder) => ({
-        getTransactions: builder.query<TransactionsResponse, void>({
-            query: () => "/portfolio/transactions",
+        getTransactions: builder.query<TransactionsResponse, { page?: number; limit?: number; search?: string } | void>({
+            query: (params) => {
+                const page = params?.page ?? 1;
+                const limit = params?.limit ?? 10;
+                const search = params?.search ?? "";
+                return `/portfolio/transactions?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`;
+            },
             providesTags: ["Portfolio"],
         }),
         addTransaction: builder.mutation<PortfolioMutationResponse, AddTransactionInput>({
@@ -50,6 +56,10 @@ export const portfolioApi = createApi({
         getPortfolioStats: builder.query<PortfolioStatsResponse, void>({
             query: () => "/portfolio/stats",
             providesTags: ["Portfolio", "Alerts"],
+        }),
+        getPortfolioAnalytics: builder.query<PortfolioAnalyticsResponse, void>({
+            query: () => "/portfolio/analytics",
+            providesTags: ["Portfolio"],
         }),
         searchCoins: builder.query<CoinSearchResult[], string>({
             query: (searchTerm) => `/portfolio/search?query=${encodeURIComponent(searchTerm)}`,
@@ -138,6 +148,7 @@ export const {
     useGetAlertsQuery,
     useGetCoinDetailQuery,
     useGetPortfolioStatsQuery,
+    useGetPortfolioAnalyticsQuery,
     useGetTopCoinsQuery,
     useGetTransactionsQuery,
     useGetWatchlistQuery,

@@ -28,8 +28,9 @@ const ImportExportPanel = () => {
         try {
             const response = await importTransactions({ csv, previewOnly }).unwrap();
             setMessage(previewOnly ? `Preview ready: ${response.count ?? response.preview?.length ?? 0} rows validated.` : `Imported ${response.count ?? 0} transactions.`);
-        } catch (err: any) {
-            setMessage(err?.data?.message || "Import failed.");
+        } catch (err: unknown) {
+            const error = err as { data?: { message?: string } };
+            setMessage(error?.data?.message || "Import failed.");
         }
     };
 

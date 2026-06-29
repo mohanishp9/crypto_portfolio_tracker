@@ -1,7 +1,9 @@
 import type { PortfolioStatsResponse } from "../types/portfolio.types";
+import { CardSkeleton, InsightCardSkeleton } from "./common/Skeleton";
 
 interface PortfolioStatsProps {
     statsData?: PortfolioStatsResponse;
+    isLoading?: boolean;
 }
 
 const accentFor = (value: number) => (value < 0 ? "#8b5e3c" : "#587560");
@@ -52,12 +54,36 @@ const InsightCard = ({
     </div>
 );
 
-const PortfolioStats = ({ statsData }: PortfolioStatsProps) => {
+const PortfolioStats = ({ statsData, isLoading }: PortfolioStatsProps) => {
+    if (isLoading) {
+        return (
+            <div className="space-y-4 mt-8">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-[#3d4a3e]/20 rounded-sm overflow-hidden">
+                    <CardSkeleton />
+                    <CardSkeleton />
+                    <CardSkeleton />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-[#3d4a3e]/20 rounded-sm overflow-hidden">
+                    <CardSkeleton />
+                    <CardSkeleton />
+                    <CardSkeleton />
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                    <InsightCardSkeleton />
+                    <InsightCardSkeleton />
+                    <InsightCardSkeleton />
+                </div>
+            </div>
+        );
+    }
+
     const insights = statsData?.insights;
 
     return (
-        <div className="space-y-5 mt-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-px bg-[#3d4a3e]/20 rounded-sm overflow-hidden">
+        <div className="space-y-4 mt-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-[#3d4a3e]/20 rounded-sm overflow-hidden">
                 <MetricCard
                     label="Total Value"
                     value={`$${statsData?.currentValue?.toFixed(2) ?? "0.00"}`}
@@ -66,16 +92,31 @@ const PortfolioStats = ({ statsData }: PortfolioStatsProps) => {
                 <MetricCard
                     label="Total Investment"
                     value={`$${statsData?.investment?.toFixed(2) ?? "0.00"}`}
-                    caption="Capital deployed"
+                    caption="Active capital cost"
                 />
                 <MetricCard
-                    label="Profit / Loss"
+                    label="Net Profit / Loss"
                     value={`${(statsData?.profitLoss ?? 0) >= 0 ? "+" : ""}$${statsData?.profitLoss?.toFixed(2) ?? "0.00"}`}
-                    caption={(statsData?.profitLoss ?? 0) >= 0 ? "Returning gain" : "Unrealized loss"}
+                    caption="Total performance"
                     accent={accentFor(statsData?.profitLoss ?? 0)}
                 />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-[#3d4a3e]/20 rounded-sm overflow-hidden">
                 <MetricCard
-                    label="Change"
+                    label="Unrealized PnL"
+                    value={`${(statsData?.unrealizedProfit ?? 0) >= 0 ? "+" : ""}$${statsData?.unrealizedProfit?.toFixed(2) ?? "0.00"}`}
+                    caption="Paper gains / losses"
+                    accent={accentFor(statsData?.unrealizedProfit ?? 0)}
+                />
+                <MetricCard
+                    label="Realized PnL"
+                    value={`${(statsData?.realizedProfit ?? 0) >= 0 ? "+" : ""}$${statsData?.realizedProfit?.toFixed(2) ?? "0.00"}`}
+                    caption="Locked-in gains / losses"
+                    accent={accentFor(statsData?.realizedProfit ?? 0)}
+                />
+                <MetricCard
+                    label="Total ROI"
                     value={`${(statsData?.profitPercentage ?? 0) >= 0 ? "+" : ""}${statsData?.profitPercentage?.toFixed(2) ?? "0.00"}%`}
                     caption="Since inception"
                     accent={accentFor(statsData?.profitPercentage ?? 0)}

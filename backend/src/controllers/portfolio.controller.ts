@@ -10,8 +10,10 @@ import { searchCoins } from "../services/coinGecko.service";
 import {
     getPortfolioStatsForUser,
     getUserTransactions,
+    getAllUserTransactions,
     validateTransactionSequence,
     validateTransactionTimeline,
+    getPortfolioAnalyticsForUser,
 } from "../services/portfolio.service";
 
 const ensureUserId = (req: Request) => {
@@ -56,11 +58,14 @@ const parseCsvTransactions = (csv: string) => {
 
 const getPortfolioController = asyncHandler(async (req: Request, res: Response) => {
     const userId = ensureUserId(req);
-    const transactions = await getUserTransactions(userId);
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const search = (req.query.search as string) || "";
+    const result = await getUserTransactions(userId, page, limit, search);
 
     res.status(200).json({
         success: true,
-        transactions,
+        ...result,
     });
 });
 
@@ -147,7 +152,7 @@ const searchCoinsController = asyncHandler(async (req: Request, res: Response) =
 
 const exportTransactionsController = asyncHandler(async (req: Request, res: Response) => {
     const userId = ensureUserId(req);
-    const transactions = await getUserTransactions(userId);
+    const transactions = await getAllUserTransactions(userId);
     const rows = [
         "coinId,coinName,coinSymbol,type,quantity,price,fee,timestamp",
         ...transactions.map((tx) => [
@@ -182,7 +187,7 @@ const importTransactionsController = asyncHandler(async (req: Request, res: Resp
         seen.add(key);
     }
 
-    const existingTransactions = await getUserTransactions(userId);
+    const existingTransactions = await getAllUserTransactions(userId);
     validateTransactionSequence([...((existingTransactions as unknown) as typeof parsedTransactions), ...parsedTransactions]);
 
     if (previewOnly) {
@@ -205,12 +210,22 @@ const importTransactionsController = asyncHandler(async (req: Request, res: Resp
     });
 });
 
+const getPortfolioAnalyticsController = asyncHandler(async (req: Request, res: Response) => {
+    const userId = ensureUserId(req);
+    const analytics = await getPortfolioAnalyticsForUser(userId);
+    res.status(200).json({
+        success: true,
+        analytics,
+    });
+});
+
 export {
     addTransactionController,
     deleteTransactionController,
     exportTransactionsController,
     getPortfolioController,
     getPortfolioStatsController,
+    getPortfolioAnalyticsController,
     importTransactionsController,
     searchCoinsController,
     updateTransactionController,

@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { useGetTopCoinsQuery } from "../services/portfolioApi";
 import type { TopCoin } from "../types/coin.types";
+import { useLivePrices } from "../context/LivePriceContext";
+import { TopCoinSkeleton } from "./common/Skeleton";
 
 const TopCoinsList = ({ onSelectCoin }: { onSelectCoin: (coinId: string) => void }) => {
     const { data, isLoading, error } = useGetTopCoinsQuery();
+    const { livePrices } = useLivePrices();
     const listRef = useRef<HTMLDivElement>(null);
     const [activeCoin, setActiveCoin] = useState<string | null>(null);
 
@@ -56,8 +59,12 @@ const TopCoinsList = ({ onSelectCoin }: { onSelectCoin: (coinId: string) => void
             </div>
 
             {isLoading && (
-                <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", color: "#9aab97" }}>
-                    Loading market...
+                <div style={{ flex: 1, overflowY: "hidden" }}>
+                    <TopCoinSkeleton />
+                    <TopCoinSkeleton />
+                    <TopCoinSkeleton />
+                    <TopCoinSkeleton />
+                    <TopCoinSkeleton />
                 </div>
             )}
 
@@ -72,17 +79,21 @@ const TopCoinsList = ({ onSelectCoin }: { onSelectCoin: (coinId: string) => void
             {data?.coins && (
                 <div ref={listRef} style={{ flex: 1, overflowY: "hidden", scrollbarWidth: "none" }}>
                     {[...data.coins, ...data.coins].map((coin: TopCoin, index: number) => {
-                        const isUp = coin.price_change_percentage_24h >= 0;
+                        const liveData = livePrices[coin.id];
+                        const currentPrice = liveData ? liveData.price : coin.current_price;
+                        const priceChange24h = liveData ? liveData.priceChange24h : coin.price_change_percentage_24h;
+                        const isUp = priceChange24h >= 0;
                         const key = `${coin.id}-${index}`;
                         const isActive = activeCoin === key;
 
                         return (
                             <button
-                                key={key}
+                                key={`${key}-${liveData?.updateKey ?? 0}`}
                                 type="button"
                                 onClick={() => onSelectCoin(coin.id)}
                                 onMouseEnter={() => setActiveCoin(key)}
                                 onMouseLeave={() => setActiveCoin(null)}
+                                className={liveData?.direction === "up" ? "flash-up" : liveData?.direction === "down" ? "flash-down" : ""}
                                 style={{
                                     width: "100%",
                                     padding: "11px 20px",
@@ -95,6 +106,7 @@ const TopCoinsList = ({ onSelectCoin }: { onSelectCoin: (coinId: string) => void
                                     borderLeft: "none",
                                     borderRight: "none",
                                     borderTop: "none",
+                                    transition: "background-color 1s ease",
                                 }}
                             >
                                 <span style={{ fontSize: "0.48rem", letterSpacing: "0.1em", color: "#3d4a3e", width: "14px", flexShrink: 0, textAlign: "right" }}>
@@ -111,11 +123,11 @@ const TopCoinsList = ({ onSelectCoin }: { onSelectCoin: (coinId: string) => void
                                 </div>
                                 <div style={{ textAlign: "right", flexShrink: 0 }}>
                                     <div style={{ fontFamily: "'DM Mono', monospace", fontSize: "0.63rem", color: isActive ? "#ede8dd" : "#d4cfc4" }}>
-                                        ${coin.current_price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                        ${currentPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                     </div>
                                     <div style={{ fontSize: "0.5rem", letterSpacing: "0.08em", color: isUp ? "#587560" : "#8b5e3c", marginTop: "2px" }}>
                                         {isUp ? "+" : "-"}
-                                        {Math.abs(coin.price_change_percentage_24h).toFixed(2)}%
+                                        {Math.abs(priceChange24h).toFixed(2)}%
                                     </div>
                                 </div>
                             </button>
