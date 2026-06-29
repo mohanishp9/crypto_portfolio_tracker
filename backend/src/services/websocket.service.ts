@@ -91,5 +91,6 @@ export const initWebSocketServer = (server: HttpServer): void => {
         });
     };
 
-    connectToBinance();
+    // Commented out because Render's US IPs get blocked by Binance (451 Unavailable For Legal Reasons).
+    // connectToBinance();
 };
