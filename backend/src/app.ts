@@ -21,10 +21,8 @@ app.use(
     cors({
         origin: [
             "http://localhost:5173",
-            "https://grove-portfolio.onrender.com",
-            "https://grove-crypto-tracker.vercel.app",
-            "https://grove-crypto-portfolio-tracker2.vercel.app",
-        ],
+            process.env.FRONTEND_URL || "",
+        ].filter(Boolean),
         credentials: true,
     })
 );
