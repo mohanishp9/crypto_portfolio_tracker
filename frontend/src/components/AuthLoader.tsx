@@ -1,8 +1,29 @@
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { setCredentials, setAuthInitialized } from '../features/auth/authSlice';
-import { refreshAccessToken } from '../services/baseQuery';
 import type { AppDispatch } from '../app/store';
+
+const API_URL = import.meta.env.VITE_API_URL;
+
+// Module-level singleton: ensures only ONE /auth/refresh call fires on app init,
+// even if React StrictMode double-invokes the effect in development.
+let _initRefreshPromise: Promise<string | null> | null = null;
+
+const getInitialAccessToken = (): Promise<string | null> => {
+    if (!_initRefreshPromise) {
+        _initRefreshPromise = fetch(`${API_URL}/auth/refresh`, {
+            method: 'POST',
+            credentials: 'include',
+        })
+            .then(async (res) => {
+                if (!res.ok) return null;
+                const data = await res.json();
+                return (data.accessToken as string) ?? null;
+            })
+            .catch(() => null);
+    }
+    return _initRefreshPromise;
+};
 
 /**
  * AuthLoader
@@ -32,26 +53,22 @@ const AuthLoader = ({ children }: AuthLoaderProps) => {
 
         const restoreSession = async () => {
             try {
-                // 1. Try to get a fresh access token from the HttpOnly cookie
-                const accessToken = await refreshAccessToken();
+                // 1. Singleton fetch: both StrictMode invocations share the same promise,
+                //    so only ONE /auth/refresh request ever hits the server.
+                const accessToken = await getInitialAccessToken();
 
                 if (cancelled) return;
 
                 if (!accessToken) {
-                    // Refresh failed (no valid cookie, expired, etc.) → guest mode
                     dispatch(setAuthInitialized());
                     return;
                 }
 
                 // 2. Token obtained → fetch user profile to fully hydrate Redux
-                // We use a raw fetch here to avoid RTK Query cache complications on init
-                const userRes = await fetch(
-                    `${import.meta.env.VITE_API_URL}/auth/me`,
-                    {
-                        headers: { Authorization: `Bearer ${accessToken}` },
-                        credentials: 'include',
-                    }
-                );
+                const userRes = await fetch(`${API_URL}/auth/me`, {
+                    headers: { Authorization: `Bearer ${accessToken}` },
+                    credentials: 'include',
+                });
 
                 if (cancelled) return;
 
@@ -66,7 +83,6 @@ const AuthLoader = ({ children }: AuthLoaderProps) => {
                 dispatch(setCredentials({ user, accessToken }));
             } catch {
                 if (!cancelled) {
-                    // Network failure, server down, etc. → safe fallback to guest
                     dispatch(setAuthInitialized());
                 }
             }

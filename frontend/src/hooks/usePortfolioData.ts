@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useGetTransactionsQuery, useGetPortfolioStatsQuery } from "../services/portfolioApi";
 
-export const usePortfolioData = () => {
+export const usePortfolioData = (params?: { page?: number; limit?: number; search?: string }) => {
     const getPollingInterval = () => (document.visibilityState === "visible" ? 90_000 : 5 * 60_000);
     const [pollingInterval, setPollingInterval] = useState<number>(getPollingInterval);
 
@@ -19,7 +19,7 @@ export const usePortfolioData = () => {
         isLoading: transactionsLoading,
         error: transactionsError,
         refetch: refetchTransactions,
-    } = useGetTransactionsQuery(undefined, {
+    } = useGetTransactionsQuery(params, {
         pollingInterval,
     });
 

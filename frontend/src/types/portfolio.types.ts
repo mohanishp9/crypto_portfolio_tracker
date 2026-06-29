@@ -31,7 +31,7 @@ export interface HoldingStat {
     priceChange24h: number;
 }
 
-export interface InsightHolding extends HoldingStat {}
+export type InsightHolding = HoldingStat;
 
 export interface PortfolioInsight {
     largestHolding: InsightHolding | null;
@@ -54,6 +54,8 @@ export interface PortfolioStatsResponse {
     investment: number;
     currentValue: number;
     profitLoss: number;
+    realizedProfit?: number;
+    unrealizedProfit?: number;
     profitPercentage: number;
     portfolio: HoldingStat[];
     insights: PortfolioInsight;
@@ -62,6 +64,27 @@ export interface PortfolioStatsResponse {
     usedStalePrices: boolean;
     staleReason?: string;
     triggeredAlerts?: string[];
+}
+
+export interface PortfolioAnalyticsItem {
+    coinId: string;
+    coinName: string;
+    coinSymbol: string;
+    totalBought: number;
+    totalSold: number;
+    totalBuyValue: number;
+    totalSellValue: number;
+    netQuantity: number;
+    avgBuyPrice: number;
+    avgSellPrice: number;
+    transactionCount: number;
+    firstTransaction: string;
+    lastTransaction: string;
+}
+
+export interface PortfolioAnalyticsResponse {
+    success: boolean;
+    analytics: PortfolioAnalyticsItem[];
 }
 
 export interface AddTransactionInput {
@@ -85,6 +108,9 @@ export interface PortfolioMutationResponse {
 export interface TransactionsResponse {
     success: boolean;
     transactions: Transaction[];
+    totalCount: number;
+    totalPages: number;
+    currentPage: number;
 }
 
 export interface WatchlistItem {

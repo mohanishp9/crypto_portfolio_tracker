@@ -64,6 +64,8 @@ export interface PortfolioStatsView {
     investment: number;
     currentValue: number;
     profitLoss: number;
+    realizedProfit?: number;
+    unrealizedProfit?: number;
     profitPercentage: number;
     portfolio: PortfolioHoldingView[];
     insights: {

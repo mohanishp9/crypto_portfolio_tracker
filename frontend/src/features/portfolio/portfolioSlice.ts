@@ -1,8 +1,9 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
+import type { Transaction } from '../../types/portfolio.types';
 
 interface PortfolioState {
-    selectedTransaction: any | null;
+    selectedTransaction: Transaction | null;
     isAddModalOpen: boolean;
     isDeleteModalOpen: boolean;
 }
@@ -17,7 +18,7 @@ const portfolioSlice = createSlice({
     name: 'portfolio',
     initialState,
     reducers: {
-        setSelectedTransaction: (state, action: PayloadAction<any>) => {
+        setSelectedTransaction: (state, action: PayloadAction<Transaction>) => {
             state.selectedTransaction = action.payload;
         },
 

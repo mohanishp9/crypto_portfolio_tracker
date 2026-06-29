@@ -38,6 +38,6 @@ export const isApiErrorResponse = (error: unknown): error is ApiErrorResponse =>
         error !== null &&
         'status' in error &&
         'data' in error &&
-        typeof (error as any).data?.message === 'string'
+        typeof (error as { data?: { message?: unknown } }).data?.message === 'string'
     );
 };

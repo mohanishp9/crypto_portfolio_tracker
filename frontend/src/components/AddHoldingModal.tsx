@@ -43,6 +43,7 @@ const AddHoldingModal = () => {
         }
 
         if (selectedTransaction) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setFormData({
                 coinId: selectedTransaction.coinId,
                 coinName: selectedTransaction.coinName,
@@ -115,8 +116,9 @@ const AddHoldingModal = () => {
                 await addTransaction(payload).unwrap();
             }
             handleClose();
-        } catch (err: any) {
-            setErrorMessage(err?.data?.message || err?.error || "Failed to save transaction.");
+        } catch (err: unknown) {
+            const error = err as { data?: { message?: string }, error?: string };
+            setErrorMessage(error?.data?.message || error?.error || "Failed to save transaction.");
         }
     };
 

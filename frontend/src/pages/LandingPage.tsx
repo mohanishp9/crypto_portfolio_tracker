@@ -94,7 +94,7 @@ function getCachedItem<T>(key: string): CacheEntry<T> | null {
                 return parsed;
             }
         }
-    } catch (e) {
+    } catch {
         // ignore
     }
     return null;
@@ -103,7 +103,7 @@ function getCachedItem<T>(key: string): CacheEntry<T> | null {
 function setCachedItem<T>(key: string, data: CacheEntry<T>) {
     try {
         localStorage.setItem(key, JSON.stringify(data));
-    } catch (e) {
+    } catch {
         // ignore
     }
 }
@@ -141,8 +141,8 @@ const LandingPage = () => {
     const [activeChartTab, setActiveChartTab] = useState('bitcoin');
 
     const fetchMarketData = useCallback(async () => {
-        let cachedCoins = coinsCache || getCachedItem<CoinMarket[]>('grove_coins');
-        let cachedGlobal = globalCache || getCachedItem<GlobalData>('grove_global');
+        const cachedCoins = coinsCache || getCachedItem<CoinMarket[]>('grove_coins');
+        const cachedGlobal = globalCache || getCachedItem<GlobalData>('grove_global');
 
         // Return cached data if fresh
         if (isFresh(cachedCoins) && isFresh(cachedGlobal)) {
@@ -160,19 +160,20 @@ const LandingPage = () => {
         try {
             const [coinsRes, globalRes] = await Promise.all([
                 fetch(
-                    'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=10&page=1&sparkline=false'
+                    `${import.meta.env.VITE_API_URL}/market/top?limit=10`
                 ),
-                fetch('https://api.coingecko.com/api/v3/global'),
+                fetch(`${import.meta.env.VITE_API_URL}/market/global`),
             ]);
 
             if (!coinsRes.ok || !globalRes.ok) {
-                throw new Error('CoinGecko API returned an error');
+                throw new Error('Backend API returned an error for market data');
             }
 
             const coinsJson = await coinsRes.json();
             const globalJson = await globalRes.json();
 
-            const parsedCoins: CoinMarket[] = coinsJson.map((c: any) => ({
+            const coinsArray = coinsJson.coins || coinsJson;
+            const parsedCoins: CoinMarket[] = coinsArray.map((c: Record<string, unknown>) => ({
                 id: c.id,
                 symbol: c.symbol,
                 name: c.name,
@@ -218,7 +219,7 @@ const LandingPage = () => {
     }, [fetchMarketData]);
 
     const fetchChartsData = useCallback(async () => {
-        let cachedCharts = chartsCache || getCachedItem<CoinCharts>('grove_charts');
+        const cachedCharts = chartsCache || getCachedItem<CoinCharts>('grove_charts');
         
         if (isFresh(cachedCharts)) {
             chartsCache = cachedCharts;
@@ -229,17 +230,18 @@ const LandingPage = () => {
         setChartLoading(true);
         try {
             const responses = await Promise.all(
-                CHART_COINS.map(c => fetch(`https://api.coingecko.com/api/v3/coins/${c.id}/market_chart?vs_currency=usd&days=7`))
+                CHART_COINS.map(c => fetch(`${import.meta.env.VITE_API_URL}/market/chart/${c.id}?days=7`))
             );
             
             if (responses.some(r => !r.ok)) {
-                throw new Error('CoinGecko API returned an error for chart data');
+                throw new Error('Backend API returned an error for chart data');
             }
 
             const newChartData: CoinCharts = {};
             for (let i = 0; i < CHART_COINS.length; i++) {
                 const json = await responses[i].json();
-                newChartData[CHART_COINS[i].id] = json.prices.map((p: [number, number]) => ({
+                const pricesArray = json.prices || json;
+                newChartData[CHART_COINS[i].id] = pricesArray.map((p: [number, number]) => ({
                     timestamp: p[0], price: p[1]
                 }));
             }
@@ -1023,7 +1025,7 @@ const LandingPage = () => {
                                                 <LabelList 
                                                     dataKey="price_change_percentage_24h" 
                                                     position="right" 
-                                                    formatter={(val: any) => fmtPct(Number(val))} 
+                                                    formatter={(val: unknown) => fmtPct(Number(val))} 
                                                     style={{ fill: '#9aab97', fontSize: 9, fontFamily: "'DM Mono', monospace" }}
                                                 />
                                             </Bar>

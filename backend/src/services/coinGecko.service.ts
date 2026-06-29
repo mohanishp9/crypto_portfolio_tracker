@@ -7,13 +7,15 @@ import {
     CoinSearchResult,
     MarketCoin,
 } from "../types/coinsData.types";
-import { getCachedOrFetch } from "./cache.service";
+import { getCachedOrFetch, getPersistentCache } from "./cache.service";
 
 const TTL = {
     prices: 60_000,
     topCoins: 120_000,
     search: 300_000,
     coinDetail: 300_000,
+    global: 300_000,
+    marketChart: 300_000,
     staleGrace: 1000 * 60 * 60 * 6,
 };
 
@@ -121,6 +123,53 @@ export const getCurrentPrice = async (coinIds: string[]): Promise<CachedResponse
 };
 
 export const getTopCoins = async (limit: number): Promise<CachedResponse<MarketCoin[]>> => {
+    if (limit <= 100) {
+        const cached100 = await getPersistentCache<MarketCoin[]>("topCoins:100");
+        if (cached100 && !cached100.stale) {
+            return {
+                data: cached100.data.slice(0, limit),
+                lastUpdated: cached100.lastUpdatedAt.toISOString(),
+                stale: false,
+            };
+        }
+
+        try {
+            const result = await getCachedOrFetch<MarketCoin[]>(
+                "topCoins:100",
+                { ttlMs: TTL.topCoins, staleTtlMs: TTL.staleGrace },
+                async () => {
+                    const response = await coinGeckoApi.get<MarketCoin[]>("/coins/markets", {
+                        params: {
+                            vs_currency: "usd",
+                            order: "market_cap_desc",
+                            per_page: 100,
+                            page: 1,
+                            sparkline: false,
+                        },
+                    });
+                    return response.data;
+                }
+            );
+
+            return {
+                data: result.data.slice(0, limit),
+                lastUpdated: result.lastUpdatedAt.toISOString(),
+                stale: result.stale,
+            };
+        } catch (error: unknown) {
+            if (cached100) {
+                return {
+                    data: cached100.data.slice(0, limit),
+                    lastUpdated: cached100.lastUpdatedAt.toISOString(),
+                    stale: true,
+                    staleReason: "CoinGecko is temporarily offline. Showing stale cached data.",
+                };
+            }
+            console.error("Error fetching top coins:", normalizeError(error));
+            throw new Error("Failed to fetch top coins");
+        }
+    }
+
     const key = `topCoins:${limit}`;
 
     try {
@@ -197,5 +246,56 @@ export const getCoinDetail = async (coinId: string): Promise<CachedResponse<Coin
     } catch (error: unknown) {
         console.error("Error fetching coin detail:", normalizeError(error));
         throw new Error("Failed to fetch coin detail");
+    }
+};
+
+export const getGlobalData = async (): Promise<CachedResponse<any>> => {
+    const key = "global";
+
+    try {
+        const result = await getCachedOrFetch<any>(
+            key,
+            { ttlMs: TTL.global, staleTtlMs: TTL.staleGrace },
+            async () => {
+                const response = await coinGeckoApi.get("/global");
+                return response.data;
+            }
+        );
+
+        return toCachedResponse(
+            result,
+            result.stale ? "Showing cached global stats because CoinGecko is temporarily unavailable." : undefined
+        );
+    } catch (error: unknown) {
+        console.error("Error fetching global data:", normalizeError(error));
+        throw new Error("Failed to fetch global market data");
+    }
+};
+
+export const getCoinMarketChart = async (coinId: string, days: number = 7): Promise<CachedResponse<any>> => {
+    const key = `marketChart:${coinId}:${days}`;
+
+    try {
+        const result = await getCachedOrFetch<any>(
+            key,
+            { ttlMs: TTL.marketChart, staleTtlMs: TTL.staleGrace },
+            async () => {
+                const response = await coinGeckoApi.get(`/coins/${coinId}/market_chart`, {
+                    params: {
+                        vs_currency: "usd",
+                        days,
+                    },
+                });
+                return response.data;
+            }
+        );
+
+        return toCachedResponse(
+            result,
+            result.stale ? "Showing cached chart data because CoinGecko is temporarily unavailable." : undefined
+        );
+    } catch (error: unknown) {
+        console.error(`Error fetching market chart for ${coinId}:`, normalizeError(error));
+        throw new Error(`Failed to fetch market chart for ${coinId}`);
     }
 };
