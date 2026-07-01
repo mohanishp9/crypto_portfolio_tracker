@@ -12,6 +12,16 @@ services:
       - ./backend/.env
     environment:
       - FRONTEND_URL=http://localhost:8080
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  redis:
+    image: redis:alpine
+    container_name: cyphersight_redis
+    ports:
+      - "6379:6379"
     restart: unless-stopped
 
   # frontend:
