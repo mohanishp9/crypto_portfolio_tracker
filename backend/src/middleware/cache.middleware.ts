@@ -19,7 +19,8 @@ export const cacheRoute = (ttlSeconds: number) => {
             return next();
         }
 
-        const cacheKey = `cache:${req.originalUrl || req.url}`;
+        // Add a project-specific prefix so it doesn't collide with your other Render projects!
+        const cacheKey = `cyphersight:cache:${req.originalUrl || req.url}`;
 
         try {
             const cachedData = await redis!.get(cacheKey);
