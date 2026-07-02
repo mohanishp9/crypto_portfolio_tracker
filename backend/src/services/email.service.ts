@@ -15,7 +15,7 @@ export const sendTransactionalEmail = async ({
 }: SendEmailParams): Promise<boolean> => {
     const apiKey = process.env.BREVO_API_KEY;
     const senderEmail = process.env.BREVO_SENDER_EMAIL;
-    const senderName = process.env.BREVO_SENDER_NAME || "Grove Portfolio Tracker";
+    const senderName = process.env.BREVO_SENDER_NAME || "CypherSight";
 
     if (!apiKey || apiKey.trim() === "") {
         console.warn("[Email Service] BREVO_API_KEY is not configured in .env. Skipping email send.");
