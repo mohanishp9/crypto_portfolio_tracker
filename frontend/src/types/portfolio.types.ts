@@ -82,9 +82,18 @@ export interface PortfolioAnalyticsItem {
     lastTransaction: string;
 }
 
+export interface PortfolioPerformanceMetrics {
+    sharpeRatio: number;
+    maxDrawdown: number;
+    volatility: number;
+    bestDay: number;
+    worstDay: number;
+}
+
 export interface PortfolioAnalyticsResponse {
     success: boolean;
     analytics: PortfolioAnalyticsItem[];
+    performanceMetrics?: PortfolioPerformanceMetrics;
 }
 
 export interface AddTransactionInput {

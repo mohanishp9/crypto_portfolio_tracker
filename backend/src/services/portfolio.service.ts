@@ -311,5 +311,75 @@ export const getPortfolioAnalyticsForUser = async (userId: string) => {
         { $sort: { coinName: 1 } }
     ]);
 
-    return summary;
+    const snapshots = await getPortfolioHistory(userId);
+    let maxDrawdown = 0;
+    
+    let bestDayReturn = -Infinity;
+    let worstDayReturn = Infinity;
+    
+    const returns: number[] = [];
+    
+    let currentNAV = 100; // Start with a hypothetical index value of 100
+    let peakNAV = 100;
+
+    for (let i = 1; i < snapshots.length; i++) {
+        const prev = snapshots[i - 1];
+        const curr = snapshots[i];
+
+        if (prev.currentValue > 0) {
+            const cashFlow = curr.investment - prev.investment;
+            const periodReturn = (curr.currentValue - prev.currentValue - cashFlow) / prev.currentValue;
+            
+            returns.push(periodReturn);
+            
+            if (periodReturn > bestDayReturn) bestDayReturn = periodReturn;
+            if (periodReturn < worstDayReturn) worstDayReturn = periodReturn;
+            
+            // Update NAV
+            currentNAV = currentNAV * (1 + periodReturn);
+            
+            // Track peak for drawdown using NAV
+            if (currentNAV > peakNAV) {
+                peakNAV = currentNAV;
+            }
+            if (peakNAV > 0) {
+                const drawdown = (peakNAV - currentNAV) / peakNAV;
+                if (drawdown > maxDrawdown) {
+                    maxDrawdown = drawdown;
+                }
+            }
+        }
+    }
+
+    if (bestDayReturn === -Infinity) bestDayReturn = 0;
+    if (worstDayReturn === Infinity) worstDayReturn = 0;
+
+    const avgReturn = returns.length > 0 ? returns.reduce((a, b) => a + b, 0) / returns.length : 0;
+    
+    // Volatility (Standard Deviation of returns)
+    let variance = 0;
+    if (returns.length > 1) {
+        variance = returns.reduce((sum, r) => sum + Math.pow(r - avgReturn, 2), 0) / (returns.length - 1);
+    }
+    const volatility = Math.sqrt(variance);
+
+    // Annualized Volatility (Assuming snapshots are every 6 hours -> 4 per day -> 1460 per year)
+    const annualizedVolatility = volatility * Math.sqrt(1460);
+    
+    // Annualized Return
+    const annualizedReturn = avgReturn * 1460;
+
+    // Sharpe Ratio (Risk-free rate assumed 3%)
+    const riskFreeRate = 0.03;
+    const sharpeRatio = annualizedVolatility > 0 ? (annualizedReturn - riskFreeRate) / annualizedVolatility : 0;
+
+    const performanceMetrics = {
+        sharpeRatio,
+        maxDrawdown: maxDrawdown * 100, // percentage
+        volatility: annualizedVolatility * 100, // percentage
+        bestDay: bestDayReturn * 100, // percentage
+        worstDay: worstDayReturn * 100 // percentage
+    };
+
+    return { summary, performanceMetrics };
 };
