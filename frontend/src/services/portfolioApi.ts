@@ -126,6 +126,13 @@ export const portfolioApi = createApi({
                 responseHandler: async (response) => response.text(),
             }),
         }),
+        exportTaxReport: builder.mutation<string, { year?: number }>({
+            query: ({ year }) => ({
+                url: `/portfolio/tax-report${year ? `?year=${year}` : ""}`,
+                method: "GET",
+                responseHandler: async (response) => response.text(),
+            }),
+        }),
         importTransactions: builder.mutation<{ success: boolean; preview?: Transaction[]; count?: number }, { csv: string; previewOnly?: boolean }>({
             query: (body) => ({
                 url: "/portfolio/import",
@@ -145,6 +152,7 @@ export const {
     useDeleteFromWatchlistMutation,
     useDeleteTransactionMutation,
     useExportTransactionsMutation,
+    useExportTaxReportMutation,
     useGetAlertsQuery,
     useGetCoinDetailQuery,
     useGetPortfolioStatsQuery,

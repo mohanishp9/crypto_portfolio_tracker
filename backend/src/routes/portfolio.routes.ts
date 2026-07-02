@@ -9,6 +9,7 @@ import {
     importTransactionsController,
     searchCoinsController,
     updateTransactionController,
+    getTaxReportController,
 } from "../controllers/portfolio.controller";
 import { protect } from "../middleware/auth.middleware";
 
@@ -22,6 +23,7 @@ router.get("/analytics", protect, getPortfolioAnalyticsController);
 router.delete("/transactions/:id", protect, deleteTransactionController);
 router.get("/search", protect, searchCoinsController);
 router.get("/export", protect, exportTransactionsController);
+router.get("/tax-report", protect, getTaxReportController);
 router.post("/import", protect, importTransactionsController);
 
 export default router;

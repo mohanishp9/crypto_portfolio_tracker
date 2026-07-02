@@ -2,27 +2,51 @@ import { useState } from "react";
 import {
     useExportTransactionsMutation,
     useImportTransactionsMutation,
+    useExportTaxReportMutation,
 } from "../services/portfolioApi";
-import { Upload, Download, FileText } from "lucide-react";
+import { Upload, Download, FileText, FileSpreadsheet } from "lucide-react";
 
 const ImportExportPanel = () => {
     const [csv, setCsv] = useState("");
     const [message, setMessage] = useState<string | null>(null);
     const [exportTransactions, { isLoading: isExporting }] = useExportTransactionsMutation();
+    const [exportTaxReport, { isLoading: isExportingTax }] = useExportTaxReportMutation();
     const [importTransactions, { isLoading: isImporting }] = useImportTransactionsMutation();
 
     const handleExport = async () => {
-        const content = await exportTransactions().unwrap();
-        const blob = new Blob([content], { type: "text/csv;charset=utf-8;" });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.setAttribute("download", "portfolio-transactions.csv");
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        URL.revokeObjectURL(url);
-        setMessage("Transactions exported successfully.");
+        try {
+            const content = await exportTransactions().unwrap();
+            const blob = new Blob([content], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.setAttribute("download", "portfolio-transactions.csv");
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            URL.revokeObjectURL(url);
+            setMessage("Transactions exported successfully.");
+        } catch {
+            setMessage("Failed to export transactions.");
+        }
+    };
+
+    const handleTaxExport = async () => {
+        try {
+            const content = await exportTaxReport({}).unwrap();
+            const blob = new Blob([content], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.setAttribute("download", `tax-report-all-years.csv`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            URL.revokeObjectURL(url);
+            setMessage(`Tax report exported successfully.`);
+        } catch {
+            setMessage("Failed to export tax report.");
+        }
     };
 
     const handleImport = async (previewOnly: boolean) => {
@@ -38,10 +62,10 @@ const ImportExportPanel = () => {
     return (
         <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl shadow-sm">
             <p className="text-[10px] tracking-widest uppercase text-zinc-500">
-                Import / Export
+                Data Management
             </p>
             <h3 className="font-semibold text-lg text-zinc-50 tracking-tight mt-2 flex items-center gap-2">
-                Move Data In and Out
+                Import, Export & Tax Reports
             </h3>
             <textarea
                 value={csv}
@@ -72,7 +96,15 @@ const ImportExportPanel = () => {
                     disabled={isExporting} 
                     className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 hover:text-zinc-50 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors disabled:opacity-50 disabled:cursor-not-allowed ml-auto"
                 >
-                    <Download size={14} /> Export Transactions
+                    <Download size={14} /> Backup Data
+                </button>
+                <button 
+                    type="button" 
+                    onClick={handleTaxExport} 
+                    disabled={isExportingTax} 
+                    className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    <FileSpreadsheet size={14} /> Tax Report
                 </button>
             </div>
             {message && (
