@@ -7,8 +7,14 @@ import portfolioRoutes from "./routes/portfolio.routes";
 import marketRoutes from "./routes/market.routes";
 import watchlistRoutes from "./routes/watchlist.routes";
 import alertsRoutes from "./routes/alerts.routes";
+import swaggerUi from "swagger-ui-express";
+import YAML from "yamljs";
+import path from "path";
 
 const app: Application = express();
+
+const swaggerDocument = YAML.load(path.join(__dirname, "./docs/swagger.yaml"));
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use(
     helmet({
