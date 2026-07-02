@@ -8,7 +8,7 @@
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "worker:dev": "ts-node-dev --respawn --transpile-only src/worker.ts",
     "worker": "node dist/worker.js",
-    "build": "tsc -p tsconfig.build.json",
+    "build": "tsc -p tsconfig.build.json && node -e \"require('fs').mkdirSync('dist/docs', {recursive:true}); require('fs').copyFileSync('src/docs/swagger.yaml', 'dist/docs/swagger.yaml')\"",
     "start": "node dist/server.js",
     "clean": "rimraf dist",
     "test": "jest"
@@ -30,7 +30,9 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^9.0.0",
     "node-cron": "^4.5.0",
+    "swagger-ui-express": "^5.0.1",
     "ws": "^8.21.0",
+    "yamljs": "^0.3.0",
     "zod": "^4.1.13"
   },
   "devDependencies": {
@@ -43,7 +45,9 @@
     "@types/node": "^24.12.0",
     "@types/node-cron": "^3.0.11",
     "@types/supertest": "^7.2.0",
+    "@types/swagger-ui-express": "^4.1.8",
     "@types/ws": "^8.18.1",
+    "@types/yamljs": "^0.2.34",
     "jest": "^30.4.2",
     "nodemon": "^3.1.11",
     "rimraf": "^6.1.2",

@@ -1,0 +1,195 @@
+openapi: 3.0.0
+info:
+  title: CypherSight API
+  description: API documentation for the CypherSight Crypto Portfolio Tracker
+  version: 1.0.0
+servers:
+  - url: /
+    description: Current Server
+  - url: http://localhost:5000
+    description: Local development server
+tags:
+  - name: Auth
+    description: Authentication & user management
+  - name: Portfolio
+    description: Holdings and transactions
+  - name: Alerts
+    description: Price alerts management
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Transaction:
+      type: object
+      properties:
+        coinId:
+          type: string
+          example: "bitcoin"
+        coinSymbol:
+          type: string
+          example: "btc"
+        coinName:
+          type: string
+          example: "Bitcoin"
+        type:
+          type: string
+          enum: [BUY, SELL]
+          example: "BUY"
+        quantity:
+          type: number
+          example: 1.5
+        price:
+          type: number
+          example: 60000
+        fee:
+          type: number
+          example: 10
+        timestamp:
+          type: string
+          format: date-time
+    PriceAlert:
+      type: object
+      properties:
+        coinId:
+          type: string
+          example: "ethereum"
+        coinSymbol:
+          type: string
+          example: "eth"
+        coinName:
+          type: string
+          example: "Ethereum"
+        direction:
+          type: string
+          enum: [ABOVE, BELOW]
+          example: "ABOVE"
+        targetPrice:
+          type: number
+          example: 4000
+        isActive:
+          type: boolean
+          example: true
+paths:
+  /api/auth/register:
+    post:
+      tags:
+        - Auth
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, password]
+              properties:
+                name:
+                  type: string
+                  example: "John Doe"
+                email:
+                  type: string
+                  format: email
+                  example: "john@example.com"
+                password:
+                  type: string
+                  format: password
+                  example: "password123"
+      responses:
+        '201':
+          description: User registered successfully
+        '400':
+          description: Validation error or user exists
+  /api/auth/login:
+    post:
+      tags:
+        - Auth
+      summary: Login user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  example: "john@example.com"
+                password:
+                  type: string
+                  example: "password123"
+      responses:
+        '200':
+          description: Login successful
+          headers:
+            Set-Cookie:
+              description: Refresh token cookie
+              schema:
+                type: string
+        '401':
+          description: Invalid credentials
+  /api/portfolio/transactions:
+    get:
+      tags:
+        - Portfolio
+      summary: Get user portfolio stats and holdings
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Portfolio data retrieved
+        '401':
+          description: Unauthorized
+    post:
+      tags:
+        - Portfolio
+      summary: Add a new transaction (Buy/Sell)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Transaction'
+      responses:
+        '201':
+          description: Transaction created
+        '400':
+          description: Validation error
+        '401':
+          description: Unauthorized
+  /api/alerts:
+    get:
+      tags:
+        - Alerts
+      summary: Get all price alerts for user
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of alerts
+        '401':
+          description: Unauthorized
+    post:
+      tags:
+        - Alerts
+      summary: Create a new price alert
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PriceAlert'
+      responses:
+        '201':
+          description: Alert created
+        '400':
+          description: Validation error
+        '401':
+          description: Unauthorized
