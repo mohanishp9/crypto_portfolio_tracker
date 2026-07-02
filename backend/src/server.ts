@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 import { connectDB } from "./config/db";
 import { startCronJobs } from "./services/cron.service";
 import { initWebSocketServer } from "./services/websocket.service";
+import "./worker";
 import app from "./app";
 
 dotenv.config();
