@@ -5,7 +5,7 @@ A production-grade, full-stack cryptocurrency portfolio tracker engineered with 
 Built to solve the common issues with free crypto trackers: API rate limits, inaccurate historical analytics, and delayed price updates. 
 
 ## 🚀 Live Demo
-* **Frontend (Vercel):** https://grove-crypto-tracker.vercel.app/
+* **Frontend (Vercel):** https://cypher-sight.vercel.app/
 <!-- * **Backend API (Render):** [Replace with your Render URL] -->
 
 ## 🏗 System Architecture & Technical Highlights
