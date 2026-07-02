@@ -17,6 +17,23 @@ services:
       - redis
     restart: unless-stopped
 
+  backend-worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: cyphersight_worker
+    command: ["node", "dist/worker.js"]
+    env_file:
+      - ./backend/.env
+    environment:
+      - MONGO_URI=${MONGO_URI}
+      - REDIS_URL=redis://redis:6379
+      - NODE_ENV=development
+    depends_on:
+      - backend
+      - redis
+    restart: unless-stopped
+
   redis:
     image: redis:alpine
     container_name: cyphersight_redis
