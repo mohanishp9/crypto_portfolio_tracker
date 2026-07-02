@@ -3,7 +3,7 @@
 A full-stack cryptocurrency portfolio tracker designed to handle API rate limits, store historical analytics, and process real-time price updates.
 
 ## 🚀 Live Demo
-* **Frontend (Vercel):** https://grove-crypto-tracker.vercel.app/
+* **Frontend (Vercel):** https://cypher-sight.vercel.app/
 * **Live API Docs (Swagger):** https://cypher-sight.onrender.com/api-docs/
 
 ## 🏗 System Architecture & Technical Highlights
