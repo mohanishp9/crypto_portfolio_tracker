@@ -2,15 +2,15 @@ import { useState } from "react";
 import {
     useExportTransactionsMutation,
     useImportTransactionsMutation,
-    useExportTaxReportMutation,
 } from "../services/portfolioApi";
 import { Upload, Download, FileText, FileSpreadsheet } from "lucide-react";
+import TaxReportModal from "./TaxReportModal";
 
 const ImportExportPanel = () => {
     const [csv, setCsv] = useState("");
     const [message, setMessage] = useState<string | null>(null);
+    const [showTaxModal, setShowTaxModal] = useState(false);
     const [exportTransactions, { isLoading: isExporting }] = useExportTransactionsMutation();
-    const [exportTaxReport, { isLoading: isExportingTax }] = useExportTaxReportMutation();
     const [importTransactions, { isLoading: isImporting }] = useImportTransactionsMutation();
 
     const handleExport = async () => {
@@ -31,24 +31,6 @@ const ImportExportPanel = () => {
         }
     };
 
-    const handleTaxExport = async () => {
-        try {
-            const content = await exportTaxReport({}).unwrap();
-            const blob = new Blob([content], { type: "text/csv;charset=utf-8;" });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement("a");
-            link.href = url;
-            link.setAttribute("download", `tax-report-all-years.csv`);
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-            URL.revokeObjectURL(url);
-            setMessage(`Tax report exported successfully.`);
-        } catch {
-            setMessage("Failed to export tax report.");
-        }
-    };
-
     const handleImport = async (previewOnly: boolean) => {
         try {
             const response = await importTransactions({ csv, previewOnly }).unwrap();
@@ -60,58 +42,61 @@ const ImportExportPanel = () => {
     };
 
     return (
-        <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl shadow-sm">
-            <p className="text-[10px] tracking-widest uppercase text-zinc-500">
-                Data Management
+        <div className="brutalist-card h-full flex flex-col">
+            <p className="text-sm font-black uppercase tracking-tighter mb-4 border-b-4 border-black pb-2">
+                DATA MANAGEMENT
             </p>
-            <h3 className="font-semibold text-lg text-zinc-50 tracking-tight mt-2 flex items-center gap-2">
-                Import, Export & Tax Reports
+            <h3 className="font-black text-xl text-black tracking-tight mt-1">
+                IMPORT, EXPORT & TAX REPORTS
             </h3>
             <textarea
                 value={csv}
                 onChange={(e) => setCsv(e.target.value)}
-                placeholder="Paste CSV with header: coinId,coinName,coinSymbol,type,quantity,price,fee,timestamp"
-                className="w-full min-h-[150px] mt-4 bg-zinc-950 border border-zinc-800 rounded-lg text-zinc-50 font-mono text-xs p-4 focus:outline-none focus:border-indigo-500 transition-colors resize-y placeholder-zinc-700"
+                placeholder="PASTE CSV WITH HEADER: coinId,coinName,coinSymbol,type,quantity,price,fee,timestamp"
+                className="w-full min-h-[150px] mt-4 bg-white border-4 border-black text-black font-mono font-bold text-xs p-4 focus:outline-none focus:bg-[#ccff00] transition-colors resize-y placeholder-black uppercase brutalist-shadow-sm"
             />
             <div className="flex flex-wrap gap-3 mt-4">
                 <button 
                     type="button" 
                     onClick={() => handleImport(true)} 
                     disabled={!csv || isImporting} 
-                    className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 hover:text-zinc-50 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="brutalist-btn bg-white text-black hover:bg-[#ccff00] disabled:opacity-50 disabled:cursor-not-allowed flex-1 justify-center"
                 >
-                    <FileText size={14} /> Preview CSV
+                    <FileText size={16} strokeWidth={2.5} /> PREVIEW
                 </button>
                 <button 
                     type="button" 
                     onClick={() => handleImport(false)} 
                     disabled={!csv || isImporting} 
-                    className="flex items-center gap-2 px-4 py-2 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 text-indigo-400 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="brutalist-btn bg-black text-white hover:bg-white hover:text-black disabled:opacity-50 disabled:cursor-not-allowed flex-1 justify-center"
                 >
-                    <Upload size={14} /> Import CSV
+                    <Upload size={16} strokeWidth={2.5} /> IMPORT
                 </button>
+            </div>
+            <div className="flex flex-wrap gap-3 mt-4">
                 <button 
                     type="button" 
                     onClick={handleExport} 
                     disabled={isExporting} 
-                    className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 hover:text-zinc-50 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors disabled:opacity-50 disabled:cursor-not-allowed ml-auto"
+                    className="brutalist-btn bg-white text-black hover:bg-[#ccff00] disabled:opacity-50 disabled:cursor-not-allowed flex-1 justify-center"
                 >
-                    <Download size={14} /> Backup Data
+                    <Download size={16} strokeWidth={2.5} /> BACKUP
                 </button>
                 <button 
                     type="button" 
-                    onClick={handleTaxExport} 
-                    disabled={isExportingTax} 
-                    className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={() => setShowTaxModal(true)} 
+                    className="brutalist-btn bg-[#ccff00] text-black hover:bg-black hover:text-white disabled:opacity-50 disabled:cursor-not-allowed flex-1 justify-center"
                 >
-                    <FileSpreadsheet size={14} /> Tax Report
+                    <FileSpreadsheet size={16} strokeWidth={2.5} /> TAX REPORT
                 </button>
             </div>
             {message && (
-                <p className={`mt-4 text-xs font-mono px-3 py-2 rounded border ${message.includes("failed") ? "bg-rose-500/10 text-rose-400 border-rose-500/20" : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"}`}>
+                <p className={`mt-4 text-xs font-mono font-bold uppercase px-3 py-2 border-2 border-black ${message.includes("failed") ? "bg-[#ff3333] text-white" : "bg-black text-white"}`}>
                     {message}
                 </p>
             )}
+            
+            {showTaxModal && <TaxReportModal onClose={() => setShowTaxModal(false)} />}
         </div>
     );
 };

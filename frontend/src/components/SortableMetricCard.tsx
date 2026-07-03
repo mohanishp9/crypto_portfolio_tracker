@@ -29,21 +29,21 @@ export const SortableMetricCard = ({ id, title, value, description }: SortableMe
         <div
             ref={setNodeRef}
             style={style}
-            className={`relative p-5 bg-zinc-900 border ${
-                isDragging ? "border-indigo-500 shadow-2xl opacity-80" : "border-zinc-800 shadow-sm"
-            } rounded-xl group`}
+            className={`relative p-5 bg-white border-4 border-black brutalist-shadow-sm group ${
+                isDragging ? "opacity-50" : ""
+            }`}
         >
             <div
                 {...attributes}
                 {...listeners}
-                className="absolute top-4 right-4 text-zinc-600 hover:text-zinc-300 cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute top-4 right-4 text-black cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity"
             >
-                <GripHorizontal size={16} />
+                <GripHorizontal size={20} strokeWidth={3} />
             </div>
             
-            <p className="text-[10px] tracking-widest uppercase text-zinc-500 font-semibold mb-1 mr-6">{title}</p>
-            <div className="mt-1">{value}</div>
-            <p className="text-xs text-zinc-600 mt-2">{description}</p>
+            <p className="text-sm font-black tracking-widest uppercase text-black mb-1 mr-6 border-b-4 border-black pb-1">{title}</p>
+            <div className="mt-2">{value}</div>
+            <p className="text-xs font-mono font-bold text-black mt-2 bg-[#ccff00] inline-block px-1 border-2 border-black">{description}</p>
         </div>
     );
 };

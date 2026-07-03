@@ -38,9 +38,9 @@ const AlertInlineForm = memo(({ coinName, initialPrice, onSubmit, onCancel }: Al
     };
 
     return (
-        <div className="bg-zinc-950/80 border border-t-0 border-indigo-500/20 px-4 py-4 rounded-b-lg">
-            <p className="text-[10px] tracking-widest uppercase text-indigo-400 mb-3 font-semibold">
-                Set Price Alert — {coinName}
+        <div className="bg-white border-4 border-black border-t-0 px-4 py-4 brutalist-shadow-sm relative z-0">
+            <p className="text-sm font-black uppercase text-black mb-3 border-b-2 border-black pb-2">
+                SET PRICE ALERT — {coinName}
             </p>
 
             {/* Direction toggle */}
@@ -50,13 +50,13 @@ const AlertInlineForm = memo(({ coinName, initialPrice, onSubmit, onCancel }: Al
                         key={dir}
                         type="button"
                         onClick={() => setDirection(dir)}
-                        className={`flex-1 py-2 text-[10px] tracking-widest uppercase font-mono rounded-md border transition-all duration-150 flex items-center justify-center gap-1.5 ${
+                        className={`flex-1 py-2 text-xs font-black uppercase font-mono border-2 border-black transition-all duration-150 flex items-center justify-center gap-1.5 ${
                             direction === dir 
-                                ? "bg-indigo-500/10 border-indigo-500/30 text-indigo-400 font-semibold" 
-                                : "bg-transparent border-zinc-800 text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/50"
+                                ? "bg-black text-white" 
+                                : "bg-white text-black hover:bg-[#ccff00]"
                         }`}
                     >
-                        {dir === "ABOVE" ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                        {dir === "ABOVE" ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
                         {dir}
                     </button>
                 ))}
@@ -78,28 +78,28 @@ const AlertInlineForm = memo(({ coinName, initialPrice, onSubmit, onCancel }: Al
                                 setTargetPrice(val);
                             }
                         }}
-                        className="w-full bg-zinc-900 border border-zinc-700 text-zinc-50 font-mono text-sm py-2 pl-7 pr-3 rounded-md focus:outline-none focus:border-indigo-500 transition-colors"
+                        className="w-full bg-white border-2 border-black text-black font-mono font-bold text-sm py-2 pl-7 pr-3 focus:outline-none focus:bg-[#ccff00] transition-colors"
                     />
                 </div>
                 <button
                     type="button"
                     disabled={saving || !targetPrice || parseFloat(targetPrice) <= 0}
                     onClick={handleSubmit}
-                    className="px-4 py-2 bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 hover:bg-indigo-500/20 disabled:opacity-50 disabled:cursor-not-allowed rounded-md text-xs font-semibold uppercase tracking-wider transition-colors whitespace-nowrap"
+                    className="px-4 py-2 bg-black text-white border-2 border-black disabled:opacity-50 disabled:cursor-not-allowed text-xs font-black uppercase tracking-wider transition-colors whitespace-nowrap hover:bg-white hover:text-black"
                 >
-                    {saving ? "Saving..." : "Set Alert"}
+                    {saving ? "SAVING..." : "SET ALERT"}
                 </button>
             </div>
             <div className="flex justify-between items-center mt-3">
-                <p className="text-[10px] font-mono text-zinc-500">
-                    Current: ${initialPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })}
+                <p className="text-xs font-mono font-bold text-black bg-[#ccff00] border-2 border-black px-1 inline-block">
+                    CURRENT: ${initialPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })}
                 </p>
                 <button
                     type="button"
                     onClick={onCancel}
-                    className="text-[10px] uppercase tracking-wider text-zinc-500 hover:text-zinc-300 transition-colors"
+                    className="text-xs font-black uppercase text-black hover:underline"
                 >
-                    Cancel
+                    CANCEL
                 </button>
             </div>
         </div>
@@ -150,24 +150,24 @@ const WatchlistPanel = ({ onSelectCoin }: { onSelectCoin: (coinId: string) => vo
     };
 
     return (
-        <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl shadow-sm">
-            <div className="flex items-start justify-between gap-4">
+        <div className="brutalist-card h-full">
+            <div className="flex items-start justify-between gap-4 border-b-4 border-black pb-2 mb-4">
                 <div>
-                    <p className="text-[10px] tracking-widest uppercase text-zinc-500">
-                        Watchlist
+                    <p className="text-sm font-black uppercase tracking-tighter">
+                        WATCHLIST
                     </p>
-                    <h3 className="font-semibold text-lg text-zinc-50 tracking-tight mt-2">
-                        Track Before You Buy
+                    <h3 className="font-black text-xl text-black tracking-tight mt-1">
+                        TRACK BEFORE YOU BUY
                     </h3>
                 </div>
-                <p className="text-xs font-mono text-zinc-500 bg-zinc-950 px-2 py-1 rounded-md border border-zinc-800">
-                    {data?.items.length ?? 0} <span className="text-zinc-600">COINS</span>
+                <p className="text-xs font-mono font-bold text-black bg-[#ccff00] px-2 py-1 border-2 border-black shadow-[2px_2px_0_0_#000]">
+                    {data?.items.length ?? 0} COINS
                 </p>
             </div>
 
             <div className="relative mt-5">
                 <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                    <Search size={14} className="text-zinc-500" />
+                    <Search size={16} className="text-black font-bold" />
                 </div>
                 <input
                     value={coinInput}
@@ -182,12 +182,12 @@ const WatchlistPanel = ({ onSelectCoin }: { onSelectCoin: (coinId: string) => vo
                     onBlur={() => {
                         setTimeout(() => setShowDropdown(false), 150);
                     }}
-                    placeholder="Search by coin name"
-                    className="w-full bg-zinc-950 border border-zinc-800 text-zinc-50 text-sm py-2.5 pl-9 pr-4 rounded-lg focus:outline-none focus:border-indigo-500 transition-colors placeholder-zinc-600"
+                    placeholder="SEARCH BY COIN NAME"
+                    className="w-full bg-white border-4 border-black text-black font-mono font-bold text-sm py-2.5 pl-10 pr-4 focus:outline-none focus:bg-[#ccff00] transition-colors placeholder-black uppercase brutalist-shadow-sm"
                 />
 
                 {showDropdown && (searchResults?.length ?? 0) > 0 && (
-                    <ul className="absolute top-full left-0 right-0 mt-1 bg-zinc-950 border border-zinc-800 rounded-lg max-h-56 overflow-y-auto z-20 shadow-xl py-1">
+                    <ul className="absolute top-full left-0 right-0 mt-1 bg-white border-4 border-black max-h-56 overflow-y-auto z-20 brutalist-shadow py-1">
                         {searchResults?.map((coin) => (
                             <li
                                 key={coin.id}
@@ -196,10 +196,10 @@ const WatchlistPanel = ({ onSelectCoin }: { onSelectCoin: (coinId: string) => vo
                                     setCoinInput(coin.name);
                                     setShowDropdown(false);
                                 }}
-                                className="px-4 py-2.5 hover:bg-zinc-800 cursor-pointer flex items-center justify-between transition-colors"
+                                className="px-4 py-2.5 hover:bg-[#ccff00] cursor-pointer flex items-center justify-between border-b-2 border-black last:border-b-0"
                             >
-                                <span className="text-sm text-zinc-300 font-medium">{coin.name}</span>
-                                <span className="text-[10px] tracking-widest font-mono text-zinc-500 uppercase">{coin.symbol}</span>
+                                <span className="text-sm text-black font-black uppercase">{coin.name}</span>
+                                <span className="text-xs font-mono font-bold text-black bg-[#ccff00] border-2 border-black px-1 group-hover:bg-white">{coin.symbol}</span>
                             </li>
                         ))}
                     </ul>
@@ -210,11 +210,9 @@ const WatchlistPanel = ({ onSelectCoin }: { onSelectCoin: (coinId: string) => vo
                 type="button"
                 onClick={handleAdd}
                 disabled={!selectedCoin}
-                className="w-full mt-3 flex items-center justify-center gap-2 py-2.5 rounded-lg border text-xs font-semibold uppercase tracking-wider transition-all duration-200 
-                disabled:opacity-50 disabled:cursor-not-allowed disabled:border-zinc-800 disabled:text-zinc-600 disabled:bg-zinc-950
-                border-indigo-500/30 text-indigo-400 bg-indigo-500/10 hover:bg-indigo-500/20"
+                className="brutalist-btn w-full mt-4 justify-center bg-black text-white disabled:opacity-50 disabled:cursor-not-allowed"
             >
-                <Plus size={14} /> Add to Watchlist
+                <Plus size={16} strokeWidth={3} /> ADD TO WATCHLIST
             </button>
 
             <div className="space-y-3 mt-6">
@@ -235,38 +233,38 @@ const WatchlistPanel = ({ onSelectCoin }: { onSelectCoin: (coinId: string) => vo
                             return (
                                 // Key is stable (item._id only) — no updateKey, so the row
                                 // never unmounts/remounts due to price ticks
-                                <div key={item._id} className="relative">
+                                <div key={item._id} className="relative z-10">
                                     <div
-                                        className={`flex items-center justify-between gap-4 p-4 rounded-lg bg-zinc-950 border transition-colors ${isAlertOpen ? 'border-indigo-500/30 rounded-b-none' : 'border-zinc-800 hover:border-zinc-700'} ${liveData?.direction === "up" ? "flash-up" : liveData?.direction === "down" ? "flash-down" : ""}`}
+                                        className={`flex items-center justify-between gap-4 p-4 bg-white border-4 border-black transition-colors ${isAlertOpen ? 'border-b-0' : 'hover:bg-[#ccff00]'} ${liveData?.direction === "up" ? "flash-up" : liveData?.direction === "down" ? "flash-down" : ""}`}
                                     >
                                         <button type="button" onClick={() => onSelectCoin(item.coinId)} className="flex-1 text-left focus:outline-none group">
-                                            <div className="font-medium text-sm text-zinc-50 group-hover:text-white transition-colors">{item.coinName}</div>
-                                            <div className="text-[10px] font-mono tracking-widest text-zinc-500 uppercase mt-0.5">{item.coinSymbol}</div>
+                                            <div className="font-black uppercase text-sm text-black">{item.coinName}</div>
+                                            <div className="text-xs font-bold font-mono text-black bg-[#ccff00] border-2 border-black inline-block px-1 mt-1 group-hover:bg-white">{item.coinSymbol}</div>
                                         </button>
                                         <div className="text-right">
-                                            <div className="font-mono text-sm font-medium text-zinc-300">
+                                            <div className="font-mono text-sm font-black text-black">
                                                 ${currentPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })}
                                             </div>
-                                            <div className={`font-mono text-[10px] mt-0.5 ${isUp ? 'text-emerald-500' : 'text-rose-500'}`}>
+                                            <div className={`font-mono font-bold text-xs mt-0.5 ${isUp ? 'text-blue-700' : 'text-red-600'}`}>
                                                 {isUp ? "+" : ""}{priceChange24h.toFixed(2)}%
                                             </div>
                                         </div>
-                                        <div className="flex flex-col gap-2 shrink-0 border-l border-zinc-800 pl-3 ml-1">
+                                        <div className="flex flex-col gap-2 shrink-0 border-l-4 border-black pl-3 ml-1">
                                             <button
                                                 type="button"
-                                                className={`p-1.5 rounded-md transition-colors flex items-center justify-center ${isAlertOpen ? 'bg-indigo-500/20 text-indigo-400' : 'text-zinc-500 hover:text-indigo-400 hover:bg-zinc-800'}`}
+                                                className={`p-1.5 border-2 border-black transition-colors flex items-center justify-center ${isAlertOpen ? 'bg-black text-white' : 'text-black hover:bg-[#ccff00] bg-white'}`}
                                                 onClick={() => setAlertOpenCoinId(isAlertOpen ? null : item.coinId)}
                                                 title="Set Alert"
                                             >
-                                                <Bell size={14} />
+                                                <Bell size={16} strokeWidth={2.5} />
                                             </button>
                                             <button
                                                 type="button"
-                                                className="p-1.5 rounded-md text-zinc-500 hover:text-rose-500 hover:bg-zinc-800 transition-colors flex items-center justify-center"
+                                                className="p-1.5 border-2 border-black text-black bg-white hover:bg-red-500 hover:text-white transition-colors flex items-center justify-center"
                                                 onClick={() => deleteFromWatchlist(item.coinId)}
                                                 title="Remove"
                                             >
-                                                <Trash2 size={14} />
+                                                <Trash2 size={16} strokeWidth={2.5} />
                                             </button>
                                         </div>
                                     </div>
@@ -288,9 +286,9 @@ const WatchlistPanel = ({ onSelectCoin }: { onSelectCoin: (coinId: string) => vo
                             );
                         })}
                         {(data?.items.length ?? 0) === 0 && (
-                            <p className="text-sm text-zinc-500 text-center py-4 px-2 border border-dashed border-zinc-800 rounded-lg">
-                                Search and add coins to track them before buying.
-                            </p>
+                            <div className="font-mono font-bold text-black border-4 border-dashed border-black p-4 text-center uppercase text-sm">
+                                SEARCH AND ADD COINS TO TRACK THEM BEFORE BUYING.
+                            </div>
                         )}
                     </>
                 )}

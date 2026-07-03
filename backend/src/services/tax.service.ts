@@ -18,7 +18,19 @@ interface BuyLot {
     date: Date;
 }
 
-export const generateTaxReport = async (userId: string, targetYear?: number): Promise<string> => {
+export interface TaxReportData {
+    events: TaxEvent[];
+    summary: {
+        totalProceeds: number;
+        totalCostBasis: number;
+        totalGain: number;
+        totalShortTerm: number;
+        totalLongTerm: number;
+    };
+    csv: string;
+}
+
+export const generateTaxReport = async (userId: string, targetYear?: number): Promise<TaxReportData> => {
     // Fetch all transactions for the user, ascending order
     const transactions = await Transaction.find({ user: userId }).sort({ timestamp: 1 });
 
@@ -116,5 +128,15 @@ export const generateTaxReport = async (userId: string, targetYear?: number): Pr
     csv += `\n,,,SHORT TERM GAIN:,,,,${totalShortTerm.toFixed(2)}\n`;
     csv += `,,,LONG TERM GAIN:,,,,${totalLongTerm.toFixed(2)}\n`;
 
-    return csv;
+    return {
+        events: taxEvents,
+        summary: {
+            totalProceeds,
+            totalCostBasis,
+            totalGain,
+            totalShortTerm,
+            totalLongTerm
+        },
+        csv
+    };
 };

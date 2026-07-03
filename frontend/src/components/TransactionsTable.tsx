@@ -29,13 +29,13 @@ const TransactionsTable = ({
 }: TransactionsTableProps) => {
 
     return (
-        <div className="overflow-hidden mt-8 rounded-xl bg-zinc-900 border border-zinc-800 shadow-sm">
-            <div className="px-5 py-5 flex flex-wrap justify-between items-center gap-4 border-b border-zinc-800 bg-zinc-900">
+        <div className="brutalist-card p-0 overflow-hidden mt-8">
+            <div className="px-5 py-5 flex flex-wrap justify-between items-center gap-4 border-b-4 border-black bg-white">
                 <div>
-                    <h3 className="font-semibold text-lg text-zinc-50 tracking-tight">
+                    <h3 className="font-black text-2xl text-black tracking-tighter uppercase">
                         Transaction History
                     </h3>
-                    <p className="mt-1 text-xs text-zinc-400">
+                    <p className="mt-1 text-sm font-mono font-bold text-black uppercase">
                         Ledger
                     </p>
                 </div>
@@ -45,7 +45,7 @@ const TransactionsTable = ({
                         placeholder="Search ledger..."
                         value={searchQuery}
                         onChange={(e) => onSearchChange(e.target.value)}
-                        className="w-48 sm:w-64 px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-zinc-50 placeholder-zinc-500 text-sm focus:outline-none focus:border-indigo-500 transition-colors"
+                        className="w-48 sm:w-64 px-3 py-2 bg-white border-4 border-black text-black font-mono font-bold uppercase placeholder-black focus:outline-none focus:bg-[#ccff00] transition-colors"
                     />
                 </div>
             </div>
@@ -53,34 +53,34 @@ const TransactionsTable = ({
             <div className="overflow-x-auto">
                 <table className="min-w-full">
                     <thead>
-                        <tr className="border-b border-zinc-800 bg-zinc-900/50">
-                            <th scope="col" className="px-5 py-3 text-left text-xs font-medium text-zinc-400 uppercase tracking-wider">
+                        <tr className="border-b-4 border-black bg-[#f4f4f0]">
+                            <th scope="col" className="px-5 py-3 text-left text-sm font-black text-black uppercase tracking-wider border-r-2 border-black">
                                 Date
                             </th>
-                            <th scope="col" className="px-5 py-3 text-left text-xs font-medium text-zinc-400 uppercase tracking-wider">
+                            <th scope="col" className="px-5 py-3 text-left text-sm font-black text-black uppercase tracking-wider border-r-2 border-black">
                                 Type
                             </th>
-                            <th scope="col" className="px-5 py-3 text-left text-xs font-medium text-zinc-400 uppercase tracking-wider">
+                            <th scope="col" className="px-5 py-3 text-left text-sm font-black text-black uppercase tracking-wider border-r-2 border-black">
                                 Coin
                             </th>
-                            <th scope="col" className="px-5 py-3 text-right text-xs font-medium text-zinc-400 uppercase tracking-wider">
+                            <th scope="col" className="px-5 py-3 text-right text-sm font-black text-black uppercase tracking-wider border-r-2 border-black">
                                 Quantity
                             </th>
-                            <th scope="col" className="px-5 py-3 text-right text-xs font-medium text-zinc-400 uppercase tracking-wider">
+                            <th scope="col" className="px-5 py-3 text-right text-sm font-black text-black uppercase tracking-wider border-r-2 border-black">
                                 Price
                             </th>
-                            <th scope="col" className="px-5 py-3 text-right text-xs font-medium text-zinc-400 uppercase tracking-wider">
+                            <th scope="col" className="px-5 py-3 text-right text-sm font-black text-black uppercase tracking-wider border-r-2 border-black">
                                 Fee
                             </th>
-                            <th scope="col" className="px-5 py-3 text-right text-xs font-medium text-zinc-400 uppercase tracking-wider">
+                            <th scope="col" className="px-5 py-3 text-right text-sm font-black text-black uppercase tracking-wider border-r-2 border-black">
                                 Total
                             </th>
-                            <th scope="col" className="px-5 py-3 text-right text-xs font-medium text-zinc-400 uppercase tracking-wider">
+                            <th scope="col" className="px-5 py-3 text-right text-sm font-black text-black uppercase tracking-wider">
                                 Actions
                             </th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-zinc-800/50">
+                    <tbody className="divide-y-2 divide-black">
                         {isLoading ? (
                             <>
                                 <TableRowSkeleton columnsCount={8} />
@@ -96,37 +96,37 @@ const TransactionsTable = ({
                                     return (
                                         <tr
                                             key={tx._id}
-                                            className="group transition-colors duration-150 hover:bg-zinc-800/40"
+                                            className="group transition-colors duration-150 hover:bg-[#ccff00] bg-white"
                                         >
-                                            <td className="px-5 py-3 whitespace-nowrap text-sm text-zinc-300">
+                                            <td className="px-5 py-3 whitespace-nowrap text-sm font-mono font-bold text-black border-r-2 border-black">
                                                 {date}
                                             </td>
 
-                                            <td className="px-5 py-3 whitespace-nowrap">
-                                                <span className={`inline-flex items-center px-2 py-0.5 rounded-md font-mono text-xs font-semibold uppercase tracking-wider bg-zinc-950 border ${isBuy ? "text-emerald-500 border-emerald-500/20" : "text-rose-500 border-rose-500/20"}`}>
+                                            <td className="px-5 py-3 whitespace-nowrap border-r-2 border-black">
+                                                <span className={`inline-flex items-center px-2 py-0.5 font-mono text-xs font-black uppercase tracking-wider border-2 border-black ${isBuy ? "bg-[#ccff00] text-black" : "bg-[#ff3333] text-white"}`}>
                                                     {tx.type}
                                                 </span>
                                             </td>
 
-                                            <td className="px-5 py-3 whitespace-nowrap">
-                                                <div className="font-medium text-sm text-zinc-50 group-hover:text-white transition-colors">
+                                            <td className="px-5 py-3 whitespace-nowrap border-r-2 border-black">
+                                                <div className="font-black text-sm text-black uppercase">
                                                     {tx.coinName}
                                                 </div>
                                             </td>
 
-                                            <td className="px-5 py-3 whitespace-nowrap text-right font-mono text-sm text-zinc-300">
+                                            <td className="px-5 py-3 whitespace-nowrap text-right font-mono font-bold text-sm text-black border-r-2 border-black">
                                                 {tx.quantity.toLocaleString(undefined, { maximumFractionDigits: 6 })}
                                             </td>
 
-                                            <td className="px-5 py-3 whitespace-nowrap text-right font-mono text-sm text-zinc-300">
+                                            <td className="px-5 py-3 whitespace-nowrap text-right font-mono font-bold text-sm text-black border-r-2 border-black">
                                                 ${tx.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })}
                                             </td>
 
-                                            <td className="px-5 py-3 whitespace-nowrap text-right font-mono text-sm text-zinc-400">
+                                            <td className="px-5 py-3 whitespace-nowrap text-right font-mono font-bold text-sm text-black border-r-2 border-black">
                                                 ${(tx.fee ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                             </td>
 
-                                            <td className="px-5 py-3 whitespace-nowrap text-right font-mono text-sm font-medium text-zinc-50">
+                                            <td className="px-5 py-3 whitespace-nowrap text-right font-mono font-black text-sm text-black border-r-2 border-black">
                                                 ${(tx.price * tx.quantity + (tx.fee ?? 0)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                             </td>
 
@@ -134,17 +134,17 @@ const TransactionsTable = ({
                                                 <div className="flex justify-end gap-3">
                                                     <button
                                                         onClick={() => handleEdit(tx)}
-                                                        className="text-zinc-500 hover:text-indigo-400 transition-colors"
+                                                        className="text-black hover:text-blue-700 transition-colors bg-white border-2 border-black p-1 hover:bg-[#ccff00]"
                                                         title="Edit Transaction"
                                                     >
-                                                        <Edit2 size={16} strokeWidth={1.5} />
+                                                        <Edit2 size={16} strokeWidth={2.5} />
                                                     </button>
                                                     <button
                                                         onClick={() => handleDelete(tx)}
-                                                        className="text-zinc-500 hover:text-rose-500 transition-colors"
+                                                        className="text-black hover:text-red-600 transition-colors bg-white border-2 border-black p-1 hover:bg-[#ccff00]"
                                                         title="Delete Transaction"
                                                     >
-                                                        <Trash2 size={16} strokeWidth={1.5} />
+                                                        <Trash2 size={16} strokeWidth={2.5} />
                                                     </button>
                                                 </div>
                                             </td>
@@ -153,8 +153,8 @@ const TransactionsTable = ({
                                 })}
                                 {transactions.length === 0 && (
                                     <tr>
-                                        <td colSpan={8} className="px-5 py-12 text-center text-sm text-zinc-500">
-                                            {searchQuery ? "No transactions matched your search criteria." : "No transactions recorded. Import a CSV or add your first trade to start building your history."}
+                                        <td colSpan={8} className="px-5 py-12 text-center text-sm font-mono font-bold text-black uppercase">
+                                            {searchQuery ? "NO TRANSACTIONS MATCHED YOUR SEARCH CRITERIA." : "NO TRANSACTIONS RECORDED. IMPORT A CSV OR ADD YOUR FIRST TRADE."}
                                         </td>
                                     </tr>
                                 )}
@@ -165,26 +165,26 @@ const TransactionsTable = ({
             </div>
 
             {totalPages > 1 && (
-                <div className="px-5 py-4 flex flex-wrap justify-between items-center gap-4 border-t border-zinc-800 bg-zinc-900/50">
-                    <span className="text-xs uppercase tracking-wider text-zinc-500 font-mono">
+                <div className="px-5 py-4 flex flex-wrap justify-between items-center gap-4 border-t-4 border-black bg-white">
+                    <span className="text-sm font-black uppercase text-black">
                         Showing page {currentPage} of {totalPages} ({totalCount} total)
                     </span>
-                    <div className="flex gap-2">
+                    <div className="flex gap-4">
                         <button
                             type="button"
                             disabled={currentPage === 1}
                             onClick={() => onPageChange(currentPage - 1)}
-                            className="px-3 py-1.5 bg-zinc-950 border border-zinc-800 rounded-md text-xs text-zinc-400 hover:text-zinc-50 hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider transition-colors"
+                            className="brutalist-btn px-4 py-2 bg-black text-white disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            Prev
+                            PREV
                         </button>
                         <button
                             type="button"
                             disabled={currentPage === totalPages}
                             onClick={() => onPageChange(currentPage + 1)}
-                            className="px-3 py-1.5 bg-zinc-950 border border-zinc-800 rounded-md text-xs text-zinc-400 hover:text-zinc-50 hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider transition-colors"
+                            className="brutalist-btn px-4 py-2 bg-black text-white disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            Next
+                            NEXT
                         </button>
                     </div>
                 </div>

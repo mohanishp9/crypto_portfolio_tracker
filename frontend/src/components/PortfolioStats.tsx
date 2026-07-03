@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import type { PortfolioStatsResponse } from "../types/portfolio.types";
 import { CardSkeleton, InsightCardSkeleton } from "./common/Skeleton";
 import {
@@ -23,7 +23,7 @@ interface PortfolioStatsProps {
     isLoading?: boolean;
 }
 
-const accentFor = (value: number) => (value < 0 ? "text-rose-500" : "text-emerald-500");
+const accentFor = (value: number) => (value < 0 ? "text-red-600" : "text-blue-700");
 
 const MetricCard = ({
     label,
@@ -36,15 +36,14 @@ const MetricCard = ({
     caption: string;
     accentClass?: string;
 }) => (
-    <div className="p-5 bg-zinc-900 border border-zinc-800 rounded-xl shadow-sm flex flex-col justify-center group hover:bg-zinc-800/60 transition-colors duration-300 h-full">
-        <h3 className="text-[10px] tracking-widest uppercase text-zinc-500 mb-3 flex items-center gap-2">
-            <span className="block w-2 h-2 rounded-full bg-indigo-500/50" />
+    <div className="brutalist-card h-full flex flex-col justify-center transition-colors duration-300">
+        <h3 className="text-sm font-black uppercase tracking-tighter mb-3 border-b-4 border-black pb-2">
             {label}
         </h3>
-        <p className={`font-mono text-3xl font-semibold tracking-tight ${accentClass ?? "text-zinc-50"}`}>
+        <p className={`font-mono text-3xl font-black tracking-tight ${accentClass ?? "text-black"}`}>
             {value}
         </p>
-        <span className="mt-3 block text-[10px] tracking-widest text-zinc-600 uppercase group-hover:text-zinc-400 transition-colors">
+        <span className="mt-3 block text-xs font-mono font-bold uppercase text-black">
             {caption}
         </span>
     </div>
@@ -59,15 +58,15 @@ const InsightCard = ({
     holding?: { coinName: string; coinSymbol: string } | null;
     value: string;
 }) => (
-    <div className="p-5 bg-zinc-900 border border-zinc-800 rounded-xl shadow-sm h-full">
-        <p className="text-[10px] tracking-widest uppercase text-zinc-500 mb-4">{title}</p>
-        <div className="font-semibold text-xl text-zinc-50">
-            {holding?.coinName ?? "Waiting for data"}
+    <div className="brutalist-card h-full">
+        <p className="text-sm font-black uppercase tracking-tighter mb-4 border-b-4 border-black pb-2">{title}</p>
+        <div className="font-black text-xl text-black">
+            {holding?.coinName ?? "WAITING FOR DATA"}
         </div>
-        <div className="text-xs tracking-wider uppercase text-zinc-500 font-mono mt-1">
+        <div className="text-sm font-mono font-bold uppercase mt-1 bg-[#ccff00] inline-block border-2 border-black px-1">
             {holding?.coinSymbol ?? "N/A"}
         </div>
-        <div className="text-sm text-zinc-300 mt-4 font-mono font-medium">{value}</div>
+        <div className="text-sm text-black mt-4 font-mono font-black">{value}</div>
     </div>
 );
 
@@ -84,19 +83,20 @@ const DEFAULT_STATS_ORDER = [
 ];
 
 const PortfolioStats = ({ statsData, isLoading }: PortfolioStatsProps) => {
-    const [statsOrder, setStatsOrder] = useState<string[]>(DEFAULT_STATS_ORDER);
-
-    useEffect(() => {
+    const [statsOrder, setStatsOrder] = useState<string[]>(() => {
         const saved = localStorage.getItem("stats_layout");
         if (saved) {
             try {
                 const parsed = JSON.parse(saved);
                 if (Array.isArray(parsed) && parsed.length === DEFAULT_STATS_ORDER.length) {
-                    setStatsOrder(parsed);
+                    return parsed;
                 }
-            } catch (e) {}
+            } catch (e) {
+                console.error("Failed to parse stats layout", e);
+            }
         }
-    }, []);
+        return DEFAULT_STATS_ORDER;
+    });
 
     const sensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),

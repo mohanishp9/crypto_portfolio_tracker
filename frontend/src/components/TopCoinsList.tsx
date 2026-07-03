@@ -46,19 +46,17 @@ const TopCoinsList = ({ onSelectCoin }: { onSelectCoin: (coinId: string) => void
     }, [data]);
 
     return (
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl flex flex-col h-[520px] shadow-sm overflow-hidden relative">
-            {/* Subtle glow effect */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="bg-white border-4 border-black brutalist-shadow flex flex-col h-[520px] overflow-hidden relative">
 
-            <div className="px-6 py-5 border-b border-zinc-800 bg-zinc-900/80 shrink-0 z-10">
-                <p className="text-[10px] tracking-widest uppercase text-zinc-500 flex items-center gap-2 mb-2">
-                    <Activity size={12} className="text-indigo-400" /> Live Market
+            <div className="px-6 py-5 border-b-4 border-black bg-[#ccff00] shrink-0 z-10">
+                <p className="text-xs font-black uppercase text-black flex items-center gap-2 mb-2">
+                    <Activity size={14} className="text-black" /> LIVE MARKET
                 </p>
-                <h3 className="font-semibold text-lg text-zinc-50 tracking-tight">
-                    Top <span className="font-normal text-zinc-500 italic">Coins</span>
+                <h3 className="font-black text-2xl text-black tracking-tighter uppercase">
+                    TOP COINS
                 </h3>
-                <p className="text-[10px] tracking-widest text-zinc-500 mt-2 uppercase font-mono">
-                    {data?.stale ? "cached market view" : "free-tier friendly refresh"}
+                <p className="text-xs font-bold text-black mt-2 uppercase font-mono border-t-2 border-black pt-2">
+                    {data?.stale ? "CACHED MARKET VIEW" : "FREE-TIER FRIENDLY REFRESH"}
                 </p>
             </div>
 
@@ -97,29 +95,29 @@ const TopCoinsList = ({ onSelectCoin }: { onSelectCoin: (coinId: string) => void
                                 onClick={() => onSelectCoin(coin.id)}
                                 onMouseEnter={() => setActiveCoin(key)}
                                 onMouseLeave={() => setActiveCoin(null)}
-                                className={`w-full px-6 py-3 border-b border-zinc-800/50 flex items-center gap-3 cursor-pointer transition-colors duration-300 ${isActive ? 'bg-zinc-800/60' : 'bg-transparent'} ${liveData?.direction === "up" ? "flash-up" : liveData?.direction === "down" ? "flash-down" : ""}`}
+                                className={`w-full px-6 py-3 border-b-2 border-black flex items-center gap-3 cursor-pointer transition-colors duration-100 ${isActive ? 'bg-[#ccff00]' : 'bg-white'} ${liveData?.direction === "up" ? "flash-up" : liveData?.direction === "down" ? "flash-down" : ""}`}
                             >
-                                <span className="text-[10px] tracking-wider text-zinc-500 w-4 shrink-0 text-right font-mono">
+                                <span className="text-sm font-black text-black w-4 shrink-0 text-right font-mono">
                                     {coin.market_cap_rank}
                                 </span>
                                 <img 
                                     src={coin.image} 
                                     alt={coin.name} 
-                                    className={`w-6 h-6 rounded-full shrink-0 transition-opacity duration-300 ${isActive ? 'opacity-100' : 'opacity-70'}`} 
+                                    className={`w-6 h-6 rounded-none shrink-0 border-2 border-black transition-opacity duration-300 ${isActive ? 'opacity-100' : 'opacity-80'}`} 
                                 />
                                 <div className="flex-1 min-w-0 text-left">
-                                    <div className={`text-sm tracking-wide truncate transition-colors duration-300 font-medium ${isActive ? 'text-zinc-50' : 'text-zinc-300'}`}>
+                                    <div className={`text-sm tracking-wide truncate transition-colors duration-100 font-black uppercase ${isActive ? 'text-black' : 'text-black'}`}>
                                         {coin.name}
                                     </div>
-                                    <div className="text-[10px] tracking-widest text-zinc-500 mt-0.5 uppercase font-mono">
+                                    <div className="text-xs font-bold text-black mt-0.5 uppercase font-mono">
                                         {coin.symbol.toUpperCase()}
                                     </div>
                                 </div>
                                 <div className="text-right shrink-0">
-                                    <div className={`font-mono text-sm transition-colors duration-300 ${isActive ? 'text-zinc-50 font-medium' : 'text-zinc-400'}`}>
+                                    <div className={`font-mono text-sm transition-colors duration-100 font-black text-black`}>
                                         ${currentPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })}
                                     </div>
-                                    <div className={`font-mono text-xs mt-0.5 ${isUp ? 'text-emerald-500' : 'text-rose-500'}`}>
+                                    <div className={`font-mono font-bold text-xs mt-0.5 ${isUp ? 'text-blue-700' : 'text-red-600'}`}>
                                         {isUp ? "+" : "-"}
                                         {Math.abs(priceChange24h).toFixed(2)}%
                                     </div>

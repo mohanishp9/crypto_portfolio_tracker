@@ -17,29 +17,101 @@
 
 @layer base {
   body {
-    background-color: var(--color-zinc-950);
-    color: var(--color-zinc-50);
+    background-color: #f4f4f0;
+    color: #000000;
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 }
 
-/* Subtle inner text-shadow / color pulse instead of background flash */
+/* ── Cyber-Brutalist Utilities ── */
+.brutalist-shadow {
+  box-shadow: 6px 6px 0px 0px #000;
+  transition: all 0.2s ease;
+}
+.brutalist-shadow:hover {
+  box-shadow: 8px 8px 0px 0px #000;
+  transform: translate(-2px, -2px);
+}
+.brutalist-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 4px solid #000;
+  font-family: var(--font-mono);
+  font-weight: 900;
+  padding: 0.75rem 1.5rem;
+  box-shadow: 4px 4px 0px 0px #000;
+  transition: all 0.1s ease;
+  text-transform: uppercase;
+}
+.brutalist-btn:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px 0px #000;
+}
+.brutalist-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 0px 0px 0px 0px #000;
+}
+.brutalist-card {
+  border: 4px solid #000;
+  background-color: #fff;
+  box-shadow: 4px 4px 0px 0px #000;
+  padding: 1.5rem;
+}
+.brutalist-input {
+  border: 4px solid #000;
+  background-color: #fff;
+  padding: 0.75rem 1rem;
+  font-family: var(--font-mono);
+  font-weight: bold;
+}
+.brutalist-input:focus {
+  outline: none;
+  background-color: #ccff00;
+}
+
+/* Animations */
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-marquee {
+  animation: marquee 20s linear infinite;
+}
+
+@keyframes skeletonPulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.4; }
+  100% { opacity: 1; }
+}
+.animate-skeleton {
+  animation: skeletonPulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
 @keyframes flashGreen {
-  0% { color: var(--color-emerald-500); text-shadow: 0 0 12px rgba(16, 185, 129, 0.8); }
-  100% { color: inherit; text-shadow: none; }
+  0% { background-color: #ccff00; }
+  100% { background-color: transparent; }
 }
-
 @keyframes flashRed {
-  0% { color: var(--color-rose-500); text-shadow: 0 0 12px rgba(244, 63, 94, 0.8); }
-  100% { color: inherit; text-shadow: none; }
+  0% { background-color: #ff3333; color: white; }
+  100% { background-color: transparent; color: inherit; }
 }
-
 .flash-up {
-  animation: flashGreen 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: flashGreen 1s ease-out forwards;
+}
+.flash-down {
+  animation: flashRed 1s ease-out forwards;
 }
 
-.flash-down {
-  animation: flashRed 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+.stripe-pattern {
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 10px,
+    currentColor 10px,
+    currentColor 20px
+  );
 }

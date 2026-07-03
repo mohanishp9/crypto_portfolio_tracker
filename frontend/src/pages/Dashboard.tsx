@@ -103,32 +103,37 @@ const Dashboard = () => {
   }, [statsData]);
 
   const DEFAULT_MAIN = ["holdings", "transactions", "importExport"];
-  const [mainOrder, setMainOrder] = useState<string[]>(DEFAULT_MAIN);
-
   const DEFAULT_SIDEBAR = ["liveMarket", "watchlist", "alerts", "gainers", "losers"];
-  const [sidebarOrder, setSidebarOrder] = useState<string[]>(DEFAULT_SIDEBAR);
 
-  useEffect(() => {
+  const [sidebarOrder, setSidebarOrder] = useState<string[]>(() => {
     const savedSidebar = localStorage.getItem("sidebar_layout");
     if (savedSidebar) {
       try {
         const parsed = JSON.parse(savedSidebar);
         if (Array.isArray(parsed) && parsed.length === DEFAULT_SIDEBAR.length) {
-          setSidebarOrder(parsed);
+          return parsed;
         }
-      } catch (e) {}
+      } catch (e) {
+        console.error("Failed to parse sidebar layout", e);
+      }
     }
+    return DEFAULT_SIDEBAR;
+  });
 
+  const [mainOrder, setMainOrder] = useState<string[]>(() => {
     const savedMain = localStorage.getItem("main_layout");
     if (savedMain) {
       try {
         const parsed = JSON.parse(savedMain);
         if (Array.isArray(parsed) && parsed.length === DEFAULT_MAIN.length) {
-          setMainOrder(parsed);
+          return parsed;
         }
-      } catch (e) {}
+      } catch (e) {
+        console.error("Failed to parse main layout", e);
+      }
     }
-  }, []);
+    return DEFAULT_MAIN;
+  });
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -236,54 +241,49 @@ const Dashboard = () => {
 
   if (error && !("status" in error && error.status === 401)) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4">
-        <div className="w-full max-w-sm text-center p-10 bg-zinc-900 border border-zinc-800 rounded-xl shadow-lg">
-          <h3 className="text-xl font-semibold text-zinc-50">Something went wrong</h3>
-          <p className="mt-3 text-zinc-400">We couldn't load your data. Please try again later.</p>
+      <div className="min-h-screen bg-[#f4f4f0] text-black flex items-center justify-center px-4 font-sans">
+        <div className="w-full max-w-sm text-center p-10 bg-white border-4 border-black brutalist-shadow">
+          <h3 className="text-2xl font-black uppercase tracking-tighter">System Failure</h3>
+          <p className="mt-3 font-mono font-bold">We couldn't load your data. Please try again later.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-[#f4f4f0] text-black font-sans">
       <Navbar email={data?.user.email} handleLogout={handleLogout} isLoggingOut={isLoggingOut} />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div className="mb-8 p-8 bg-zinc-900 border border-zinc-800 rounded-xl shadow-sm relative overflow-hidden">
-          {/* Subtle background glow effect */}
-          <div className="absolute -top-24 -right-24 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
-          
-          <p className="text-xs tracking-widest uppercase text-zinc-500 mb-3">
-            Welcome back
+        <div className="mb-8 p-8 bg-[#ccff00] border-4 border-black brutalist-shadow relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-4 font-mono font-black text-6xl opacity-10 pointer-events-none">SYS_ACTIVE</div>
+          <p className="text-sm font-mono font-bold uppercase tracking-widest mb-3">
+            [ SECURE CONNECTION ESTABLISHED ]
           </p>
-          <h2 className="text-3xl md:text-4xl font-semibold text-zinc-50 tracking-tight flex items-center gap-3">
+          <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tighter flex items-center gap-3">
             {isLoading ? (
-              <Skeleton className="w-48 h-8 my-1" />
+              <Skeleton className="w-48 h-12 my-1 border-4 border-black" />
             ) : (
-              data?.user.name
+              `WELCOME, ${data?.user.name}`
             )}
-            <span className="text-lg font-normal text-zinc-500 italic hidden sm:inline-block">
-              your cyphersight
-            </span>
           </h2>
-          <p className="text-xs text-zinc-400 mt-4 font-mono">
-            Polling every {(pollingInterval / 1000).toFixed(0)}s while this tab stays open.
+          <p className="text-sm mt-4 font-mono font-bold">
+            &gt; STREAMING MARKET DATA: {(pollingInterval / 1000).toFixed(0)}s interval
           </p>
         </div>
 
-        <div className="flex flex-wrap gap-3 mb-6">
+        <div className="flex flex-wrap gap-4 mb-8 border-b-4 border-black pb-8">
           <button
             onClick={() => dispatch(openAddModal())}
-            className="bg-zinc-50 text-zinc-950 hover:bg-zinc-200 px-5 py-2 rounded-md text-sm font-semibold transition-colors shadow-sm"
+            className="brutalist-btn bg-white"
           >
-            Add Transaction
+            + ADD TRANSACTION
           </button>
           <button
             onClick={refetchPortfolio}
-            className="bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-zinc-50 hover:bg-zinc-800/70 px-5 py-2 rounded-md text-sm font-medium transition-colors"
+            className="brutalist-btn bg-black text-white"
           >
-            Refresh Prices
+            REFRESH DATA
           </button>
         </div>
 
@@ -346,39 +346,39 @@ const MarketPulse = ({
   tone: "up" | "down";
   isLoading?: boolean;
 }) => (
-  <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl shadow-sm">
-    <p className="text-xs tracking-widest uppercase text-zinc-500">{title}</p>
-    <div className="space-y-4 mt-5">
+  <div className="brutalist-card">
+    <p className="text-xl font-black uppercase tracking-tighter border-b-4 border-black pb-2 mb-4">{title}</p>
+    <div className="space-y-4">
       {isLoading ? (
         <>
           <div className="flex items-center justify-between">
             <div>
-              <Skeleton className="w-16 h-4 mb-1" />
-              <Skeleton className="w-8 h-3" />
+              <Skeleton className="w-16 h-4 mb-1 border-2 border-black" />
+              <Skeleton className="w-8 h-3 border-2 border-black" />
             </div>
-            <Skeleton className="w-12 h-4" />
+            <Skeleton className="w-12 h-4 border-2 border-black" />
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <Skeleton className="w-20 h-4 mb-1" />
-              <Skeleton className="w-10 h-3" />
+              <Skeleton className="w-20 h-4 mb-1 border-2 border-black" />
+              <Skeleton className="w-10 h-3 border-2 border-black" />
             </div>
-            <Skeleton className="w-10 h-4" />
+            <Skeleton className="w-10 h-4 border-2 border-black" />
           </div>
         </>
       ) : items.length > 0 ? items.map((item) => (
-        <div key={item.coinSymbol} className="flex items-center justify-between group">
+        <div key={item.coinSymbol} className="flex items-center justify-between border-b-2 border-black pb-2 last:border-b-0">
           <div>
-            <div className="text-sm font-medium text-zinc-50 group-hover:text-white transition-colors">{item.coinName}</div>
-            <div className="text-xs font-mono text-zinc-500 uppercase mt-0.5">{item.coinSymbol}</div>
+            <div className="text-sm font-bold uppercase">{item.coinName}</div>
+            <div className="text-xs font-mono font-bold bg-[#ccff00] border-2 border-black px-1 inline-block mt-1">{item.coinSymbol}</div>
           </div>
-          <div className={`font-mono text-sm font-medium ${tone === "up" ? "text-emerald-500" : "text-rose-500"}`}>
+          <div className={`font-mono text-lg font-black ${tone === "up" ? "text-blue-700" : "text-red-600"}`}>
             {item.priceChange24h >= 0 ? "+" : ""}
             {item.priceChange24h.toFixed(2)}%
           </div>
         </div>
       )) : (
-        <p className="text-sm text-zinc-500">Add holdings to unlock this view.</p>
+        <p className="font-mono font-bold text-sm">NO DATA DETECTED.</p>
       )}
     </div>
   </div>

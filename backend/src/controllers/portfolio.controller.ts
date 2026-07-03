@@ -225,11 +225,18 @@ const getTaxReportController = asyncHandler(async (req: Request, res: Response) 
     const userId = ensureUserId(req);
     const year = req.query.year ? parseInt(req.query.year as string) : undefined;
     
-    const csv = await generateTaxReport(userId, year);
+    const report = await generateTaxReport(userId, year);
 
-    res.setHeader("Content-Type", "text/csv");
-    res.setHeader("Content-Disposition", `attachment; filename=tax-report${year ? '-' + year : ''}.csv`);
-    res.status(200).send(csv);
+    if (req.query.format === 'csv') {
+        res.setHeader("Content-Type", "text/csv");
+        res.setHeader("Content-Disposition", `attachment; filename=tax-report${year ? '-' + year : ''}.csv`);
+        res.status(200).send(report.csv);
+    } else {
+        res.status(200).json({
+            success: true,
+            report
+        });
+    }
 });
 
 export {

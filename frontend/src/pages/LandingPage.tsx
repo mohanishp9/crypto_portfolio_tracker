@@ -2,9 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../app/store';
-import { BarChart3, Bell, Eye, ArrowLeftRight, Activity, FolderInput } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar, LabelList } from 'recharts';
+import { ArrowRight, Terminal, BarChart2, Shield, Zap, Activity } from 'lucide-react';
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 // ── Types ──────────────────────────────────────────────────────
 
@@ -25,41 +24,14 @@ interface GlobalData {
     btc_dominance: number;
 }
 
-interface CacheEntry<T> {
-    data: T;
-    timestamp: number;
-}
-
-// ── Module-level cache (survives re-renders, cleared on full page reload) ──
-
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
-
-let coinsCache: CacheEntry<CoinMarket[]> | null = null;
-let globalCache: CacheEntry<GlobalData> | null = null;
-
-interface ChartData { timestamp: number; price: number; }
-type CoinCharts = Record<string, ChartData[]>;
-let chartsCache: CacheEntry<CoinCharts> | null = null;
-
-const CHART_COINS = [
-    { id: 'bitcoin', symbol: 'BTC', color: '#F7931A' },
-    { id: 'ethereum', symbol: 'ETH', color: '#627EEA' },
-    { id: 'solana', symbol: 'SOL', color: '#14F195' },
-    { id: 'binancecoin', symbol: 'BNB', color: '#F3BA2F' },
-    { id: 'ripple', symbol: 'XRP', color: '#00AAE4' },
-];
+// ── Mock Data (Fallback) ───────────────────────────────────────
 
 const MOCK_COINS: CoinMarket[] = [
     { id: 'bitcoin', symbol: 'btc', name: 'Bitcoin', image: 'https://coin-images.coingecko.com/coins/images/1/large/bitcoin.png', current_price: 65000, market_cap: 1200000000000, price_change_percentage_24h: 2.5, market_cap_rank: 1 },
-    { id: 'ethereum', symbol: 'eth', name: 'Ethereum', image: 'https://coin-images.coingecko.com/coins/images/279/large/ethereum.png', current_price: 3500, market_cap: 400000000000, price_change_percentage_24h: 1.2, market_cap_rank: 2 },
+    { id: 'ethereum', symbol: 'eth', name: 'Ethereum', image: 'https://coin-images.coingecko.com/coins/images/279/large/ethereum.png', current_price: 3500, market_cap: 400000000000, price_change_percentage_24h: -1.2, market_cap_rank: 2 },
     { id: 'tether', symbol: 'usdt', name: 'Tether', image: 'https://coin-images.coingecko.com/coins/images/325/large/Tether.png', current_price: 1, market_cap: 100000000000, price_change_percentage_24h: 0.01, market_cap_rank: 3 },
-    { id: 'binancecoin', symbol: 'bnb', name: 'BNB', image: 'https://coin-images.coingecko.com/coins/images/825/large/bnb-icon2_2x.png', current_price: 600, market_cap: 90000000000, price_change_percentage_24h: -1.5, market_cap_rank: 4 },
-    { id: 'solana', symbol: 'sol', name: 'Solana', image: 'https://coin-images.coingecko.com/coins/images/4128/large/solana.png', current_price: 150, market_cap: 70000000000, price_change_percentage_24h: 5.5, market_cap_rank: 5 },
-    { id: 'usd-coin', symbol: 'usdc', name: 'USDC', image: 'https://coin-images.coingecko.com/coins/images/6319/large/usdc.png', current_price: 1, market_cap: 32000000000, price_change_percentage_24h: -0.01, market_cap_rank: 6 },
-    { id: 'ripple', symbol: 'xrp', name: 'XRP', image: 'https://coin-images.coingecko.com/coins/images/44/large/xrp-symbol-white-128.png', current_price: 0.6, market_cap: 30000000000, price_change_percentage_24h: 0.5, market_cap_rank: 7 },
-    { id: 'steth', symbol: 'steth', name: 'Lido Staked Ether', image: 'https://coin-images.coingecko.com/coins/images/13442/large/steth_logo.png', current_price: 3500, market_cap: 25000000000, price_change_percentage_24h: 1.2, market_cap_rank: 8 },
-    { id: 'dogecoin', symbol: 'doge', name: 'Dogecoin', image: 'https://coin-images.coingecko.com/coins/images/5/large/dogecoin.png', current_price: 0.15, market_cap: 22000000000, price_change_percentage_24h: 10.2, market_cap_rank: 9 },
-    { id: 'toncoin', symbol: 'ton', name: 'Toncoin', image: 'https://coin-images.coingecko.com/coins/images/17980/large/ton_symbol.png', current_price: 6.5, market_cap: 20000000000, price_change_percentage_24h: 3.1, market_cap_rank: 10 }
+    { id: 'binancecoin', symbol: 'bnb', name: 'BNB', image: 'https://coin-images.coingecko.com/coins/images/825/large/bnb-icon2_2x.png', current_price: 600, market_cap: 90000000000, price_change_percentage_24h: 5.5, market_cap_rank: 4 },
+    { id: 'solana', symbol: 'sol', name: 'Solana', image: 'https://coin-images.coingecko.com/coins/images/4128/large/solana.png', current_price: 150, market_cap: 70000000000, price_change_percentage_24h: -3.5, market_cap_rank: 5 }
 ];
 
 const MOCK_GLOBAL: GlobalData = {
@@ -68,45 +40,32 @@ const MOCK_GLOBAL: GlobalData = {
     btc_dominance: 52.5
 };
 
+interface ChartData { timestamp: number; price: number; }
+type CoinCharts = Record<string, ChartData[]>;
+
+const CHART_COINS = [
+    { id: 'bitcoin', symbol: 'BTC', color: '#F7931A' },
+    { id: 'ethereum', symbol: 'ETH', color: '#627EEA' },
+    { id: 'tether', symbol: 'USDT', color: '#26A17B' },
+    { id: 'binancecoin', symbol: 'BNB', color: '#F3BA2F' },
+    { id: 'solana', symbol: 'SOL', color: '#14F195' },
+    { id: 'ripple', symbol: 'XRP', color: '#23292F' },
+    { id: 'dogecoin', symbol: 'DOGE', color: '#C2A633' },
+    { id: 'cardano', symbol: 'ADA', color: '#0033AD' },
+    { id: 'avalanche-2', symbol: 'AVAX', color: '#E84142' },
+    { id: 'chainlink', symbol: 'LINK', color: '#2A5ADA' },
+];
+
 const MOCK_CHART = Array.from({ length: 7 * 24 }, (_, i) => ({
     timestamp: Date.now() - (7 * 24 - i) * 3600000,
     price: 60000 + Math.random() * 5000
 }));
 
-const MOCK_CHARTS: CoinCharts = {
-    bitcoin: MOCK_CHART,
-    ethereum: MOCK_CHART.map(p => ({ ...p, price: p.price * 0.05 })),
-    solana: MOCK_CHART.map(p => ({ ...p, price: p.price * 0.002 })),
-    binancecoin: MOCK_CHART.map(p => ({ ...p, price: p.price * 0.01 })),
-    ripple: MOCK_CHART.map(p => ({ ...p, price: p.price * 0.00001 }))
-};
-
-function isFresh<T>(entry: CacheEntry<T> | null): entry is CacheEntry<T> {
-    return entry !== null && Date.now() - entry.timestamp < CACHE_TTL;
-}
-
-function getCachedItem<T>(key: string): CacheEntry<T> | null {
-    try {
-        const item = localStorage.getItem(key);
-        if (item) {
-            const parsed = JSON.parse(item);
-            if (Date.now() - parsed.timestamp < CACHE_TTL) {
-                return parsed;
-            }
-        }
-    } catch {
-        // ignore
-    }
-    return null;
-}
-
-function setCachedItem<T>(key: string, data: CacheEntry<T>) {
-    try {
-        localStorage.setItem(key, JSON.stringify(data));
-    } catch {
-        // ignore
-    }
-}
+const MOCK_CHARTS: CoinCharts = CHART_COINS.reduce((acc, coin, idx) => {
+    // Generate a mock chart based on the index to have some visual variance
+    acc[coin.id] = MOCK_CHART.map(p => ({ ...p, price: p.price * (1 / Math.pow(10, idx)) }));
+    return acc;
+}, {} as CoinCharts);
 
 // ── Formatters ─────────────────────────────────────────────────
 
@@ -118,9 +77,7 @@ const fmtUsd = (n: number): string => {
 };
 
 const fmtPrice = (n: number): string =>
-    n >= 1
-        ? `$${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-        : `$${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 6 })}`;
+    n >= 1 ? `$${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : `$${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 6 })}`;
 
 const fmtPct = (n: number): string => `${n >= 0 ? '+' : ''}${n.toFixed(2)}%`;
 
@@ -133,84 +90,31 @@ const LandingPage = () => {
     const { isAuthenticated } = useSelector((state: RootState) => state.auth);
     const [coins, setCoins] = useState<CoinMarket[]>([]);
     const [globalData, setGlobalData] = useState<GlobalData | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-
     const [chartData, setChartData] = useState<CoinCharts>({});
     const [chartLoading, setChartLoading] = useState(true);
     const [activeChartTab, setActiveChartTab] = useState('bitcoin');
 
     const fetchMarketData = useCallback(async () => {
-        const cachedCoins = coinsCache || getCachedItem<CoinMarket[]>('cyphersight_coins');
-        const cachedGlobal = globalCache || getCachedItem<GlobalData>('cyphersight_global');
-
-        // Return cached data if fresh
-        if (isFresh(cachedCoins) && isFresh(cachedGlobal)) {
-            coinsCache = cachedCoins;
-            globalCache = cachedGlobal;
-            setCoins(cachedCoins.data);
-            setGlobalData(cachedGlobal.data);
-            setLoading(false);
-            return;
-        }
-
-        setLoading(true);
-        setError(null);
-
         try {
             const [coinsRes, globalRes] = await Promise.all([
-                fetch(
-                    `${import.meta.env.VITE_API_URL}/market/top?limit=10`
-                ),
+                fetch(`${import.meta.env.VITE_API_URL}/market/top?limit=10`),
                 fetch(`${import.meta.env.VITE_API_URL}/market/global`),
             ]);
 
-            if (!coinsRes.ok || !globalRes.ok) {
-                throw new Error('Backend API returned an error for market data');
-            }
+            if (!coinsRes.ok || !globalRes.ok) throw new Error('API Error');
 
             const coinsJson = await coinsRes.json();
             const globalJson = await globalRes.json();
 
-            const coinsArray = coinsJson.coins || coinsJson;
-            const parsedCoins: CoinMarket[] = coinsArray.map((c: Record<string, unknown>) => ({
-                id: c.id,
-                symbol: c.symbol,
-                name: c.name,
-                image: c.image,
-                current_price: c.current_price ?? 0,
-                market_cap: c.market_cap ?? 0,
-                price_change_percentage_24h: c.price_change_percentage_24h ?? 0,
-                market_cap_rank: c.market_cap_rank ?? 0,
-            }));
-
-            const parsedGlobal: GlobalData = {
+            setCoins(coinsJson.coins || coinsJson);
+            setGlobalData({
                 total_market_cap: globalJson.data?.total_market_cap?.usd ?? 0,
                 total_volume_24h: globalJson.data?.total_volume?.usd ?? 0,
                 btc_dominance: globalJson.data?.market_cap_percentage?.btc ?? 0,
-            };
-
-            // Persist in module-level cache and localStorage
-            const now = Date.now();
-            coinsCache = { data: parsedCoins, timestamp: now };
-            globalCache = { data: parsedGlobal, timestamp: now };
-            setCachedItem('cyphersight_coins', coinsCache);
-            setCachedItem('cyphersight_global', globalCache);
-
-            setCoins(parsedCoins);
-            setGlobalData(parsedGlobal);
-        } catch (err) {
-            console.warn('Failed to fetch market data, using fallback data', err);
-            // Fallback to cache (even if stale) or mock data
-            if (cachedCoins && cachedGlobal) {
-                setCoins((cachedCoins as CacheEntry<CoinMarket[]>).data);
-                setGlobalData((cachedGlobal as CacheEntry<GlobalData>).data);
-            } else {
-                setCoins(MOCK_COINS);
-                setGlobalData(MOCK_GLOBAL);
-            }
-        } finally {
-            setLoading(false);
+            });
+        } catch {
+            setCoins(MOCK_COINS);
+            setGlobalData(MOCK_GLOBAL);
         }
     }, []);
 
@@ -219,24 +123,12 @@ const LandingPage = () => {
     }, [fetchMarketData]);
 
     const fetchChartsData = useCallback(async () => {
-        const cachedCharts = chartsCache || getCachedItem<CoinCharts>('cyphersight_charts');
-        
-        if (isFresh(cachedCharts)) {
-            chartsCache = cachedCharts;
-            setChartData(cachedCharts.data);
-            setChartLoading(false);
-            return;
-        }
         setChartLoading(true);
         try {
             const responses = await Promise.all(
                 CHART_COINS.map(c => fetch(`${import.meta.env.VITE_API_URL}/market/chart/${c.id}?days=7`))
             );
-            
-            if (responses.some(r => !r.ok)) {
-                throw new Error('Backend API returned an error for chart data');
-            }
-
+            if (responses.some(r => !r.ok)) throw new Error('API Error');
             const newChartData: CoinCharts = {};
             for (let i = 0; i < CHART_COINS.length; i++) {
                 const json = await responses[i].json();
@@ -245,16 +137,9 @@ const LandingPage = () => {
                     timestamp: p[0], price: p[1]
                 }));
             }
-            chartsCache = { data: newChartData, timestamp: Date.now() };
-            setCachedItem('cyphersight_charts', chartsCache);
             setChartData(newChartData);
-        } catch (err) {
-            console.warn('Failed to fetch chart data, using fallback data', err);
-            if (cachedCharts) {
-                setChartData((cachedCharts as CacheEntry<CoinCharts>).data);
-            } else {
-                setChartData(MOCK_CHARTS);
-            }
+        } catch {
+            setChartData(MOCK_CHARTS);
         } finally {
             setChartLoading(false);
         }
@@ -264,1264 +149,274 @@ const LandingPage = () => {
         fetchChartsData();
     }, [fetchChartsData]);
 
-    // ── Shared styles ──────────────────────────────────────────
-
-    const labelStyle: React.CSSProperties = {
-        fontSize: '0.5rem',
-        letterSpacing: '0.35em',
-        textTransform: 'uppercase',
-        color: '#818cf8',
-    };
-
-    const monoStyle: React.CSSProperties = {
-        fontFamily: "'DM Mono', monospace",
-        fontSize: '0.68rem',
-        letterSpacing: '0.08em',
-    };
-
-    // ── Render ──────────────────────────────────────────────────
-
     return (
-        <div style={{ background: '#09090b', minHeight: '100vh', color: '#fafafa' }}>
-
-            {/* Subtle background grid — same as Login page */}
-            <div
-                className="fixed inset-0 pointer-events-none"
-                style={{
-                    backgroundImage:
-                        'linear-gradient(rgba(63, 63, 70,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(63, 63, 70,0.06) 1px, transparent 1px)',
-                    backgroundSize: '48px 48px',
-                }}
-            />
-
-            {/* ─── Navbar ─── */}
-            <nav
-                style={{
-                    background: 'rgba(9, 9, 11, 0.92)',
-                    backdropFilter: 'blur(12px)',
-                    borderBottom: '1px solid rgba(63, 63, 70,0.3)',
-                    position: 'sticky',
-                    top: 0,
-                    zIndex: 50,
-                }}
-            >
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center h-16">
-
-                        {/* Logo — matches Navbar.tsx */}
-                        <Link to="/" className="flex items-center gap-3 transition-opacity hover:opacity-80" style={{ textDecoration: 'none' }}>
-                            <div
-                                style={{
-                                    width: 28,
-                                    height: 28,
-                                    borderRadius: '50%',
-                                    border: '1px solid rgba(129, 140, 248,0.5)',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    flexShrink: 0,
-                                }}
-                            >
-                                <div
-                                    style={{
-                                        width: 8,
-                                        height: 8,
-                                        borderRadius: '50%',
-                                        background: '#818cf8',
-                                        opacity: 0.8,
-                                    }}
-                                />
-                            </div>
-                            <span
-                                className="font-light"
-                                style={{
-                                    fontFamily: "ui-sans-serif, system-ui, sans-serif",
-                                    fontSize: 'clamp(1.1rem, 2.5vw, 1.6rem)',
-                                    color: '#fafafa',
-                                    letterSpacing: '0.06em',
-                                }}
-                            >
-                                CypherSight{' '}
-                                <span style={{ color: '#818cf8', fontStyle: 'italic' }}>Portfolio</span>
+        <div className="bg-[#f4f4f0] min-h-screen text-black overflow-x-hidden font-sans">
+            {/* ── TICKER ── */}
+            <div className="w-full bg-[#ccff00] border-b-4 border-black py-2 overflow-hidden whitespace-nowrap flex items-center">
+                <div className="animate-marquee inline-block font-mono text-sm font-bold uppercase tracking-widest">
+                    {coins.length > 0 ? [...coins, ...coins, ...coins, ...coins].map((c, i) => (
+                        <span key={i} className="mx-6 inline-flex items-center gap-4">
+                            <span>[{c.symbol.toUpperCase()}]</span>
+                            <span>{fmtPrice(c.current_price)}</span>
+                            <span className={c.price_change_percentage_24h >= 0 ? "text-blue-700" : "text-red-600"}>
+                                {fmtPct(c.price_change_percentage_24h)}
                             </span>
-                        </Link>
+                            <span className="mx-4">///</span>
+                        </span>
+                    )) : (
+                        <span className="mx-6">INITIALIZING MARKET STREAM /// STAND BY /// INITIALIZING MARKET STREAM</span>
+                    )}
+                </div>
+            </div>
 
-                        {/* Right — Login + Sign Up or Dashboard */}
-                        <div className="flex items-center gap-4">
-                            {isAuthenticated ? (
-                                <Link
-                                    to="/dashboard"
-                                    className="transition-all duration-300"
-                                    style={{
-                                        border: '1px solid rgba(129, 140, 248,0.4)',
-                                        color: '#818cf8',
-                                        fontFamily: "'DM Mono', monospace",
-                                        fontSize: '0.6rem',
-                                        letterSpacing: '0.25em',
-                                        textTransform: 'uppercase',
-                                        padding: '8px 18px',
-                                        textDecoration: 'none',
-                                        display: 'inline-flex',
-                                        alignItems: 'center',
-                                        gap: '8px',
-                                    }}
-                                    onMouseEnter={e => {
-                                        e.currentTarget.style.background = '#818cf8';
-                                        e.currentTarget.style.color = '#09090b';
-                                    }}
-                                    onMouseLeave={e => {
-                                        e.currentTarget.style.background = 'transparent';
-                                        e.currentTarget.style.color = '#818cf8';
-                                    }}
-                                >
-                                    <span style={{ fontFamily: "ui-sans-serif, system-ui, sans-serif", fontSize: '0.9rem', fontWeight: 300 }}>→</span>
-                                    Dashboard
+            {/* ── NAVBAR ── */}
+            <nav className="w-full border-b-4 border-black bg-white sticky top-0 z-50">
+                <div className="max-w-[1400px] mx-auto px-6 h-20 flex justify-between items-center">
+                    <div className="font-mono text-2xl font-black tracking-tighter">
+                        [ CYPHER_SIGHT ]
+                    </div>
+                    <div className="flex gap-4">
+                        {isAuthenticated ? (
+                            <Link to="/dashboard" className="brutalist-btn bg-[#ccff00]">
+                                DASHBOARD <ArrowRight size={18} />
+                            </Link>
+                        ) : (
+                            <>
+                                <Link to="/login" className="brutalist-btn bg-white">
+                                    LOGIN
                                 </Link>
-                            ) : (
-                                <>
-                                    <Link
-                                        to="/login"
-                                        style={{
-                                            background: 'transparent',
-                                            border: 'none',
-                                            fontSize: '0.6rem',
-                                            letterSpacing: '0.25em',
-                                            textTransform: 'uppercase',
-                                            color: '#a1a1aa',
-                                            fontFamily: "'DM Mono', monospace",
-                                            textDecoration: 'none',
-                                            padding: '6px 0',
-                                            transition: 'color 0.2s',
-                                        }}
-                                        onMouseEnter={e => (e.currentTarget.style.color = '#fafafa')}
-                                        onMouseLeave={e => (e.currentTarget.style.color = '#a1a1aa')}
-                                    >
-                                        Login
-                                    </Link>
-
-                                    <div
-                                        className="hidden sm:block"
-                                        style={{ width: 1, height: 20, background: 'rgba(63, 63, 70,0.5)' }}
-                                    />
-
-                                    <Link
-                                        to="/register"
-                                        className="transition-all duration-300"
-                                        style={{
-                                            border: '1px solid rgba(129, 140, 248,0.4)',
-                                            color: '#818cf8',
-                                            fontFamily: "'DM Mono', monospace",
-                                            fontSize: '0.6rem',
-                                            letterSpacing: '0.25em',
-                                            textTransform: 'uppercase',
-                                            padding: '8px 18px',
-                                            textDecoration: 'none',
-                                            display: 'inline-flex',
-                                            alignItems: 'center',
-                                            gap: '8px',
-                                        }}
-                                        onMouseEnter={e => {
-                                            e.currentTarget.style.background = '#818cf8';
-                                            e.currentTarget.style.color = '#09090b';
-                                        }}
-                                        onMouseLeave={e => {
-                                            e.currentTarget.style.background = 'transparent';
-                                            e.currentTarget.style.color = '#818cf8';
-                                        }}
-                                    >
-                                        <span style={{ fontFamily: "ui-sans-serif, system-ui, sans-serif", fontSize: '0.9rem', fontWeight: 300 }}>→</span>
-                                        Sign Up
-                                    </Link>
-                                </>
-                            )}
-                        </div>
+                                <Link to="/register" className="brutalist-btn bg-black text-white">
+                                    SIGN UP
+                                </Link>
+                            </>
+                        )}
                     </div>
                 </div>
             </nav>
 
-            {/* ─── Market Stats Bar ─── */}
-            <div
-                style={{
-                    borderBottom: '1px solid rgba(63, 63, 70,0.2)',
-                    background: 'rgba(39, 39, 42, 0.5)',
-                }}
-            >
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex items-center justify-center gap-6 sm:gap-10 py-3 overflow-x-auto">
-                        {loading ? (
-                            // Skeleton for stats bar
-                            <>
-                                {[1, 2, 3].map(i => (
-                                    <div key={i} className="flex items-center gap-2">
-                                        <div style={{ ...skeletonBlock, width: 60, height: 10 }} />
-                                        <div style={{ ...skeletonBlock, width: 80, height: 12 }} />
-                                    </div>
-                                ))}
-                            </>
-                        ) : error ? (
-                            <span style={{ ...monoStyle, color: '#f43f5e', fontSize: '0.55rem' }}>
-                                Market data unavailable
-                            </span>
-                        ) : globalData ? (
-                            <>
-                                <StatItem label="Market Cap" value={fmtUsd(globalData.total_market_cap)} labelStyle={labelStyle} monoStyle={monoStyle} />
-                                <div style={{ width: 1, height: 16, background: 'rgba(63, 63, 70,0.3)' }} />
-                                <StatItem label="24h Volume" value={fmtUsd(globalData.total_volume_24h)} labelStyle={labelStyle} monoStyle={monoStyle} />
-                                <div className="hidden sm:block" style={{ width: 1, height: 16, background: 'rgba(63, 63, 70,0.3)' }} />
-                                <StatItem label="BTC Dominance" value={`${globalData.btc_dominance.toFixed(1)}%`} labelStyle={labelStyle} monoStyle={monoStyle} className="hidden sm:flex" />
-                            </>
-                        ) : null}
-                    </div>
-                </div>
-            </div>
+            {/* ── HERO ── */}
+            <section className="max-w-[1400px] mx-auto px-6 py-20 lg:py-32 grid grid-cols-1 lg:grid-cols-2 gap-16 relative">
+                {/* Background grid pattern */}
+                <div className="absolute inset-0 pointer-events-none opacity-[0.03]" style={{ backgroundImage: 'linear-gradient(90deg, #000 1px, transparent 1px), linear-gradient(#000 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
 
-            {/* ─── Hero Section ─── */}
-            <section className="relative flex flex-col items-center justify-center px-4 py-20 sm:py-28">
-
-                {/* Decorative ambient glow */}
-                <div
-                    className="absolute pointer-events-none"
-                    style={{
-                        width: '520px',
-                        height: '520px',
-                        borderRadius: '50%',
-                        background: 'radial-gradient(circle, rgba(129, 140, 248,0.06) 0%, transparent 70%)',
-                        top: '5%',
-                        left: '50%',
-                        transform: 'translateX(-50%)',
-                    }}
-                />
-
-                {/* Brand mark — same circle as Login */}
-                <div className="mb-8 flex items-center justify-center" style={{ animation: 'heroFadeIn 0.8s ease-out' }}>
-                    <div
-                        style={{
-                            width: 64,
-                            height: 64,
-                            borderRadius: '50%',
-                            border: '1px solid rgba(129, 140, 248,0.3)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                        }}
-                    >
-                        <div style={{ width: 20, height: 20, borderRadius: '50%', background: '#818cf8', opacity: 0.7 }} />
-                    </div>
-                </div>
-
-                {/* Tagline chip */}
-                <div
-                    className="mb-6"
-                    style={{
-                        padding: '6px 16px',
-                        border: '1px solid rgba(63, 63, 70,0.35)',
-                        background: 'rgba(39, 39, 42, 0.5)',
-                        fontSize: '0.55rem',
-                        letterSpacing: '0.35em',
-                        textTransform: 'uppercase',
-                        color: '#818cf8',
-                        animation: 'heroFadeIn 0.8s ease-out 0.15s both',
-                    }}
-                >
-                    Portfolio Tracker
-                </div>
-
-                {/* Headline */}
-                <h1
-                    className="font-light text-center"
-                    style={{
-                        fontFamily: "ui-sans-serif, system-ui, sans-serif",
-                        fontSize: 'clamp(2.2rem, 6vw, 4rem)',
-                        color: '#fafafa',
-                        letterSpacing: '0.04em',
-                        lineHeight: 1.15,
-                        maxWidth: '720px',
-                        animation: 'heroFadeIn 0.8s ease-out 0.3s both',
-                    }}
-                >
-                    Cultivate your{' '}
-                    <span style={{ fontStyle: 'italic', color: '#818cf8' }}>crypto</span>
-                    <br />
-                    portfolio with clarity
-                </h1>
-
-                {/* Subheadline */}
-                <p
-                    className="text-center mt-5"
-                    style={{
-                        fontFamily: "'DM Mono', monospace",
-                        fontSize: '0.68rem',
-                        letterSpacing: '0.12em',
-                        color: '#71717a',
-                        maxWidth: '480px',
-                        lineHeight: 1.8,
-                        animation: 'heroFadeIn 0.8s ease-out 0.45s both',
-                    }}
-                >
-                    Track holdings, monitor real-time prices, and watch your digital assets grow — all in one quiet, refined space.
-                </p>
-
-                {/* CTA Buttons */}
-                <div
-                    className="flex flex-col sm:flex-row items-center gap-4 mt-10"
-                    style={{ animation: 'heroFadeIn 0.8s ease-out 0.6s both' }}
-                >
-                    {isAuthenticated ? (
-                        <Link
-                            to="/dashboard"
-                            className="transition-all duration-300"
-                            style={{
-                                border: '1px solid rgba(129, 140, 248,0.4)',
-                                background: '#818cf8',
-                                color: '#09090b',
-                                fontFamily: "'DM Mono', monospace",
-                                fontSize: '0.62rem',
-                                letterSpacing: '0.3em',
-                                textTransform: 'uppercase',
-                                padding: '14px 36px',
-                                textDecoration: 'none',
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '10px',
-                            }}
-                            onMouseEnter={e => {
-                                e.currentTarget.style.background = 'transparent';
-                                e.currentTarget.style.color = '#818cf8';
-                            }}
-                            onMouseLeave={e => {
-                                e.currentTarget.style.background = '#818cf8';
-                                e.currentTarget.style.color = '#09090b';
-                            }}
-                        >
-                            <span style={{ fontFamily: "ui-sans-serif, system-ui, sans-serif", fontSize: '1rem', fontWeight: 300 }}>→</span>
-                            Go to Dashboard
+                <div className="flex flex-col justify-center z-10">
+                    <h1 className="text-[clamp(4rem,8vw,7rem)] font-black leading-[0.85] tracking-tighter uppercase break-words mb-8">
+                        Track <br />
+                        <span className="bg-[#ccff00] px-2 border-4 border-black brutalist-shadow-sm inline-block transform -rotate-2">Wealth.</span> <br />
+                        Trust <br />
+                        Data.
+                    </h1>
+                    <p className="font-mono text-lg max-w-lg mb-10 leading-relaxed border-l-4 border-black pl-6">
+                        No AI slop. No generic dashboards. Pure, raw, unfiltered control over your cryptocurrency portfolio. Built for the paranoid and precise.
+                    </p>
+                    <div className="flex gap-6">
+                        <Link to={isAuthenticated ? "/dashboard" : "/register"} className="brutalist-btn bg-[#0055ff] text-white text-xl py-4 px-8">
+                            INITIALIZE TRACKER <Terminal size={24} className="ml-2" />
                         </Link>
-                    ) : (
-                        <>
-                            {/* Primary — Get Started */}
-                            <Link
-                                to="/register"
-                                id="hero-cta-register"
-                                className="transition-all duration-300"
-                                style={{
-                                    border: '1px solid rgba(129, 140, 248,0.4)',
-                                    background: '#818cf8',
-                                    color: '#09090b',
-                                    fontFamily: "'DM Mono', monospace",
-                                    fontSize: '0.62rem',
-                                    letterSpacing: '0.3em',
-                                    textTransform: 'uppercase',
-                                    padding: '14px 36px',
-                                    textDecoration: 'none',
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    gap: '10px',
-                                }}
-                                onMouseEnter={e => {
-                                    e.currentTarget.style.background = 'transparent';
-                                    e.currentTarget.style.color = '#818cf8';
-                                }}
-                                onMouseLeave={e => {
-                                    e.currentTarget.style.background = '#818cf8';
-                                    e.currentTarget.style.color = '#09090b';
-                                }}
-                            >
-                                <span style={{ fontFamily: "ui-sans-serif, system-ui, sans-serif", fontSize: '1rem', fontWeight: 300 }}>→</span>
-                                Get Started
-                            </Link>
+                    </div>
+                </div>
 
-                            {/* Secondary — Login */}
-                            <Link
-                                to="/login"
-                                id="hero-cta-login"
-                                className="transition-all duration-300"
-                                style={{
-                                    border: '1px solid rgba(63, 63, 70,0.4)',
-                                    background: 'transparent',
-                                    color: '#a1a1aa',
-                                    fontFamily: "'DM Mono', monospace",
-                                    fontSize: '0.62rem',
-                                    letterSpacing: '0.3em',
-                                    textTransform: 'uppercase',
-                                    padding: '14px 36px',
-                                    textDecoration: 'none',
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    gap: '10px',
-                                }}
-                                onMouseEnter={e => {
-                                    e.currentTarget.style.borderColor = 'rgba(154,171,151,0.5)';
-                                    e.currentTarget.style.color = '#fafafa';
-                                }}
-                                onMouseLeave={e => {
-                                    e.currentTarget.style.borderColor = 'rgba(63, 63, 70,0.4)';
-                                    e.currentTarget.style.color = '#a1a1aa';
-                                }}
-                            >
-                                Login
-                            </Link>
-                        </>
-                    )}
+                <div className="relative z-10 flex items-center justify-center h-[500px]">
+                    {/* Fake Window 1 */}
+                    <div className="absolute top-10 left-0 w-80 bg-white border-4 border-black brutalist-shadow z-20 transform -rotate-3 hover:rotate-0 transition-transform cursor-crosshair">
+                        <div className="bg-black text-white px-3 py-2 font-mono text-xs flex justify-between border-b-4 border-black">
+                            <span>portfolio_dump.json</span>
+                            <span>[X]</span>
+                        </div>
+                        <div className="p-4 bg-black text-[#ccff00] font-mono text-xs overflow-hidden h-48 whitespace-pre">
+                            {`{
+  "user": "sysadmin",
+  "total_value": "$45,210.89",
+  "holdings": [
+    { "asset": "BTC", "qty": 0.45 },
+    { "asset": "ETH", "qty": 4.2 }
+  ],
+  "status": "SECURE",
+  "encryption": "ACTIVE"
+}`}
+                        </div>
+                    </div>
+                    
+                    {/* Fake Window 2 */}
+                    <div className="absolute bottom-10 right-0 w-96 bg-[#ff4400] border-4 border-black brutalist-shadow z-30 transform rotate-2 hover:-rotate-1 transition-transform cursor-crosshair">
+                        <div className="bg-white border-b-4 border-black px-3 py-2 font-mono text-xs font-bold uppercase flex justify-between">
+                            <span>ALERT: VOLATILITY SPIKE</span>
+                            <span>_ [] X</span>
+                        </div>
+                        <div className="p-6">
+                            <h2 className="text-4xl font-black text-white mb-2 uppercase">Market Move</h2>
+                            <p className="font-mono font-bold text-black bg-white inline-block px-2 border-2 border-black">BTC DOMINANCE: {globalData?.btc_dominance.toFixed(1) || "52.5"}%</p>
+                        </div>
+                    </div>
                 </div>
             </section>
 
-            {/* ─── Top 10 Coins Section ─── */}
-            <section className="relative px-4 pb-20">
-                <div className="max-w-5xl mx-auto">
-
-                    {/* Section header */}
-                    <div className="flex items-center gap-4 mb-8">
-                        <div style={{ width: 24, height: 1, background: 'rgba(129, 140, 248,0.3)' }} />
-                        <h2
-                            className="font-light"
-                            style={{
-                                fontFamily: "ui-sans-serif, system-ui, sans-serif",
-                                fontSize: '1.5rem',
-                                color: '#fafafa',
-                                letterSpacing: '0.04em',
-                            }}
-                        >
-                            Top <span style={{ fontStyle: 'italic', color: '#818cf8' }}>10</span> by Market Cap
-                        </h2>
-                        <div style={{ flex: 1, height: 1, background: 'rgba(63, 63, 70,0.2)' }} />
+            {/* ── ASYMMETRIC BENTO BOX FEATURES ── */}
+            <section className="border-t-4 border-black bg-white">
+                <div className="max-w-[1400px] mx-auto px-6 py-24">
+                    <div className="mb-16 border-b-4 border-black pb-4 inline-block">
+                        <h2 className="text-6xl font-black uppercase tracking-tighter">System Specs</h2>
                     </div>
 
-                    {/* Error state */}
-                    {error && !loading && (
-                        <div
-                            style={{
-                                padding: '16px 20px',
-                                background: 'rgba(244, 63, 94,0.1)',
-                                border: '1px solid rgba(244, 63, 94,0.25)',
-                                ...monoStyle,
-                                fontSize: '0.6rem',
-                                color: '#f43f5e',
-                                letterSpacing: '0.1em',
-                                textAlign: 'center',
-                            }}
-                        >
-                            {error}
-                            <button
-                                onClick={fetchMarketData}
-                                style={{
-                                    marginLeft: 12,
-                                    background: 'transparent',
-                                    border: '1px solid rgba(244, 63, 94,0.35)',
-                                    color: '#818cf8',
-                                    fontFamily: "'DM Mono', monospace",
-                                    fontSize: '0.55rem',
-                                    letterSpacing: '0.2em',
-                                    textTransform: 'uppercase',
-                                    padding: '4px 12px',
-                                    cursor: 'pointer',
-                                }}
-                            >
-                                Retry
-                            </button>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div className="bg-[#ccff00] border-4 border-black brutalist-shadow p-8 flex flex-col md:col-span-2">
+                            <div className="flex justify-between items-start mb-16">
+                                <span className="font-mono text-2xl font-black border-2 border-black px-2 bg-white">01</span>
+                                <BarChart2 size={48} />
+                            </div>
+                            <h3 className="text-4xl font-black uppercase mb-4">Granular Analytics</h3>
+                            <p className="font-mono text-lg leading-relaxed max-w-md">Real-time PnL, historical cost basis, and extreme portfolio dissection. No vague metrics.</p>
                         </div>
-                    )}
 
-                    {/* Loading skeleton */}
-                    {loading && (
-                        <div style={{ background: '#18181b', border: '1px solid rgba(63, 63, 70,0.3)', overflowX: 'auto' }}>
-                            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '600px' }}>
-                                <thead>
-                                    <tr style={{ borderBottom: '1px solid rgba(63, 63, 70,0.3)', background: 'rgba(39, 39, 42, 0.5)' }}>
-                                        <th style={{ padding: '16px', ...labelStyle, width: '60px' }}>#</th>
-                                        <th style={{ padding: '16px', ...labelStyle }}>Name</th>
-                                        <th style={{ padding: '16px', ...labelStyle, textAlign: 'right' }}>Price</th>
-                                        <th style={{ padding: '16px', ...labelStyle, textAlign: 'right' }}>24h Change</th>
-                                        <th style={{ padding: '16px', ...labelStyle, textAlign: 'right' }}>Market Cap</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {Array.from({ length: 10 }).map((_, i) => (
-                                        <tr
-                                            key={i}
-                                            style={{
-                                                borderBottom: '1px solid rgba(63, 63, 70,0.15)',
-                                                animation: `skeletonPulse 1.6s ease-in-out infinite ${i * 0.08}s`,
-                                            }}
-                                        >
-                                            <td style={{ padding: '16px' }}>
-                                                <div style={{ ...skeletonBlock, width: 20, height: 12 }} />
-                                            </td>
-                                            <td style={{ padding: '16px' }}>
-                                                <div className="flex items-center gap-3">
-                                                    <div style={{ ...skeletonBlock, width: 24, height: 24, borderRadius: '50%' }} />
-                                                    <div style={{ ...skeletonBlock, width: 80, height: 12 }} />
-                                                </div>
-                                            </td>
-                                            <td style={{ padding: '16px' }}>
-                                                <div style={{ ...skeletonBlock, width: 60, height: 12, marginLeft: 'auto' }} />
-                                            </td>
-                                            <td style={{ padding: '16px' }}>
-                                                <div style={{ ...skeletonBlock, width: 45, height: 12, marginLeft: 'auto' }} />
-                                            </td>
-                                            <td style={{ padding: '16px' }}>
-                                                <div style={{ ...skeletonBlock, width: 80, height: 12, marginLeft: 'auto' }} />
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                        <div className="bg-[#0055ff] text-white border-4 border-black brutalist-shadow p-8 flex flex-col">
+                            <div className="flex justify-between items-start mb-16">
+                                <span className="font-mono text-2xl font-black border-2 border-white px-2 bg-black">02</span>
+                                <Zap size={48} />
+                            </div>
+                            <h3 className="text-3xl font-black uppercase mb-4">Zero Latency</h3>
+                            <p className="font-mono text-base leading-relaxed">Direct WebSocket streams. Prices update faster than you can blink.</p>
                         </div>
-                    )}
 
-                    {/* Coin table */}
-                    {!loading && !error && coins.length > 0 && (
-                        <div style={{ background: '#18181b', border: '1px solid rgba(63, 63, 70,0.3)', overflowX: 'auto' }}>
-                            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '600px' }}>
-                                <thead>
-                                    <tr style={{ borderBottom: '1px solid rgba(63, 63, 70,0.3)', background: 'rgba(39, 39, 42, 0.5)' }}>
-                                        <th style={{ padding: '16px', ...labelStyle, width: '60px' }}>#</th>
-                                        <th style={{ padding: '16px', ...labelStyle }}>Name</th>
-                                        <th style={{ padding: '16px', ...labelStyle, textAlign: 'right' }}>Price</th>
-                                        <th style={{ padding: '16px', ...labelStyle, textAlign: 'right' }}>24h Change</th>
-                                        <th style={{ padding: '16px', ...labelStyle, textAlign: 'right' }}>Market Cap</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {coins.map((coin, idx) => {
-                                        const isPositive = coin.price_change_percentage_24h >= 0;
-                                        return (
-                                            <tr
-                                                key={coin.id}
-                                                className="transition-colors duration-200"
-                                                style={{
-                                                    borderBottom: '1px solid rgba(63, 63, 70,0.15)',
-                                                    animation: `heroFadeIn 0.5s ease-out ${idx * 0.04}s both`,
-                                                }}
-                                                onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'rgba(63, 63, 70,0.1)')}
-                                                onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
-                                            >
-                                                {/* Rank */}
-                                                <td style={{ padding: '16px', ...monoStyle, color: '#71717a' }}>
-                                                    {coin.market_cap_rank}
-                                                </td>
-
-                                                {/* Name */}
-                                                <td style={{ padding: '16px' }}>
-                                                    <div className="flex items-center gap-3">
-                                                        <div
-                                                            style={{
-                                                                width: 24,
-                                                                height: 24,
-                                                                borderRadius: '50%',
-                                                                border: '1px solid rgba(63, 63, 70,0.25)',
-                                                                overflow: 'hidden',
-                                                                display: 'flex',
-                                                                alignItems: 'center',
-                                                                justifyContent: 'center',
-                                                                background: '#09090b',
-                                                                flexShrink: 0,
-                                                            }}
-                                                        >
-                                                            <img
-                                                                src={coin.image}
-                                                                alt={coin.name}
-                                                                width={16}
-                                                                height={16}
-                                                                loading="lazy"
-                                                            />
-                                                        </div>
-                                                        <div className="flex items-baseline gap-2 min-w-0">
-                                                            <span
-                                                                style={{
-                                                                    fontFamily: "ui-sans-serif, system-ui, sans-serif",
-                                                                    fontSize: '0.9rem',
-                                                                    color: '#fafafa',
-                                                                    whiteSpace: 'nowrap',
-                                                                    overflow: 'hidden',
-                                                                    textOverflow: 'ellipsis',
-                                                                }}
-                                                            >
-                                                                {coin.name}
-                                                            </span>
-                                                            <span style={{ ...labelStyle, fontSize: '0.45rem', color: '#71717a' }}>
-                                                                {coin.symbol.toUpperCase()}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                </td>
-
-                                                {/* Price */}
-                                                <td
-                                                    style={{
-                                                        padding: '16px',
-                                                        textAlign: 'right',
-                                                        fontFamily: "'DM Mono', monospace",
-                                                        fontSize: '0.72rem',
-                                                        color: '#fafafa',
-                                                    }}
-                                                >
-                                                    {fmtPrice(coin.current_price)}
-                                                </td>
-
-                                                {/* 24h Change */}
-                                                <td
-                                                    style={{
-                                                        padding: '16px',
-                                                        textAlign: 'right',
-                                                        fontFamily: "'DM Mono', monospace",
-                                                        fontSize: '0.72rem',
-                                                        color: isPositive ? '#10b981' : '#f43f5e',
-                                                    }}
-                                                >
-                                                    {fmtPct(coin.price_change_percentage_24h)}
-                                                </td>
-
-                                                {/* Market Cap */}
-                                                <td
-                                                    style={{
-                                                        padding: '16px',
-                                                        textAlign: 'right',
-                                                        ...monoStyle,
-                                                        color: '#a1a1aa',
-                                                    }}
-                                                >
-                                                    {fmtUsd(coin.market_cap)}
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
+                        <div className="bg-[#ff4400] text-white border-4 border-black brutalist-shadow p-8 flex flex-col">
+                            <div className="flex justify-between items-start mb-16">
+                                <span className="font-mono text-2xl font-black border-2 border-black text-black px-2 bg-white">03</span>
+                                <Shield size={48} className="text-black" />
+                            </div>
+                            <h3 className="text-3xl font-black text-black uppercase mb-4">Bulletproof</h3>
+                            <p className="font-mono text-base text-black leading-relaxed">Local-first caching, JWT auth, background workers. It never goes down.</p>
                         </div>
-                    )}
 
+                        <div className="bg-white border-4 border-black brutalist-shadow p-8 flex flex-col md:col-span-2">
+                            <div className="flex justify-between items-start mb-16">
+                                <span className="font-mono text-2xl font-black border-2 border-black px-2 bg-[#ccff00]">04</span>
+                                <Activity size={48} />
+                            </div>
+                            <h3 className="text-4xl font-black uppercase mb-4">Complete Control</h3>
+                            <p className="font-mono text-lg leading-relaxed max-w-xl">Fully modular drag-and-drop dashboard. Put your data exactly where you want it. CSV/JSON export built in.</p>
+                        </div>
+                    </div>
                 </div>
             </section>
 
-            {/* ─── Live Market Overview (Charts) ─── */}
-            <section className="relative px-4 py-20" style={{ borderTop: '1px solid rgba(63, 63, 70,0.15)' }}>
-                <div className="max-w-5xl mx-auto">
-                    {/* Section header */}
-                    <div className="flex items-center gap-4 mb-10">
-                        <div style={{ width: 24, height: 1, background: 'rgba(129, 140, 248,0.3)' }} />
-                        <h2 className="font-light" style={{ fontFamily: "ui-sans-serif, system-ui, sans-serif", fontSize: '1.5rem', color: '#fafafa', letterSpacing: '0.04em' }}>
-                            Live Market <span style={{ fontStyle: 'italic', color: '#818cf8' }}>Overview</span>
-                        </h2>
-                        <div style={{ flex: 1, height: 1, background: 'rgba(63, 63, 70,0.2)' }} />
+            {/* ── TRADING CARDS (TOP COINS) ── */}
+            <section className="border-t-4 border-black bg-[#ccff00] py-24 overflow-hidden">
+                <div className="max-w-[1400px] mx-auto px-6 mb-12 flex items-end justify-between">
+                    <h2 className="text-6xl font-black uppercase tracking-tighter bg-white inline-block border-4 border-black brutalist-shadow-sm px-6 py-2">
+                        Top Assets
+                    </h2>
+                    <div className="font-mono font-bold text-xl hidden md:block">
+                        // LIVE_INDEX_SCAN
+                    </div>
+                </div>
+
+                <div className="flex overflow-x-auto gap-8 px-6 pb-12 snap-x" style={{ scrollbarWidth: 'none' }}>
+                    {coins.slice(0, 8).map((coin, idx) => {
+                        const colors = ['bg-white', 'bg-black text-white', 'bg-[#0055ff] text-white', 'bg-[#ff4400] text-white'];
+                        const cardStyle = colors[idx % colors.length];
+                        const isPos = coin.price_change_percentage_24h >= 0;
+
+                        return (
+                            <div key={coin.id} className={`flex-shrink-0 w-80 border-4 border-black brutalist-shadow p-6 flex flex-col snap-center ${cardStyle}`}>
+                                <div className="flex justify-between items-start mb-8 border-b-2 border-current pb-4">
+                                    <span className="font-mono text-3xl font-black">{coin.symbol.toUpperCase()}</span>
+                                    <span className="font-mono font-bold">#{coin.market_cap_rank}</span>
+                                </div>
+                                <div className="flex justify-center mb-8">
+                                    <img src={coin.image} alt={coin.name} className="w-24 h-24 border-4 border-current bg-white object-cover brutalist-shadow-sm" />
+                                </div>
+                                <h3 className="text-3xl font-black uppercase mb-2 truncate">{coin.name}</h3>
+                                <div className="font-mono text-2xl font-bold mb-4">{fmtPrice(coin.current_price)}</div>
+                                
+                                <div className={`font-mono text-lg font-black border-2 border-current px-2 py-1 inline-block self-start mb-6 ${isPos ? 'bg-[#ccff00] text-black' : 'bg-red-600 text-white'}`}>
+                                    {fmtPct(coin.price_change_percentage_24h)}
+                                </div>
+
+                                <div className="mt-auto border-t-2 border-current pt-4">
+                                    <div className="flex justify-between font-mono text-xs uppercase opacity-80">
+                                        <span>Mkt Cap</span>
+                                        <span>{fmtUsd(coin.market_cap)}</span>
+                                    </div>
+                                    <div className="h-8 w-full bg-current opacity-20 mt-4 flex items-center justify-center">
+                                        <div className="w-full h-1/2 border-y border-current stripe-pattern"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            </section>
+
+            {/* ── MARKET CHARTS ── */}
+            <section className="border-t-4 border-black bg-white py-24">
+                <div className="max-w-[1400px] mx-auto px-6">
+                    <div className="mb-12 border-b-4 border-black pb-4 inline-block">
+                        <h2 className="text-6xl font-black uppercase tracking-tighter">7D Price History</h2>
                     </div>
 
-                    {/* Top Row: 7-day Line Chart */}
-                    <div style={{ background: '#18181b', border: '1px solid rgba(63, 63, 70,0.3)', padding: '24px', marginBottom: '24px' }}>
-                        <div className="flex flex-wrap gap-2 mb-6 border-b border-[rgba(63, 63, 70,0.3)] pb-4">
+                    <div className="bg-white border-4 border-black brutalist-shadow p-8 mb-8">
+                        <div className="flex flex-wrap gap-4 mb-8 border-b-4 border-black pb-4">
                             {CHART_COINS.map(c => (
                                 <button
                                     key={c.id}
                                     onClick={() => setActiveChartTab(c.id)}
-                                    style={{
-                                        background: activeChartTab === c.id ? 'rgba(63, 63, 70,0.3)' : 'transparent',
-                                        border: `1px solid ${activeChartTab === c.id ? c.color : 'rgba(63, 63, 70,0.2)'}`,
-                                        color: activeChartTab === c.id ? '#fafafa' : '#a1a1aa',
-                                        padding: '6px 12px',
-                                        fontFamily: "'DM Mono', monospace",
-                                        fontSize: '0.65rem',
-                                        letterSpacing: '0.1em',
-                                        textTransform: 'uppercase',
-                                        cursor: 'pointer',
-                                        transition: 'all 0.2s',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '6px'
-                                    }}
+                                    className={`brutalist-btn ${activeChartTab === c.id ? 'bg-black text-white' : 'bg-white text-black'}`}
                                 >
-                                    <div style={{ width: 6, height: 6, borderRadius: '50%', background: c.color }} />
+                                    <div className="w-3 h-3 border-2 border-current" style={{ backgroundColor: c.color }} />
                                     {c.symbol}
                                 </button>
                             ))}
                         </div>
-                        <div style={{ height: 300 }}>
+                        
+                        <div className="h-[400px] border-4 border-black p-4 bg-[#f4f4f0]">
                             {chartLoading ? (
-                                <div className="w-full h-full flex items-center justify-center" style={{ background: 'rgba(63, 63, 70,0.1)', animation: 'skeletonPulse 1.6s ease-in-out infinite' }}>
-                                    <span style={{ fontFamily: "'DM Mono', monospace", fontSize: '0.7rem', color: '#71717a' }}>Loading chart...</span>
+                                <div className="w-full h-full flex items-center justify-center font-mono font-bold text-xl uppercase animate-pulse">
+                                    [ LOADING_CHART_DATA... ]
                                 </div>
                             ) : (
                                 <ResponsiveContainer width="100%" height="100%">
-                                    <AreaChart data={chartData[activeChartTab] || []} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                                        <defs>
-                                            <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
-                                                <stop offset="5%" stopColor={CHART_COINS.find(c => c.id === activeChartTab)?.color || '#818cf8'} stopOpacity={0.3}/>
-                                                <stop offset="95%" stopColor={CHART_COINS.find(c => c.id === activeChartTab)?.color || '#818cf8'} stopOpacity={0}/>
-                                            </linearGradient>
-                                        </defs>
-                                        <XAxis dataKey="timestamp" tickFormatter={formatAxisDate} tick={{ fill: '#71717a', fontSize: 10, fontFamily: "'DM Mono', monospace" }} axisLine={false} tickLine={false} minTickGap={30} />
-                                        <YAxis tickFormatter={(val) => `$${val >= 1000 ? (val / 1000).toFixed(1) + 'K' : val}`} tick={{ fill: '#71717a', fontSize: 10, fontFamily: "'DM Mono', monospace" }} axisLine={false} tickLine={false} domain={['auto', 'auto']} />
+                                    <AreaChart data={chartData[activeChartTab] || []} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
+                                        <XAxis dataKey="timestamp" tickFormatter={formatAxisDate} tick={{ fill: '#000', fontSize: 12, fontFamily: "'DM Mono', monospace", fontWeight: 'bold' }} axisLine={{ stroke: '#000', strokeWidth: 4 }} tickLine={{ stroke: '#000', strokeWidth: 2 }} minTickGap={50} />
+                                        <YAxis tickFormatter={(val) => `$${val >= 1000 ? (val / 1000).toFixed(1) + 'K' : val}`} tick={{ fill: '#000', fontSize: 12, fontFamily: "'DM Mono', monospace", fontWeight: 'bold' }} axisLine={{ stroke: '#000', strokeWidth: 4 }} tickLine={{ stroke: '#000', strokeWidth: 2 }} domain={['auto', 'auto']} orientation="right" />
                                         <Tooltip 
-                                            contentStyle={{ background: '#09090b', border: '1px solid rgba(63, 63, 70,0.5)', borderRadius: '4px', fontFamily: "'DM Mono', monospace", fontSize: '0.7rem' }}
+                                            contentStyle={{ background: '#fff', border: '4px solid #000', boxShadow: '4px 4px 0 #000', borderRadius: '0', fontFamily: "'DM Mono', monospace", fontSize: '0.8rem', fontWeight: 'bold' }}
                                             labelFormatter={(l) => formatTooltipDate(l as number)}
-                                            itemStyle={{ color: '#fafafa' }}
-                                            formatter={(val: number) => [fmtPrice(val), 'Price']}
+                                            itemStyle={{ color: '#000', fontWeight: '900' }}
+                                            formatter={(val: number) => [fmtPrice(val), 'PRICE']}
                                         />
-                                        <Area type="monotone" dataKey="price" stroke={CHART_COINS.find(c => c.id === activeChartTab)?.color || '#818cf8'} fillOpacity={1} fill="url(#colorPrice)" strokeWidth={2} isAnimationActive={true} />
+                                        <Area type="step" dataKey="price" stroke="#000" fillOpacity={1} fill={CHART_COINS.find(c => c.id === activeChartTab)?.color || '#ccff00'} strokeWidth={4} isAnimationActive={false} />
                                     </AreaChart>
                                 </ResponsiveContainer>
                             )}
                         </div>
                     </div>
-
-                    {/* Bottom Row: Donut & Bar Charts */}
-                    <div className="flex flex-col md:flex-row gap-6">
-                        {/* Donut Chart: Market Cap */}
-                        <div style={{ background: '#18181b', border: '1px solid rgba(63, 63, 70,0.3)', padding: '24px', flex: 1 }}>
-                            <h3 style={{ fontFamily: "ui-sans-serif, system-ui, sans-serif", fontSize: '1.2rem', color: '#fafafa', letterSpacing: '0.04em', marginBottom: '16px' }}>Market Cap Distribution</h3>
-                            <div style={{ height: 250 }}>
-                                {!loading && coins.length > 0 ? (
-                                    <ResponsiveContainer width="100%" height="100%">
-                                        <PieChart>
-                                            <Pie
-                                                data={coins.map(coin => ({
-                                                    ...coin,
-                                                    value: coin.market_cap // Pie chart needs 'value' key or specific mapping
-                                                }))}
-                                                dataKey="value"
-                                                nameKey="symbol"
-                                                cx="50%"
-                                                cy="50%"
-                                                innerRadius={60}
-                                                outerRadius={90}
-                                                stroke="none"
-                                                isAnimationActive={true}
-                                            >
-                                                {coins.map((coin, index) => {
-                                                    const predefined = CHART_COINS.find(c => c.id === coin.id);
-                                                    const color = predefined ? predefined.color : `hsl(${120 + index * 40}, 30%, 50%)`;
-                                                    return <Cell key={`cell-${index}`} fill={color} />;
-                                                })}
-                                            </Pie>
-                                            <Tooltip
-                                                contentStyle={{ background: '#09090b', border: '1px solid rgba(63, 63, 70,0.5)', borderRadius: '4px', fontFamily: "'DM Mono', monospace", fontSize: '0.7rem' }}
-                                                itemStyle={{ color: '#fafafa' }}
-                                                formatter={(val: number, name: string) => [fmtUsd(val), name.toUpperCase()]}
-                                            />
-                                        </PieChart>
-                                    </ResponsiveContainer>
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center" style={{ background: 'rgba(63, 63, 70,0.1)', animation: 'skeletonPulse 1.6s ease-in-out infinite' }} />
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Bar Chart: 24h Performance */}
-                        <div style={{ background: '#18181b', border: '1px solid rgba(63, 63, 70,0.3)', padding: '24px', flex: 1 }}>
-                            <h3 style={{ fontFamily: "ui-sans-serif, system-ui, sans-serif", fontSize: '1.2rem', color: '#fafafa', letterSpacing: '0.04em', marginBottom: '16px' }}>24h Performance</h3>
-                            <div style={{ height: 250 }}>
-                                {!loading && coins.length > 0 ? (
-                                    <ResponsiveContainer width="100%" height="100%">
-                                        <BarChart layout="vertical" data={coins} margin={{ top: 0, right: 40, left: 0, bottom: 0 }}>
-                                            <XAxis type="number" hide domain={['dataMin - 2', 'dataMax + 2']} />
-                                            <YAxis type="category" dataKey="symbol" tickFormatter={(val) => val.toUpperCase()} tick={{ fill: '#71717a', fontSize: 10, fontFamily: "'DM Mono', monospace" }} axisLine={false} tickLine={false} width={40} />
-                                            <Tooltip
-                                                cursor={{ fill: 'rgba(63, 63, 70,0.2)' }}
-                                                contentStyle={{ background: '#09090b', border: '1px solid rgba(63, 63, 70,0.5)', borderRadius: '4px', fontFamily: "'DM Mono', monospace", fontSize: '0.7rem' }}
-                                                formatter={(val: number) => [fmtPct(val), '24h Change']}
-                                            />
-                                            <Bar dataKey="price_change_percentage_24h" radius={[0, 4, 4, 0]} isAnimationActive={true} barSize={12}>
-                                                {coins.map((coin, index) => (
-                                                    <Cell key={`cell-${index}`} fill={coin.price_change_percentage_24h >= 0 ? '#10b981' : '#f43f5e'} />
-                                                ))}
-                                                <LabelList 
-                                                    dataKey="price_change_percentage_24h" 
-                                                    position="right" 
-                                                    formatter={(val: unknown) => fmtPct(Number(val))} 
-                                                    style={{ fill: '#a1a1aa', fontSize: 9, fontFamily: "'DM Mono', monospace" }}
-                                                />
-                                            </Bar>
-                                        </BarChart>
-                                    </ResponsiveContainer>
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center" style={{ background: 'rgba(63, 63, 70,0.1)', animation: 'skeletonPulse 1.6s ease-in-out infinite' }} />
-                                )}
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </section>
 
-            {/* ─── Features Section ─── */}
-            <section className="relative px-4 py-20" style={{ borderTop: '1px solid rgba(63, 63, 70,0.15)' }}>
-                <div className="max-w-5xl mx-auto">
-
-                    {/* Section header */}
-                    <div className="flex items-center gap-4 mb-4">
-                        <div style={{ width: 24, height: 1, background: 'rgba(129, 140, 248,0.3)' }} />
-                        <span style={{ fontSize: '0.5rem', letterSpacing: '0.35em', textTransform: 'uppercase', color: '#818cf8' }}>
-                            What you get
-                        </span>
-                    </div>
-                    <h2
-                        className="font-light mb-12"
-                        style={{
-                            fontFamily: "ui-sans-serif, system-ui, sans-serif",
-                            fontSize: 'clamp(1.4rem, 3vw, 2rem)',
-                            color: '#fafafa',
-                            letterSpacing: '0.04em',
-                        }}
-                    >
-                        Everything to <span style={{ fontStyle: 'italic', color: '#818cf8' }}>grow</span> your portfolio
-                    </h2>
-
-                    {/* Feature cards grid */}
-                    <div
-                        style={{
-                            display: 'grid',
-                            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-                            gap: '1px',
-                            background: 'rgba(63, 63, 70,0.15)',
-                        }}
-                    >
-                        {FEATURES.map((feat, idx) => (
-                            <FeatureCard key={feat.title} feature={feat} index={idx} />
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* ─── How It Works Section ─── */}
-            <section className="relative px-4 py-20" style={{ borderTop: '1px solid rgba(63, 63, 70,0.15)' }}>
-                <div className="max-w-3xl mx-auto">
-
-                    {/* Section header */}
-                    <div className="text-center mb-14">
-                        <span
-                            style={{
-                                display: 'inline-block',
-                                padding: '6px 16px',
-                                border: '1px solid rgba(63, 63, 70,0.35)',
-                                background: 'rgba(39, 39, 42, 0.5)',
-                                fontSize: '0.5rem',
-                                letterSpacing: '0.35em',
-                                textTransform: 'uppercase',
-                                color: '#818cf8',
-                                marginBottom: '16px',
-                            }}
-                        >
-                            How it works
-                        </span>
-                        <h2
-                            className="font-light"
-                            style={{
-                                fontFamily: "ui-sans-serif, system-ui, sans-serif",
-                                fontSize: 'clamp(1.4rem, 3vw, 2rem)',
-                                color: '#fafafa',
-                                letterSpacing: '0.04em',
-                            }}
-                        >
-                            Three steps to <span style={{ fontStyle: 'italic', color: '#818cf8' }}>clarity</span>
-                        </h2>
-                    </div>
-
-                    {/* Steps */}
-                    <div className="flex flex-col gap-0">
-                        {STEPS.map((step, idx) => (
-                            <StepItem key={step.title} step={step} index={idx} isLast={idx === STEPS.length - 1} />
-                        ))}
-                    </div>
-
-                    {/* CTA */}
-                    <div className="flex flex-col items-center mt-14">
-                        <Link
-                            to={isAuthenticated ? "/dashboard" : "/register"}
-                            id="how-it-works-cta"
-                            className="transition-all duration-300"
-                            style={{
-                                border: '1px solid rgba(129, 140, 248,0.4)',
-                                background: '#818cf8',
-                                color: '#09090b',
-                                fontFamily: "'DM Mono', monospace",
-                                fontSize: '0.62rem',
-                                letterSpacing: '0.3em',
-                                textTransform: 'uppercase',
-                                padding: '14px 36px',
-                                textDecoration: 'none',
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '10px',
-                            }}
-                            onMouseEnter={e => {
-                                e.currentTarget.style.background = 'transparent';
-                                e.currentTarget.style.color = '#818cf8';
-                            }}
-                            onMouseLeave={e => {
-                                e.currentTarget.style.background = '#818cf8';
-                                e.currentTarget.style.color = '#09090b';
-                            }}
-                        >
-                            <span style={{ fontFamily: "ui-sans-serif, system-ui, sans-serif", fontSize: '1rem', fontWeight: 300 }}>→</span>
-                            {isAuthenticated ? "Go to Dashboard" : "Start Tracking Free"}
-                        </Link>
-
-                        <div className="mt-10" style={{ width: 40, height: 1, background: 'rgba(129, 140, 248,0.25)' }} />
-                        <p
-                            className="mt-4"
-                            style={{
-                                fontSize: '0.5rem',
-                                letterSpacing: '0.4em',
-                                textTransform: 'uppercase',
-                                color: '#52525b',
-                            }}
-                        >
-                            Free to use · No credit card required
-                        </p>
-                    </div>
-                </div>
-            </section>
-
-            {/* ─── Trending Coins Section ─── */}
-            <section className="relative px-4 py-20" style={{ borderTop: '1px solid rgba(63, 63, 70,0.15)' }}>
-                <div className="max-w-5xl mx-auto">
-                    {/* Section header */}
-                    <div className="flex items-center gap-4 mb-8">
-                        <div style={{ width: 24, height: 1, background: 'rgba(129, 140, 248,0.3)' }} />
-                        <h2
-                            className="font-light"
-                            style={{
-                                fontFamily: "ui-sans-serif, system-ui, sans-serif",
-                                fontSize: '1.5rem',
-                                color: '#fafafa',
-                                letterSpacing: '0.04em',
-                            }}
-                        >
-                            Trending <span style={{ fontStyle: 'italic', color: '#818cf8' }}>Movers</span>
-                        </h2>
-                        <div style={{ flex: 1, height: 1, background: 'rgba(63, 63, 70,0.2)' }} />
-                    </div>
+            {/* ── FOOTER ── */}
+            <footer className="border-t-4 border-black bg-black text-white overflow-hidden relative">
+                <div className="absolute inset-0 opacity-20 stripe-pattern pointer-events-none"></div>
+                <div className="max-w-[1400px] mx-auto px-6 py-32 flex flex-col items-center justify-center text-center relative z-10">
                     
-                    {/* Horizontal scrollable row */}
-                    {!loading && !error && coins.length > 0 ? (
-                        <div className="flex overflow-x-auto gap-4 pb-4 sm:grid sm:grid-cols-5 sm:overflow-visible sm:pb-0" style={{ scrollbarWidth: 'none' }}>
-                            {[...coins].sort((a, b) => b.price_change_percentage_24h - a.price_change_percentage_24h).slice(0, 5).map((coin, idx) => {
-                                const isPositive = coin.price_change_percentage_24h >= 0;
-                                return (
-                                    <div
-                                        key={coin.id}
-                                        className="transition-all duration-200 flex-shrink-0 w-48 sm:w-auto"
-                                        style={{
-                                            background: '#18181b',
-                                            border: '1px solid rgba(63, 63, 70,0.3)',
-                                            padding: '16px',
-                                            cursor: 'default',
-                                            animation: `heroFadeIn 0.5s ease-out ${idx * 0.05}s both`,
-                                        }}
-                                        onMouseEnter={e => (e.currentTarget.style.background = '#343a36')}
-                                        onMouseLeave={e => (e.currentTarget.style.background = '#18181b')}
-                                    >
-                                        <div className="flex items-center gap-3 mb-3">
-                                            <div
-                                                style={{
-                                                    width: 28,
-                                                    height: 28,
-                                                    borderRadius: '50%',
-                                                    border: '1px solid rgba(63, 63, 70,0.3)',
-                                                    overflow: 'hidden',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center',
-                                                    background: '#09090b',
-                                                }}
-                                            >
-                                                <img src={coin.image} alt={coin.name} width={16} height={16} loading="lazy" style={{ borderRadius: '50%' }} />
-                                            </div>
-                                            <div style={{ minWidth: 0 }}>
-                                                <div style={{ ...monoStyle, fontSize: '0.68rem', color: '#fafafa', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                                    {coin.name}
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div style={{ fontFamily: "ui-sans-serif, system-ui, sans-serif", fontSize: '1.2rem', fontWeight: 300, color: '#fafafa', letterSpacing: '0.02em', marginBottom: 8 }}>
-                                            {fmtPrice(coin.current_price)}
-                                        </div>
-                                        <div style={{ display: 'inline-block', padding: '2px 6px', background: isPositive ? 'rgba(16, 185, 129,0.1)' : 'rgba(244, 63, 94,0.1)', border: `1px solid ${isPositive ? 'rgba(16, 185, 129,0.2)' : 'rgba(244, 63, 94,0.2)'}`, borderRadius: '2px' }}>
-                                            <span style={{ ...monoStyle, fontSize: '0.55rem', color: isPositive ? '#10b981' : '#f43f5e', letterSpacing: '0.08em' }}>
-                                                {fmtPct(coin.price_change_percentage_24h)}
-                                            </span>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    ) : (
-                        <div style={{ ...monoStyle, fontSize: '0.6rem', color: '#71717a' }}>
-                            {loading ? 'Loading trending coins...' : 'No data available'}
-                        </div>
-                    )}
-                </div>
-            </section>
+                    <Link to="/register" className="group block mb-16">
+                        <h2 className="text-[clamp(5rem,15vw,12rem)] font-black uppercase tracking-tighter leading-none hover:text-[#ccff00] transition-colors cursor-pointer" style={{ textShadow: '8px 8px 0 #0055ff' }}>
+                            INITIALIZE
+                        </h2>
+                    </Link>
 
-            {/* ─── Footer ─── */}
-            <footer style={{ borderTop: '1px solid rgba(63, 63, 70,0.3)', background: '#09090b' }}>
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-                    <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start gap-6">
-                        
-                        {/* Brand & Tagline */}
-                        <div className="text-center sm:text-left">
-                            <div className="flex items-center justify-center sm:justify-start gap-2 mb-2">
-                                <div style={{ width: 16, height: 16, borderRadius: '50%', border: '1px solid rgba(129, 140, 248,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    <div style={{ width: 4, height: 4, borderRadius: '50%', background: '#818cf8', opacity: 0.8 }} />
-                                </div>
-                                <span style={{ fontFamily: "ui-sans-serif, system-ui, sans-serif", fontSize: '1.2rem', color: '#fafafa', letterSpacing: '0.06em' }}>
-                                    CypherSight
-                                </span>
-                            </div>
-                            <p style={{ fontFamily: "'DM Mono', monospace", fontSize: '0.55rem', letterSpacing: '0.12em', color: '#71717a', textTransform: 'uppercase' }}>
-                                A refined crypto portfolio tracker.
-                            </p>
+                    <div className="w-full border-t-4 border-white pt-8 flex flex-col md:flex-row justify-between items-center gap-8">
+                        <div className="font-mono text-2xl font-black tracking-tighter">
+                            [ CYPHER_SIGHT ]
                         </div>
-                        
-                        {/* Links */}
-                        <div className="flex items-center gap-6">
-                            {isAuthenticated ? (
-                                <Link to="/dashboard" style={{ fontSize: '0.55rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#a1a1aa', fontFamily: "'DM Mono', monospace", textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fafafa'} onMouseLeave={e => e.currentTarget.style.color = '#a1a1aa'}>
-                                    Dashboard
-                                </Link>
-                            ) : (
-                                <>
-                                    <Link to="/login" style={{ fontSize: '0.55rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#a1a1aa', fontFamily: "'DM Mono', monospace", textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fafafa'} onMouseLeave={e => e.currentTarget.style.color = '#a1a1aa'}>
-                                        Login
-                                    </Link>
-                                    <Link to="/register" style={{ fontSize: '0.55rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#a1a1aa', fontFamily: "'DM Mono', monospace", textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fafafa'} onMouseLeave={e => e.currentTarget.style.color = '#a1a1aa'}>
-                                        Sign Up
-                                    </Link>
-                                </>
-                            )}
-                            <a href="https://github.com/mohanishp9/crypto_portfolio_tracker" target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.55rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#a1a1aa', fontFamily: "'DM Mono', monospace", textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fafafa'} onMouseLeave={e => e.currentTarget.style.color = '#a1a1aa'}>
-                                GitHub
-                            </a>
-                        </div>
-                        
-                        {/* Credits */}
-                        <div className="text-center sm:text-right mt-2 sm:mt-0">
-                            <p style={{ fontFamily: "'DM Mono', monospace", fontSize: '0.5rem', letterSpacing: '0.1em', color: '#818cf8', textTransform: 'uppercase' }}>
-                                Data provided by
-                            </p>
-                            <a href="https://www.coingecko.com/" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', marginTop: '4px', fontFamily: "'DM Mono', monospace", fontSize: '0.6rem', color: '#a1a1aa', textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#8dc63f'} onMouseLeave={e => e.currentTarget.style.color = '#a1a1aa'}>
-                                CoinGecko
-                            </a>
+                        <div className="flex gap-8 font-mono font-bold uppercase text-sm">
+                            <a href="https://github.com/mohanishp9/crypto_portfolio_tracker" target="_blank" rel="noreferrer" className="hover:text-[#ccff00] hover:underline underline-offset-4 border-2 border-transparent hover:border-[#ccff00] px-2 py-1 transition-all">Source Code</a>
+                            <a href="https://coingecko.com" target="_blank" rel="noreferrer" className="hover:text-[#ccff00] hover:underline underline-offset-4 border-2 border-transparent hover:border-[#ccff00] px-2 py-1 transition-all">CoinGecko API</a>
                         </div>
                     </div>
                 </div>
             </footer>
 
-            {/* Keyframe animations */}
-            <style>{`
-                @keyframes heroFadeIn {
-                    from { opacity: 0; transform: translateY(16px); }
-                    to   { opacity: 1; transform: translateY(0); }
-                }
-                @keyframes skeletonPulse {
-                    0%, 100% { opacity: 1; }
-                    50%      { opacity: 0.4; }
-                }
-            `}</style>
         </div>
     );
 };
-
-// ── Sub-components ─────────────────────────────────────────────
-
-const skeletonBlock: React.CSSProperties = {
-    background: 'rgba(63, 63, 70,0.25)',
-    borderRadius: 2,
-};
-
-interface StatItemProps {
-    label: string;
-    value: string;
-    labelStyle: React.CSSProperties;
-    monoStyle: React.CSSProperties;
-    className?: string;
-}
-
-const StatItem = ({ label, value, labelStyle, monoStyle, className }: StatItemProps) => (
-    <div className={`flex items-center gap-2 ${className ?? ''}`}>
-        <span style={labelStyle}>{label}</span>
-        <span style={{ ...monoStyle, color: '#a1a1aa' }}>{value}</span>
-    </div>
-);
-
-// ── Static data (hoisted outside component per rendering-hoist-jsx) ──
-
-interface Feature {
-    icon: LucideIcon;
-    title: string;
-    description: string;
-}
-
-const FEATURES: Feature[] = [
-    {
-        icon: BarChart3,
-        title: 'Portfolio Tracking',
-        description: 'Monitor your entire crypto portfolio with real-time valuations and allocation breakdowns.',
-    },
-    {
-        icon: Bell,
-        title: 'Price Alerts',
-        description: 'Set custom price thresholds and get notified when the market moves in your favour.',
-    },
-    {
-        icon: Eye,
-        title: 'Watchlist',
-        description: 'Keep an eye on coins you\u2019re considering without adding them to your portfolio.',
-    },
-    {
-        icon: ArrowLeftRight,
-        title: 'Transaction History',
-        description: 'A full ledger of every buy, sell, and transfer — sortable and searchable.',
-    },
-    {
-        icon: Activity,
-        title: 'Live Prices',
-        description: 'Market data refreshed automatically so your portfolio value is always current.',
-    },
-    {
-        icon: FolderInput,
-        title: 'Import / Export',
-        description: 'Bring in existing data or export your portfolio as JSON for backup and analysis.',
-    },
-];
-
-interface Step {
-    title: string;
-    description: string;
-}
-
-const STEPS: Step[] = [
-    {
-        title: 'Create an account',
-        description: 'Sign up in seconds — just an email and password. No KYC, no friction.',
-    },
-    {
-        title: 'Add your holdings',
-        description: 'Log your buys, sells, and transfers or import them from a file.',
-    },
-    {
-        title: 'Track and get alerts',
-        description: 'Watch your portfolio grow in real time and set alerts for the prices that matter.',
-    },
-];
-
-// ── Extracted sub-components (per rerender-no-inline-components) ──
-
-const FeatureCard = ({ feature, index }: { feature: Feature; index: number }) => {
-    const Icon = feature.icon;
-    return (
-        <div
-            className="transition-colors duration-200"
-            style={{
-                background: '#18181b',
-                padding: '28px 24px',
-                animation: `heroFadeIn 0.5s ease-out ${index * 0.06}s both`,
-            }}
-            onMouseEnter={e => (e.currentTarget.style.background = '#343a36')}
-            onMouseLeave={e => (e.currentTarget.style.background = '#18181b')}
-        >
-            <div
-                style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: '50%',
-                    border: '1px solid rgba(129, 140, 248,0.25)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    marginBottom: 16,
-                }}
-            >
-                <Icon size={16} strokeWidth={1.2} color="#818cf8" />
-            </div>
-            <h3
-                style={{
-                    fontFamily: "ui-sans-serif, system-ui, sans-serif",
-                    fontSize: '1.05rem',
-                    fontWeight: 400,
-                    color: '#fafafa',
-                    letterSpacing: '0.03em',
-                    marginBottom: 8,
-                }}
-            >
-                {feature.title}
-            </h3>
-            <p
-                style={{
-                    fontFamily: "'DM Mono', monospace",
-                    fontSize: '0.6rem',
-                    letterSpacing: '0.06em',
-                    color: '#71717a',
-                    lineHeight: 1.7,
-                }}
-            >
-                {feature.description}
-            </p>
-        </div>
-    );
-};
-
-const StepItem = ({ step, index, isLast }: { step: Step; index: number; isLast: boolean }) => (
-    <div
-        className="flex gap-6"
-        style={{ animation: `heroFadeIn 0.5s ease-out ${index * 0.1}s both` }}
-    >
-        {/* Number + connector line */}
-        <div className="flex flex-col items-center">
-            <div
-                style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: '50%',
-                    border: '1px solid rgba(129, 140, 248,0.35)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontFamily: "ui-sans-serif, system-ui, sans-serif",
-                    fontSize: '1rem',
-                    fontWeight: 300,
-                    color: '#818cf8',
-                    flexShrink: 0,
-                }}
-            >
-                {index + 1}
-            </div>
-            {!isLast && (
-                <div
-                    style={{
-                        width: 1,
-                        flex: 1,
-                        minHeight: 32,
-                        background: 'rgba(63, 63, 70,0.3)',
-                    }}
-                />
-            )}
-        </div>
-
-        {/* Content */}
-        <div style={{ paddingBottom: isLast ? 0 : 32 }}>
-            <h3
-                style={{
-                    fontFamily: "ui-sans-serif, system-ui, sans-serif",
-                    fontSize: '1.15rem',
-                    fontWeight: 400,
-                    color: '#fafafa',
-                    letterSpacing: '0.03em',
-                    marginBottom: 6,
-                }}
-            >
-                {step.title}
-            </h3>
-            <p
-                style={{
-                    fontFamily: "'DM Mono', monospace",
-                    fontSize: '0.6rem',
-                    letterSpacing: '0.06em',
-                    color: '#71717a',
-                    lineHeight: 1.7,
-                }}
-            >
-                {step.description}
-            </p>
-        </div>
-    </div>
-);
 
 export default LandingPage;

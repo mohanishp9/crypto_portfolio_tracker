@@ -126,11 +126,11 @@ export const portfolioApi = createApi({
                 responseHandler: async (response) => response.text(),
             }),
         }),
-        exportTaxReport: builder.mutation<string, { year?: number }>({
-            query: ({ year }) => ({
-                url: `/portfolio/tax-report${year ? `?year=${year}` : ""}`,
+        exportTaxReport: builder.mutation<any, { year?: number; format?: 'json' | 'csv' }>({
+            query: ({ year, format = 'csv' }) => ({
+                url: `/portfolio/tax-report?format=${format}${year ? `&year=${year}` : ""}`,
                 method: "GET",
-                responseHandler: async (response) => response.text(),
+                responseHandler: async (response) => format === 'csv' ? response.text() : response.json(),
             }),
         }),
         importTransactions: builder.mutation<{ success: boolean; preview?: Transaction[]; count?: number }, { csv: string; previewOnly?: boolean }>({

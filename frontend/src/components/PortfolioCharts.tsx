@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
     Area,
     AreaChart,
@@ -30,13 +30,33 @@ import { SortableDashboardWidget } from "./SortableDashboardWidget";
 import type { PortfolioStatsResponse } from "../types/portfolio.types";
 import { ChartSkeleton } from "./common/Skeleton";
 
-// Modern Fintech Palette: Emerald, Cyan, Indigo, Violet, Rose
-const colors = ["#10b981", "#06b6d4", "#4f46e5", "#8b5cf6", "#f43f5e"];
+// Brutalist Palette: Neon Green, Neon Red, Pure Blue, Magenta, Cyan
+const colors = ["#ccff00", "#ff3333", "#0000ff", "#ff00ff", "#00ffff"];
 
 const currency = (value: number) =>
     `$${value.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
 
 const PortfolioCharts = ({ statsData, isLoading }: { statsData?: PortfolioStatsResponse; isLoading?: boolean }) => {
+    const [chartOrder, setChartOrder] = useState<string[]>(() => {
+        const saved = localStorage.getItem("charts_layout");
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                if (Array.isArray(parsed) && parsed.length === 2) {
+                    return parsed;
+                }
+            } catch (e) {
+                console.error("Failed to parse chart layout", e);
+            }
+        }
+        return ["allocation", "performance"];
+    });
+
+    const sensors = useSensors(
+        useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+        useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+    );
+
     if (isLoading) {
         return (
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mt-8">
@@ -56,25 +76,6 @@ const PortfolioCharts = ({ statsData, isLoading }: { statsData?: PortfolioStatsR
         label: new Date(point.capturedAt).toLocaleDateString(undefined, { month: "short", day: "numeric" }),
     }));
 
-    const [chartOrder, setChartOrder] = useState<string[]>(["allocation", "performance"]);
-
-    useEffect(() => {
-        const saved = localStorage.getItem("charts_layout");
-        if (saved) {
-            try {
-                const parsed = JSON.parse(saved);
-                if (Array.isArray(parsed) && parsed.length === 2) {
-                    setChartOrder(parsed);
-                }
-            } catch (e) {}
-        }
-    }, []);
-
-    const sensors = useSensors(
-        useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
-        useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
-    );
-
     const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
         if (over && active.id !== over.id) {
@@ -92,11 +93,11 @@ const PortfolioCharts = ({ statsData, isLoading }: { statsData?: PortfolioStatsR
         if (id === "allocation") {
             return (
                 <SortableDashboardWidget key="allocation" id="allocation">
-                    <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl shadow-sm h-full">
-                        <p className="text-[10px] tracking-widest uppercase text-zinc-500">
+                    <div className="brutalist-card h-full">
+                        <p className="text-sm tracking-widest font-black uppercase text-black border-b-4 border-black pb-2">
                             Allocation
                         </p>
-                        <h3 className="font-semibold text-lg text-zinc-50 tracking-tight mt-2">
+                        <h3 className="font-black text-xl text-black tracking-tight mt-4">
                             Portfolio Mix
                         </h3>
                         <div className="h-72 mt-6">
@@ -110,7 +111,8 @@ const PortfolioCharts = ({ statsData, isLoading }: { statsData?: PortfolioStatsR
                                             innerRadius={70} 
                                             outerRadius={100} 
                                             paddingAngle={3}
-                                            stroke="none"
+                                            stroke="#000000"
+                                            strokeWidth={3}
                                         >
                                             {allocationData.map((entry, index) => (
                                                 <Cell key={entry.name} fill={colors[index % colors.length]} />
@@ -118,14 +120,14 @@ const PortfolioCharts = ({ statsData, isLoading }: { statsData?: PortfolioStatsR
                                         </Pie>
                                         <Tooltip 
                                             formatter={(value: number) => `${value.toFixed(2)}%`}
-                                            contentStyle={{ backgroundColor: '#09090b', borderColor: '#27272a', color: '#fafafa', borderRadius: '8px' }}
-                                            itemStyle={{ color: '#fafafa' }}
+                                            contentStyle={{ backgroundColor: '#fff', border: '4px solid #000', color: '#000', borderRadius: '0', boxShadow: '4px 4px 0 #000', fontWeight: 'bold', fontFamily: "'JetBrains Mono', monospace" }}
+                                            itemStyle={{ color: '#000' }}
                                         />
                                     </PieChart>
                                 </ResponsiveContainer>
                             ) : (
-                                <div className="h-full flex items-center justify-center text-sm text-zinc-500">
-                                    Allocation appears after your first holding.
+                                <div className="h-full flex items-center justify-center font-mono font-bold text-sm text-black">
+                                    NO ALLOCATION DATA YET.
                                 </div>
                             )}
                         </div>
@@ -135,11 +137,11 @@ const PortfolioCharts = ({ statsData, isLoading }: { statsData?: PortfolioStatsR
         } else {
             return (
                 <SortableDashboardWidget key="performance" id="performance">
-                    <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl shadow-sm h-full">
-                        <p className="text-[10px] tracking-widest uppercase text-zinc-500">
+                    <div className="brutalist-card h-full">
+                        <p className="text-sm tracking-widest font-black uppercase text-black border-b-4 border-black pb-2">
                             Performance
                         </p>
-                        <h3 className="font-semibold text-lg text-zinc-50 tracking-tight mt-2">
+                        <h3 className="font-black text-xl text-black tracking-tight mt-4">
                             Value Over Time
                         </h3>
                         <div className="h-72 mt-6">
@@ -148,45 +150,45 @@ const PortfolioCharts = ({ statsData, isLoading }: { statsData?: PortfolioStatsR
                                     <AreaChart data={chartData}>
                                         <defs>
                                             <linearGradient id="portfolioValue" x1="0" y1="0" x2="0" y2="1">
-                                                <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.5} />
-                                                <stop offset="95%" stopColor="#4f46e5" stopOpacity={0} />
+                                                <stop offset="5%" stopColor="#ccff00" stopOpacity={1} />
+                                                <stop offset="95%" stopColor="#ccff00" stopOpacity={1} />
                                             </linearGradient>
                                         </defs>
-                                        <CartesianGrid stroke="#27272a" strokeDasharray="3 3" vertical={false} />
+                                        <CartesianGrid stroke="#000" strokeDasharray="3 3" vertical={false} />
                                         <XAxis 
                                             dataKey="label" 
-                                            stroke="#a1a1aa" 
-                                            tick={{ fontSize: 11, fill: '#71717a' }} 
-                                            axisLine={false}
-                                            tickLine={false}
+                                            stroke="#000" 
+                                            tick={{ fontSize: 11, fill: '#000', fontWeight: 'bold', fontFamily: "'JetBrains Mono', monospace" }} 
+                                            axisLine={{ stroke: '#000', strokeWidth: 4 }}
+                                            tickLine={{ stroke: '#000', strokeWidth: 2 }}
                                             dy={10}
                                         />
                                         <YAxis 
-                                            stroke="#a1a1aa" 
-                                            tick={{ fontSize: 11, fill: '#71717a' }} 
+                                            stroke="#000" 
+                                            tick={{ fontSize: 11, fill: '#000', fontWeight: 'bold', fontFamily: "'JetBrains Mono', monospace" }} 
                                             tickFormatter={currency} 
-                                            axisLine={false}
-                                            tickLine={false}
+                                            axisLine={{ stroke: '#000', strokeWidth: 4 }}
+                                            tickLine={{ stroke: '#000', strokeWidth: 2 }}
                                             dx={-10}
                                         />
                                         <Tooltip 
                                             formatter={(value: number) => currency(value)}
-                                            contentStyle={{ backgroundColor: '#09090b', borderColor: '#27272a', color: '#fafafa', borderRadius: '8px' }}
-                                            itemStyle={{ color: '#4f46e5', fontWeight: 600 }}
+                                            contentStyle={{ backgroundColor: '#fff', border: '4px solid #000', color: '#000', borderRadius: '0', boxShadow: '4px 4px 0 #000', fontWeight: 'bold', fontFamily: "'JetBrains Mono', monospace" }}
+                                            itemStyle={{ color: '#000', fontWeight: 900 }}
                                         />
                                         <Area 
-                                            type="monotone" 
+                                            type="step" 
                                             dataKey="currentValue" 
-                                            stroke="#4f46e5" 
-                                            strokeWidth={2}
+                                            stroke="#000" 
+                                            strokeWidth={4}
                                             fillOpacity={1} 
                                             fill="url(#portfolioValue)" 
                                         />
                                     </AreaChart>
                                 </ResponsiveContainer>
                             ) : (
-                                <div className="h-full flex items-center justify-center text-sm text-zinc-500">
-                                    Snapshot history will accumulate as you keep using the dashboard.
+                                <div className="h-full flex items-center justify-center font-mono font-bold text-sm text-black uppercase">
+                                    WAITING FOR SNAPSHOTS...
                                 </div>
                             )}
                         </div>
