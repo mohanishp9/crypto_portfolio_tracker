@@ -213,10 +213,11 @@ const importTransactionsController = asyncHandler(async (req: Request, res: Resp
 
 const getPortfolioAnalyticsController = asyncHandler(async (req: Request, res: Response) => {
     const userId = ensureUserId(req);
-    const analytics = await getPortfolioAnalyticsForUser(userId);
+    const result = await getPortfolioAnalyticsForUser(userId);
     res.status(200).json({
         success: true,
-        analytics,
+        analytics: result.summary,
+        performanceMetrics: result.performanceMetrics,
     });
 });
 

@@ -27,6 +27,22 @@ import AlertsPanel from "../components/AlertsPanel";
 import CoinDetailDrawer from "../components/CoinDetailDrawer";
 import ImportExportPanel from "../components/ImportExportPanel";
 import { Skeleton } from "../components/common/Skeleton";
+import {
+    DndContext,
+    closestCenter,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors,
+    type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { SortableDashboardWidget } from "../components/SortableDashboardWidget";
 
 const Dashboard = () => {
   const { data, isLoading, error } = useGetCurrentUserQuery();
@@ -85,6 +101,138 @@ const Dashboard = () => {
       losers: [...holdings].sort((a, b) => a.priceChange24h - b.priceChange24h).slice(0, 3),
     };
   }, [statsData]);
+
+  const DEFAULT_MAIN = ["holdings", "transactions", "importExport"];
+  const [mainOrder, setMainOrder] = useState<string[]>(DEFAULT_MAIN);
+
+  const DEFAULT_SIDEBAR = ["liveMarket", "watchlist", "alerts", "gainers", "losers"];
+  const [sidebarOrder, setSidebarOrder] = useState<string[]>(DEFAULT_SIDEBAR);
+
+  useEffect(() => {
+    const savedSidebar = localStorage.getItem("sidebar_layout");
+    if (savedSidebar) {
+      try {
+        const parsed = JSON.parse(savedSidebar);
+        if (Array.isArray(parsed) && parsed.length === DEFAULT_SIDEBAR.length) {
+          setSidebarOrder(parsed);
+        }
+      } catch (e) {}
+    }
+
+    const savedMain = localStorage.getItem("main_layout");
+    if (savedMain) {
+      try {
+        const parsed = JSON.parse(savedMain);
+        if (Array.isArray(parsed) && parsed.length === DEFAULT_MAIN.length) {
+          setMainOrder(parsed);
+        }
+      } catch (e) {}
+    }
+  }, []);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  const handleSidebarDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      setSidebarOrder((items) => {
+        const oldIndex = items.indexOf(String(active.id));
+        const newIndex = items.indexOf(String(over.id));
+        const newOrder = arrayMove(items, oldIndex, newIndex);
+        localStorage.setItem("sidebar_layout", JSON.stringify(newOrder));
+        return newOrder;
+      });
+    }
+  };
+
+  const handleMainDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      setMainOrder((items) => {
+        const oldIndex = items.indexOf(String(active.id));
+        const newIndex = items.indexOf(String(over.id));
+        const newOrder = arrayMove(items, oldIndex, newIndex);
+        localStorage.setItem("main_layout", JSON.stringify(newOrder));
+        return newOrder;
+      });
+    }
+  };
+
+  const renderMainWidget = (id: string) => {
+    switch (id) {
+      case "holdings":
+        return (
+          <SortableDashboardWidget key="holdings" id="holdings">
+            <HoldingsTable statsData={statsData} onSelectCoin={setSelectedCoinId} isLoading={statsLoading} />
+          </SortableDashboardWidget>
+        );
+      case "transactions":
+        return (
+          <SortableDashboardWidget key="transactions" id="transactions">
+            <TransactionsTable
+              transactions={transactionsData?.transactions || []}
+              handleEdit={handleEdit}
+              handleDelete={handleDelete}
+              currentPage={transactionsData?.currentPage ?? 1}
+              totalPages={transactionsData?.totalPages ?? 1}
+              totalCount={transactionsData?.totalCount ?? 0}
+              onPageChange={setPage}
+              searchQuery={search}
+              onSearchChange={setSearch}
+              isLoading={transactionsLoading}
+            />
+          </SortableDashboardWidget>
+        );
+      case "importExport":
+        return (
+          <SortableDashboardWidget key="importExport" id="importExport">
+            <ImportExportPanel />
+          </SortableDashboardWidget>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const renderSidebarWidget = (id: string) => {
+    switch (id) {
+      case "liveMarket":
+        return (
+          <SortableDashboardWidget key="liveMarket" id="liveMarket">
+            <TopCoinsList onSelectCoin={setSelectedCoinId} />
+          </SortableDashboardWidget>
+        );
+      case "watchlist":
+        return (
+          <SortableDashboardWidget key="watchlist" id="watchlist">
+            <WatchlistPanel onSelectCoin={setSelectedCoinId} />
+          </SortableDashboardWidget>
+        );
+      case "alerts":
+        return (
+          <SortableDashboardWidget key="alerts" id="alerts">
+            <AlertsPanel />
+          </SortableDashboardWidget>
+        );
+      case "gainers":
+        return (
+          <SortableDashboardWidget key="gainers" id="gainers">
+            <MarketPulse title="Strongest 24H Movers" items={topMovers.gainers} tone="up" isLoading={statsLoading} />
+          </SortableDashboardWidget>
+        );
+      case "losers":
+        return (
+          <SortableDashboardWidget key="losers" id="losers">
+            <MarketPulse title="Weakest 24H Movers" items={topMovers.losers} tone="down" isLoading={statsLoading} />
+          </SortableDashboardWidget>
+        );
+      default:
+        return null;
+    }
+  };
 
   if (error && !("status" in error && error.status === 401)) {
     return (
@@ -151,28 +299,31 @@ const Dashboard = () => {
 
         <div className="grid grid-cols-1 xl:grid-cols-[1.8fr_1fr] gap-6 mt-8">
           <div className="space-y-6 min-w-0">
-            <HoldingsTable statsData={statsData} onSelectCoin={setSelectedCoinId} isLoading={statsLoading} />
-            <TransactionsTable
-              transactions={transactionsData?.transactions || []}
-              handleEdit={handleEdit}
-              handleDelete={handleDelete}
-              currentPage={transactionsData?.currentPage ?? 1}
-              totalPages={transactionsData?.totalPages ?? 1}
-              totalCount={transactionsData?.totalCount ?? 0}
-              onPageChange={setPage}
-              searchQuery={search}
-              onSearchChange={setSearch}
-              isLoading={transactionsLoading}
-            />
-            <ImportExportPanel />
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleMainDragEnd}
+            >
+              <SortableContext items={mainOrder} strategy={verticalListSortingStrategy}>
+                <div className="space-y-6">
+                  {mainOrder.map((id) => renderMainWidget(id))}
+                </div>
+              </SortableContext>
+            </DndContext>
           </div>
 
           <div className="space-y-6">
-            <TopCoinsList onSelectCoin={setSelectedCoinId} />
-            <WatchlistPanel onSelectCoin={setSelectedCoinId} />
-            <AlertsPanel />
-            <MarketPulse title="Strongest 24H Movers" items={topMovers.gainers} tone="up" isLoading={statsLoading} />
-            <MarketPulse title="Weakest 24H Movers" items={topMovers.losers} tone="down" isLoading={statsLoading} />
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleSidebarDragEnd}
+            >
+              <SortableContext items={sidebarOrder} strategy={verticalListSortingStrategy}>
+                <div className="space-y-6">
+                  {sidebarOrder.map((id) => renderSidebarWidget(id))}
+                </div>
+              </SortableContext>
+            </DndContext>
           </div>
         </div>
       </main>
