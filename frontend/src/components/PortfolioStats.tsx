@@ -1,5 +1,22 @@
+import { useState, useEffect } from "react";
 import type { PortfolioStatsResponse } from "../types/portfolio.types";
 import { CardSkeleton, InsightCardSkeleton } from "./common/Skeleton";
+import {
+    DndContext,
+    closestCenter,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors,
+    type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    rectSortingStrategy,
+} from "@dnd-kit/sortable";
+import { SortableDashboardWidget } from "./SortableDashboardWidget";
 
 interface PortfolioStatsProps {
     statsData?: PortfolioStatsResponse;
@@ -19,7 +36,7 @@ const MetricCard = ({
     caption: string;
     accentClass?: string;
 }) => (
-    <div className="bg-zinc-900/80 p-6 flex flex-col justify-center group hover:bg-zinc-800/60 transition-colors duration-300">
+    <div className="p-5 bg-zinc-900 border border-zinc-800 rounded-xl shadow-sm flex flex-col justify-center group hover:bg-zinc-800/60 transition-colors duration-300 h-full">
         <h3 className="text-[10px] tracking-widest uppercase text-zinc-500 mb-3 flex items-center gap-2">
             <span className="block w-2 h-2 rounded-full bg-indigo-500/50" />
             {label}
@@ -42,7 +59,7 @@ const InsightCard = ({
     holding?: { coinName: string; coinSymbol: string } | null;
     value: string;
 }) => (
-    <div className="p-5 bg-zinc-900 border border-zinc-800 rounded-xl shadow-sm">
+    <div className="p-5 bg-zinc-900 border border-zinc-800 rounded-xl shadow-sm h-full">
         <p className="text-[10px] tracking-widest uppercase text-zinc-500 mb-4">{title}</p>
         <div className="font-semibold text-xl text-zinc-50">
             {holding?.coinName ?? "Waiting for data"}
@@ -54,27 +71,63 @@ const InsightCard = ({
     </div>
 );
 
+const DEFAULT_STATS_ORDER = [
+    "totalValue",
+    "totalInvestment",
+    "netProfitLoss",
+    "unrealizedPnL",
+    "realizedPnL",
+    "totalROI",
+    "largestHolding",
+    "bestPerformer",
+    "watchConcentration"
+];
+
 const PortfolioStats = ({ statsData, isLoading }: PortfolioStatsProps) => {
+    const [statsOrder, setStatsOrder] = useState<string[]>(DEFAULT_STATS_ORDER);
+
+    useEffect(() => {
+        const saved = localStorage.getItem("stats_layout");
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                if (Array.isArray(parsed) && parsed.length === DEFAULT_STATS_ORDER.length) {
+                    setStatsOrder(parsed);
+                }
+            } catch (e) {}
+        }
+    }, []);
+
+    const sensors = useSensors(
+        useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+        useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+    );
+
+    const handleDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event;
+        if (over && active.id !== over.id) {
+            setStatsOrder((items) => {
+                const oldIndex = items.indexOf(String(active.id));
+                const newIndex = items.indexOf(String(over.id));
+                const newOrder = arrayMove(items, oldIndex, newIndex);
+                localStorage.setItem("stats_layout", JSON.stringify(newOrder));
+                return newOrder;
+            });
+        }
+    };
+
     if (isLoading) {
         return (
-            <div className="space-y-4 mt-8">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-zinc-800 rounded-xl overflow-hidden shadow-sm">
-                    <CardSkeleton />
-                    <CardSkeleton />
-                    <CardSkeleton />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-zinc-800 rounded-xl overflow-hidden shadow-sm">
-                    <CardSkeleton />
-                    <CardSkeleton />
-                    <CardSkeleton />
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                    <InsightCardSkeleton />
-                    <InsightCardSkeleton />
-                    <InsightCardSkeleton />
-                </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+                <CardSkeleton />
+                <CardSkeleton />
+                <CardSkeleton />
+                <CardSkeleton />
+                <CardSkeleton />
+                <CardSkeleton />
+                <InsightCardSkeleton />
+                <InsightCardSkeleton />
+                <InsightCardSkeleton />
             </div>
         );
     }
@@ -82,66 +135,119 @@ const PortfolioStats = ({ statsData, isLoading }: PortfolioStatsProps) => {
     const insights = statsData?.insights;
     const profitLoss = statsData?.profitLoss ?? 0;
 
+    const renderWidget = (id: string) => {
+        switch (id) {
+            case "totalValue":
+                return (
+                    <SortableDashboardWidget key="totalValue" id="totalValue">
+                        <MetricCard
+                            label="Total Value"
+                            value={`$${statsData?.currentValue?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) ?? "0.00"}`}
+                            caption="Portfolio worth"
+                        />
+                    </SortableDashboardWidget>
+                );
+            case "totalInvestment":
+                return (
+                    <SortableDashboardWidget key="totalInvestment" id="totalInvestment">
+                        <MetricCard
+                            label="Total Investment"
+                            value={`$${statsData?.investment?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) ?? "0.00"}`}
+                            caption="Active capital cost"
+                        />
+                    </SortableDashboardWidget>
+                );
+            case "netProfitLoss":
+                return (
+                    <SortableDashboardWidget key="netProfitLoss" id="netProfitLoss">
+                        <MetricCard
+                            label="Net Profit / Loss"
+                            value={`${profitLoss >= 0 ? "+" : ""}$${Math.abs(profitLoss).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                            caption="Total performance"
+                            accentClass={accentFor(profitLoss)}
+                        />
+                    </SortableDashboardWidget>
+                );
+            case "unrealizedPnL":
+                return (
+                    <SortableDashboardWidget key="unrealizedPnL" id="unrealizedPnL">
+                        <MetricCard
+                            label="Unrealized PnL"
+                            value={`${(statsData?.unrealizedProfit ?? 0) >= 0 ? "+" : ""}$${Math.abs(statsData?.unrealizedProfit ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                            caption="Paper gains / losses"
+                            accentClass={accentFor(statsData?.unrealizedProfit ?? 0)}
+                        />
+                    </SortableDashboardWidget>
+                );
+            case "realizedPnL":
+                return (
+                    <SortableDashboardWidget key="realizedPnL" id="realizedPnL">
+                        <MetricCard
+                            label="Realized PnL"
+                            value={`${(statsData?.realizedProfit ?? 0) >= 0 ? "+" : ""}$${Math.abs(statsData?.realizedProfit ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                            caption="Locked-in gains / losses"
+                            accentClass={accentFor(statsData?.realizedProfit ?? 0)}
+                        />
+                    </SortableDashboardWidget>
+                );
+            case "totalROI":
+                return (
+                    <SortableDashboardWidget key="totalROI" id="totalROI">
+                        <MetricCard
+                            label="Total ROI"
+                            value={`${(statsData?.profitPercentage ?? 0) >= 0 ? "+" : ""}${(statsData?.profitPercentage ?? 0).toFixed(2)}%`}
+                            caption="Since inception"
+                            accentClass={accentFor(statsData?.profitPercentage ?? 0)}
+                        />
+                    </SortableDashboardWidget>
+                );
+            case "largestHolding":
+                return (
+                    <SortableDashboardWidget key="largestHolding" id="largestHolding">
+                        <InsightCard
+                            title="Largest Holding"
+                            holding={insights?.largestHolding}
+                            value={insights?.largestHolding ? `${insights.largestHolding.allocationPercent.toFixed(1)}% of portfolio` : "Your biggest position will show here."}
+                        />
+                    </SortableDashboardWidget>
+                );
+            case "bestPerformer":
+                return (
+                    <SortableDashboardWidget key="bestPerformer" id="bestPerformer">
+                        <InsightCard
+                            title="Best Performer"
+                            holding={insights?.bestPerformer}
+                            value={insights?.bestPerformer ? `${insights.bestPerformer.totalReturn >= 0 ? "+" : ""}${insights.bestPerformer.totalReturn.toFixed(2)}% total return` : "Your strongest winner will show here."}
+                        />
+                    </SortableDashboardWidget>
+                );
+            case "watchConcentration":
+                return (
+                    <SortableDashboardWidget key="watchConcentration" id="watchConcentration">
+                        <InsightCard
+                            title="Watch Concentration"
+                            holding={insights?.worstPerformer}
+                            value={`Top holding dominance ${insights?.topHoldingDominance?.toFixed(1) ?? "0.0"}%`}
+                        />
+                    </SortableDashboardWidget>
+                );
+            default:
+                return null;
+        }
+    };
+
     return (
-        <div className="space-y-4 mt-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-zinc-800 rounded-xl overflow-hidden shadow-sm border border-zinc-800">
-                <MetricCard
-                    label="Total Value"
-                    value={`$${statsData?.currentValue?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) ?? "0.00"}`}
-                    caption="Portfolio worth"
-                />
-                <MetricCard
-                    label="Total Investment"
-                    value={`$${statsData?.investment?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) ?? "0.00"}`}
-                    caption="Active capital cost"
-                />
-                <MetricCard
-                    label="Net Profit / Loss"
-                    value={`${profitLoss >= 0 ? "+" : ""}$${Math.abs(profitLoss).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-                    caption="Total performance"
-                    accentClass={accentFor(profitLoss)}
-                />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-zinc-800 rounded-xl overflow-hidden shadow-sm border border-zinc-800">
-                <MetricCard
-                    label="Unrealized PnL"
-                    value={`${(statsData?.unrealizedProfit ?? 0) >= 0 ? "+" : ""}$${Math.abs(statsData?.unrealizedProfit ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-                    caption="Paper gains / losses"
-                    accentClass={accentFor(statsData?.unrealizedProfit ?? 0)}
-                />
-                <MetricCard
-                    label="Realized PnL"
-                    value={`${(statsData?.realizedProfit ?? 0) >= 0 ? "+" : ""}$${Math.abs(statsData?.realizedProfit ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-                    caption="Locked-in gains / losses"
-                    accentClass={accentFor(statsData?.realizedProfit ?? 0)}
-                />
-                <MetricCard
-                    label="Total ROI"
-                    value={`${(statsData?.profitPercentage ?? 0) >= 0 ? "+" : ""}${(statsData?.profitPercentage ?? 0).toFixed(2)}%`}
-                    caption="Since inception"
-                    accentClass={accentFor(statsData?.profitPercentage ?? 0)}
-                />
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                <InsightCard
-                    title="Largest Holding"
-                    holding={insights?.largestHolding}
-                    value={insights?.largestHolding ? `${insights.largestHolding.allocationPercent.toFixed(1)}% of portfolio` : "Your biggest position will show here."}
-                />
-                <InsightCard
-                    title="Best Performer"
-                    holding={insights?.bestPerformer}
-                    value={insights?.bestPerformer ? `${insights.bestPerformer.totalReturn >= 0 ? "+" : ""}${insights.bestPerformer.totalReturn.toFixed(2)}% total return` : "Your strongest winner will show here."}
-                />
-                <InsightCard
-                    title="Watch Concentration"
-                    holding={insights?.worstPerformer}
-                    value={`Top holding dominance ${insights?.topHoldingDominance?.toFixed(1) ?? "0.0"}%`}
-                />
-            </div>
-        </div>
+        <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+        >
+            <SortableContext items={statsOrder} strategy={rectSortingStrategy}>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+                    {statsOrder.map((id) => renderWidget(id))}
+                </div>
+            </SortableContext>
+        </DndContext>
     );
 };
 

@@ -1,11 +1,70 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useGetPortfolioAnalyticsQuery } from "../services/portfolioApi";
 import { TableRowSkeleton } from "./common/Skeleton";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import {
+    DndContext,
+    closestCenter,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors,
+    type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    rectSortingStrategy,
+} from "@dnd-kit/sortable";
+import { SortableMetricCard } from "./SortableMetricCard";
+
+const DEFAULT_ORDER = ["sharpe", "drawdown", "volatility", "extremes"];
 
 const PortfolioAnalytics = () => {
     const { data, isLoading } = useGetPortfolioAnalyticsQuery();
     const [isOpen, setIsOpen] = useState(false);
+    const [cardOrder, setCardOrder] = useState<string[]>(DEFAULT_ORDER);
+
+    useEffect(() => {
+        const savedOrder = localStorage.getItem("portfolio_metrics_layout");
+        if (savedOrder) {
+            try {
+                const parsed = JSON.parse(savedOrder);
+                if (Array.isArray(parsed) && parsed.length === DEFAULT_ORDER.length) {
+                    setCardOrder(parsed);
+                }
+            } catch (e) {
+                console.error("Failed to parse saved layout", e);
+            }
+        }
+    }, []);
+
+    const sensors = useSensors(
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 5,
+            },
+        }),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
+
+    const handleDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event;
+
+        if (over && active.id !== over.id) {
+            setCardOrder((items) => {
+                const oldIndex = items.indexOf(String(active.id));
+                const newIndex = items.indexOf(String(over.id));
+
+                const newOrder = arrayMove(items, oldIndex, newIndex);
+                localStorage.setItem("portfolio_metrics_layout", JSON.stringify(newOrder));
+                return newOrder;
+            });
+        }
+    };
 
     if (isLoading) {
         return (
@@ -50,41 +109,89 @@ const PortfolioAnalytics = () => {
         return null;
     }
 
+    const renderCard = (id: string) => {
+        if (!metrics) return null;
+        switch (id) {
+            case "sharpe":
+                return (
+                    <SortableMetricCard
+                        key="sharpe"
+                        id="sharpe"
+                        title="Sharpe Ratio"
+                        value={
+                            <p className={`text-2xl font-semibold tracking-tight ${metrics.sharpeRatio >= 1 ? 'text-emerald-400' : metrics.sharpeRatio > 0 ? 'text-zinc-50' : 'text-rose-400'}`}>
+                                {metrics.sharpeRatio.toFixed(2)}
+                            </p>
+                        }
+                        description="Risk-adjusted return"
+                    />
+                );
+            case "drawdown":
+                return (
+                    <SortableMetricCard
+                        key="drawdown"
+                        id="drawdown"
+                        title="Max Drawdown"
+                        value={
+                            <p className="text-2xl font-semibold tracking-tight text-rose-400">
+                                -{metrics.maxDrawdown.toFixed(2)}%
+                            </p>
+                        }
+                        description="Peak-to-trough drop"
+                    />
+                );
+            case "volatility":
+                return (
+                    <SortableMetricCard
+                        key="volatility"
+                        id="volatility"
+                        title="Volatility"
+                        value={
+                            <p className="text-2xl font-semibold tracking-tight text-indigo-400">
+                                {metrics.volatility.toFixed(2)}%
+                            </p>
+                        }
+                        description="Annualized std dev"
+                    />
+                );
+            case "extremes":
+                return (
+                    <SortableMetricCard
+                        key="extremes"
+                        id="extremes"
+                        title="Best / Worst Day"
+                        value={
+                            <div className="flex items-center gap-2">
+                                <p className="text-lg font-semibold tracking-tight text-emerald-400">+{metrics.bestDay.toFixed(2)}%</p>
+                                <span className="text-zinc-700">/</span>
+                                <p className="text-lg font-semibold tracking-tight text-rose-400">{metrics.worstDay.toFixed(2)}%</p>
+                            </div>
+                        }
+                        description="Single period extremes"
+                    />
+                );
+            default:
+                return null;
+        }
+    };
+
     return (
         <div className="mt-8 space-y-6">
             {metrics && (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="p-5 bg-zinc-900 border border-zinc-800 rounded-xl shadow-sm">
-                        <p className="text-[10px] tracking-widest uppercase text-zinc-500 font-semibold mb-1">Sharpe Ratio</p>
-                        <p className={`text-2xl font-semibold tracking-tight ${metrics.sharpeRatio >= 1 ? 'text-emerald-400' : metrics.sharpeRatio > 0 ? 'text-zinc-50' : 'text-rose-400'}`}>
-                            {metrics.sharpeRatio.toFixed(2)}
-                        </p>
-                        <p className="text-xs text-zinc-600 mt-1">Risk-adjusted return</p>
-                    </div>
-                    <div className="p-5 bg-zinc-900 border border-zinc-800 rounded-xl shadow-sm">
-                        <p className="text-[10px] tracking-widest uppercase text-zinc-500 font-semibold mb-1">Max Drawdown</p>
-                        <p className="text-2xl font-semibold tracking-tight text-rose-400">
-                            -{metrics.maxDrawdown.toFixed(2)}%
-                        </p>
-                        <p className="text-xs text-zinc-600 mt-1">Peak-to-trough drop</p>
-                    </div>
-                    <div className="p-5 bg-zinc-900 border border-zinc-800 rounded-xl shadow-sm">
-                        <p className="text-[10px] tracking-widest uppercase text-zinc-500 font-semibold mb-1">Volatility</p>
-                        <p className="text-2xl font-semibold tracking-tight text-indigo-400">
-                            {metrics.volatility.toFixed(2)}%
-                        </p>
-                        <p className="text-xs text-zinc-600 mt-1">Annualized std dev</p>
-                    </div>
-                    <div className="p-5 bg-zinc-900 border border-zinc-800 rounded-xl shadow-sm">
-                        <p className="text-[10px] tracking-widest uppercase text-zinc-500 font-semibold mb-1">Best / Worst Day</p>
-                        <div className="flex items-center gap-2">
-                            <p className="text-lg font-semibold tracking-tight text-emerald-400">+{metrics.bestDay.toFixed(2)}%</p>
-                            <span className="text-zinc-700">/</span>
-                            <p className="text-lg font-semibold tracking-tight text-rose-400">{metrics.worstDay.toFixed(2)}%</p>
+                <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={handleDragEnd}
+                >
+                    <SortableContext
+                        items={cardOrder}
+                        strategy={rectSortingStrategy}
+                    >
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            {cardOrder.map(id => renderCard(id))}
                         </div>
-                        <p className="text-xs text-zinc-600 mt-1">Single period extremes</p>
-                    </div>
-                </div>
+                    </SortableContext>
+                </DndContext>
             )}
 
             <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-sm transition-all duration-300">
