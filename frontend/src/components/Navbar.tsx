@@ -19,12 +19,40 @@ const Navbar = ({ email, handleLogout, isLoggingOut }: NavbarProps) => {
                         onClick={() => navigate("/")}
                         className="flex items-center gap-3 transition-opacity hover:opacity-80"
                     >
-                        <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center shrink-0">
-                            <div className="w-2.5 h-2.5 rounded-full bg-gradient-to-r from-indigo-500 to-cyan-500" />
+                        <div
+                            style={{
+                                width: 28,
+                                height: 28,
+                                borderRadius: '50%',
+                                border: '1px solid rgba(129, 140, 248,0.5)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                flexShrink: 0,
+                            }}
+                        >
+                            <div
+                                style={{
+                                    width: 8,
+                                    height: 8,
+                                    borderRadius: '50%',
+                                    background: '#818cf8',
+                                    opacity: 0.8,
+                                }}
+                            />
                         </div>
-                        <h1 className="font-semibold text-xl tracking-tight text-zinc-50">
-                            Cypher<span className="text-zinc-500 font-normal italic">Sight</span>
-                        </h1>
+                        <span
+                            className="font-light"
+                            style={{
+                                fontFamily: "ui-sans-serif, system-ui, sans-serif",
+                                fontSize: '1.25rem', // Fixed size for navbar instead of clamp to prevent jumps
+                                color: '#fafafa',
+                                letterSpacing: '0.06em',
+                            }}
+                        >
+                            CypherSight{' '}
+                            <span style={{ color: '#818cf8', fontStyle: 'italic' }}>Portfolio</span>
+                        </span>
                     </button>
 
                     {/* Right side */}
