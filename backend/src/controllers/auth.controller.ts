@@ -1,5 +1,5 @@
 import { asyncHandler } from "../utils/asyncHandler";
-import { registerSchema, RegisterInput, loginSchema, LoginInput } from "../utils/validation";
+import { registerSchema, RegisterInput, loginSchema, LoginInput, verifyOtpSchema, VerifyOtpInput } from "../utils/validation";
 import User from "../models/User.model";
 import RefreshToken from "../models/RefreshToken.model";
 import { generateAccessToken, generateRefreshToken, hashToken } from "../utils/jwt";
@@ -28,12 +28,15 @@ const createRefreshTokenRecord = async (userId: string, token: string, familyId:
     });
 };
 
-// @desc Create a new user
-// @route POST /register
-// @access Public
-const registerUserController = asyncHandler(async (req: Request, res: Response) => {
-    const validatedData = registerSchema.parse(req.body);
+import bcrypt from "bcryptjs";
+import { redis } from "../config/redis";
+import { sendTransactionalEmail } from "../services/email.service";
 
+// @desc Initiate user registration (Sends OTP)
+// @route POST /register/initiate
+// @access Public
+const initiateRegistrationController = asyncHandler(async (req: Request, res: Response) => {
+    const validatedData = registerSchema.parse(req.body);
     const { name, email, password }: RegisterInput = validatedData;
 
     const userExists = await User.findOne({ email });
@@ -43,11 +46,112 @@ const registerUserController = asyncHandler(async (req: Request, res: Response) 
         throw new Error("User already exists");
     }
 
-    const user = await User.create({
+    if (!redis) {
+        res.status(500);
+        throw new Error("Redis is not available. Cannot process registration.");
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    const payload = {
         name,
         email,
-        password,
+        hashedPassword,
+        otp,
+        attempts: 3
+    };
+
+    const redisKey = `registration:otp:${email}`;
+    await redis.set(redisKey, JSON.stringify(payload), "EX", 600); // 10 minutes expiry
+
+    const emailSent = await sendTransactionalEmail({
+        to: email,
+        recipientName: name,
+        subject: "Your Registration Verification Code",
+        htmlContent: `
+        <html>
+            <body style="font-family: sans-serif; padding: 20px;">
+                <h2>Verify Your Registration</h2>
+                <p>Your One-Time Password (OTP) is:</p>
+                <h1 style="background: #f3f4f6; padding: 10px; display: inline-block; letter-spacing: 2px;">${otp}</h1>
+                <p>It is valid for 10 minutes.</p>
+            </body>
+        </html>
+        `
     });
+
+    if (!emailSent) {
+        // If email fails (e.g. invalid IP at Brevo), delete the Redis key and throw error
+        await redis.del(redisKey);
+        res.status(500);
+        throw new Error("Failed to send OTP email. Please try again later.");
+    }
+
+    res.status(200).json({
+        success: true,
+        message: "OTP sent successfully to email"
+    });
+});
+
+// @desc Verify OTP and complete registration
+// @route POST /register/verify
+// @access Public
+const verifyRegistrationController = asyncHandler(async (req: Request, res: Response) => {
+    const validatedData = verifyOtpSchema.parse(req.body);
+    const { email, otp }: VerifyOtpInput = validatedData;
+
+    if (!redis) {
+        res.status(500);
+        throw new Error("Redis is not available.");
+    }
+
+    const redisKey = `registration:otp:${email}`;
+    
+    // WATCH the key for optimistic locking
+    await redis.watch(redisKey);
+
+    const dataString = await redis.get(redisKey);
+    if (!dataString) {
+        await redis.unwatch();
+        res.status(400);
+        throw new Error("OTP expired or invalid");
+    }
+
+    const data = JSON.parse(dataString);
+
+    if (data.attempts <= 0) {
+        await redis.unwatch();
+        res.status(400);
+        throw new Error("Too many failed attempts. Please register again.");
+    }
+
+    if (data.otp !== otp) {
+        data.attempts -= 1;
+
+        const multi = redis.multi();
+        multi.set(redisKey, JSON.stringify(data), "KEEPTTL");
+
+        const results = await multi.exec();
+
+        if (!results) {
+            res.status(409);
+            throw new Error("Conflict: Concurrent request detected.");
+        }
+
+        res.status(400);
+        throw new Error(`Invalid OTP. ${data.attempts} attempts left.`);
+    }
+
+    await redis.unwatch();
+
+    const user = await User.create({
+        name: data.name,
+        email: data.email,
+        password: data.hashedPassword,
+    });
+
+    await redis.del(redisKey);
 
     if (user) {
         const accessToken = generateAccessToken(user._id.toString());
@@ -255,8 +359,9 @@ const refreshTokenController = asyncHandler(async (req: Request, res: Response) 
 });
 
 export {
-    registerUserController,
     loginUserController,
+    initiateRegistrationController,
+    verifyRegistrationController,
     logoutUserController,
     getCurrentUserProfileController,
     refreshTokenController,

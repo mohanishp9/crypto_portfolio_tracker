@@ -65,6 +65,11 @@ userSchema.pre<HydratedDocument<IUser>>("save", async function () {
         return;
     }
 
+    // Skip hashing if it already looks like a bcrypt hash (e.g. from Redis OTP flow)
+    if (this.password.startsWith("$2a$") || this.password.startsWith("$2b$")) {
+        return;
+    }
+
     // Hash password using bcrypt (salt = 10)
     this.password = await bcrypt.hash(this.password, 10);
 });

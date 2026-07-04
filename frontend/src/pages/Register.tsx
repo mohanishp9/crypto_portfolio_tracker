@@ -1,18 +1,23 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
-import { useRegisterMutation } from '../services/authApi';
+import { useInitiateRegistrationMutation, useVerifyRegistrationMutation } from '../services/authApi';
 import { useDispatch } from 'react-redux';
 import { setCredentials } from '../features/auth/authSlice';
 import { useNavigate, Link } from 'react-router-dom';
 import { Activity } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 const Register = () => {
-    const [register, { isLoading, error }] = useRegisterMutation();
+    const [step, setStep] = useState<'form' | 'otp'>('form');
+    const [initiateRegistration, { isLoading: isInitiating }] = useInitiateRegistrationMutation();
+    const [verifyRegistration, { isLoading: isVerifying }] = useVerifyRegistrationMutation();
+    
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
     const [formData, setFormData] = useState({ name: '', email: '', password: '' });
     const [validationErrors, setValidationErrors] = useState({ name: '', email: '', password: '' });
+    const [otp, setOtp] = useState('');
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -30,16 +35,41 @@ const Register = () => {
         return isValid;
     };
 
-    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    const handleInitiate = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (!validateForm()) return;
         try {
-            const result = await register({ name: formData.name, email: formData.email, password: formData.password }).unwrap();
-            dispatch(setCredentials({ user: result.user, accessToken: result.accessToken }));
-            navigate('/dashboard');
-        } catch (err) {
-            console.error('Registration failed:', err);
+            await initiateRegistration({ name: formData.name, email: formData.email, password: formData.password }).unwrap();
+            toast.success('OTP sent to your email!');
+            setStep('otp');
+        } catch (err: any) {
+            console.error('Registration initiation failed:', err);
+            toast.error(getErrorMessage(err));
         }
+    };
+
+    const handleVerify = async (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        if (otp.length !== 6) {
+            toast.error('OTP must be 6 digits.');
+            return;
+        }
+        try {
+            const result = await verifyRegistration({ email: formData.email, otp }).unwrap();
+            dispatch(setCredentials({ user: result.user, accessToken: result.accessToken }));
+            toast.success('Registration successful! Welcome to CypherSight.');
+            navigate('/dashboard');
+        } catch (err: any) {
+            console.error('OTP verification failed:', err);
+            toast.error(getErrorMessage(err));
+        }
+    };
+
+    const getErrorMessage = (error: any) => {
+        if (!error) return null;
+        if (typeof error.data?.message === 'string') return error.data.message;
+        if ('data' in error) return 'An error occurred. Please try again.';
+        return 'Network error.';
     };
 
     return (
@@ -70,95 +100,111 @@ const Register = () => {
                     {/* Card header */}
                     <div className="px-8 py-6 border-b border-zinc-800/50 bg-zinc-900/30 text-center">
                         <p className="text-[10px] tracking-widest uppercase text-emerald-500 mb-1 font-semibold">
-                            First time here
+                            {step === 'form' ? 'First time here' : 'Verification Required'}
                         </p>
                         <h2 className="text-xl font-semibold text-zinc-50 tracking-tight">
-                            Create <span className="font-normal text-zinc-500 italic">Account</span>
+                            {step === 'form' ? (
+                                <>Create <span className="font-normal text-zinc-500 italic">Account</span></>
+                            ) : (
+                                <>Enter <span className="font-normal text-zinc-500 italic">OTP</span></>
+                            )}
                         </h2>
                     </div>
 
-                    {/* API error */}
-                    {error && (
-                        <div className="mx-8 mt-6 px-4 py-3 bg-rose-500/10 border border-rose-500/20 rounded-lg text-xs font-mono text-rose-400 text-center">
-                            {'data' in error ? 'Registration failed. Try a different email.' : 'Something went wrong. Try again.'}
-                        </div>
+                    {step === 'form' ? (
+                        <form onSubmit={handleInitiate} className="px-8 py-6 space-y-4">
+                            <div>
+                                <label htmlFor="name" className="block text-[10px] tracking-widest uppercase text-zinc-500 mb-2 font-semibold">Full Name</label>
+                                <input
+                                    type="text" id="name" name="name"
+                                    value={formData.name} onChange={handleChange}
+                                    placeholder="John Doe"
+                                    disabled={isInitiating}
+                                    className={`w-full bg-zinc-950/50 border text-zinc-50 font-mono text-sm py-2.5 px-4 rounded-lg focus:outline-none transition-colors placeholder-zinc-700 disabled:opacity-50 ${validationErrors.name ? 'border-rose-500/50 focus:border-rose-500' : 'border-zinc-800 focus:border-indigo-500'}`}
+                                />
+                                {validationErrors.name && (
+                                    <p className="text-[10px] text-rose-400 mt-1.5 font-mono">{validationErrors.name}</p>
+                                )}
+                            </div>
+
+                            <div>
+                                <label htmlFor="email" className="block text-[10px] tracking-widest uppercase text-zinc-500 mb-2 font-semibold">Email Address</label>
+                                <input
+                                    type="email" id="email" name="email"
+                                    value={formData.email} onChange={handleChange}
+                                    placeholder="you@example.com"
+                                    disabled={isInitiating}
+                                    className={`w-full bg-zinc-950/50 border text-zinc-50 font-mono text-sm py-2.5 px-4 rounded-lg focus:outline-none transition-colors placeholder-zinc-700 disabled:opacity-50 ${validationErrors.email ? 'border-rose-500/50 focus:border-rose-500' : 'border-zinc-800 focus:border-indigo-500'}`}
+                                />
+                                {validationErrors.email && (
+                                    <p className="text-[10px] text-rose-400 mt-1.5 font-mono">{validationErrors.email}</p>
+                                )}
+                            </div>
+
+                            <div>
+                                <label htmlFor="password" className="block text-[10px] tracking-widest uppercase text-zinc-500 mb-2 font-semibold">Password</label>
+                                <input
+                                    type="password" id="password" name="password"
+                                    value={formData.password} onChange={handleChange}
+                                    placeholder="••••••••"
+                                    disabled={isInitiating}
+                                    className={`w-full bg-zinc-950/50 border text-zinc-50 font-mono text-sm py-2.5 px-4 rounded-lg focus:outline-none transition-colors placeholder-zinc-700 disabled:opacity-50 ${validationErrors.password ? 'border-rose-500/50 focus:border-rose-500' : 'border-zinc-800 focus:border-indigo-500'}`}
+                                />
+                                {validationErrors.password && (
+                                    <p className="text-[10px] text-rose-400 mt-1.5 font-mono">{validationErrors.password}</p>
+                                )}
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={isInitiating}
+                                className="w-full mt-4 py-3 bg-indigo-500 border border-indigo-500 text-white rounded-lg text-xs font-semibold uppercase tracking-wider transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:bg-indigo-600 hover:border-indigo-600 flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/20"
+                            >
+                                {isInitiating ? "Sending OTP..." : "Continue"}
+                            </button>
+                        </form>
+                    ) : (
+                        <form onSubmit={handleVerify} className="px-8 py-6 space-y-4 animate-fade-in">
+                            <p className="text-xs text-zinc-400 text-center mb-4">
+                                We sent a 6-digit code to <strong className="text-zinc-50">{formData.email}</strong>
+                            </p>
+                            <div>
+                                <label htmlFor="otp" className="block text-[10px] tracking-widest uppercase text-zinc-500 mb-2 font-semibold">Verification Code</label>
+                                <input
+                                    type="text" id="otp" name="otp"
+                                    value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                                    placeholder="123456"
+                                    disabled={isVerifying}
+                                    className="w-full bg-zinc-950/50 border text-center text-zinc-50 font-mono text-2xl tracking-[0.5em] py-4 rounded-lg focus:outline-none transition-colors placeholder-zinc-700 disabled:opacity-50 border-zinc-800 focus:border-indigo-500"
+                                />
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={isVerifying || otp.length !== 6}
+                                className="w-full mt-4 py-3 bg-emerald-500 border border-emerald-500 text-zinc-950 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:bg-emerald-400 hover:border-emerald-400 flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20"
+                            >
+                                {isVerifying ? "Verifying..." : "Confirm & Register"}
+                            </button>
+                        </form>
                     )}
-
-                    {/* Form */}
-                    <form onSubmit={handleSubmit} className="px-8 py-6 space-y-4">
-                        
-                        {/* Name */}
-                        <div>
-                            <label htmlFor="name" className="block text-[10px] tracking-widest uppercase text-zinc-500 mb-2 font-semibold">Full Name</label>
-                            <input
-                                type="text" id="name" name="name"
-                                value={formData.name} onChange={handleChange}
-                                placeholder="John Doe"
-                                disabled={isLoading}
-                                className={`w-full bg-zinc-950/50 border text-zinc-50 font-mono text-sm py-2.5 px-4 rounded-lg focus:outline-none transition-colors placeholder-zinc-700 disabled:opacity-50 ${validationErrors.name ? 'border-rose-500/50 focus:border-rose-500' : 'border-zinc-800 focus:border-indigo-500'}`}
-                            />
-                            {validationErrors.name && (
-                                <p className="text-[10px] text-rose-400 mt-1.5 font-mono">{validationErrors.name}</p>
-                            )}
-                        </div>
-
-                        {/* Email */}
-                        <div>
-                            <label htmlFor="email" className="block text-[10px] tracking-widest uppercase text-zinc-500 mb-2 font-semibold">Email Address</label>
-                            <input
-                                type="email" id="email" name="email"
-                                value={formData.email} onChange={handleChange}
-                                placeholder="you@example.com"
-                                disabled={isLoading}
-                                className={`w-full bg-zinc-950/50 border text-zinc-50 font-mono text-sm py-2.5 px-4 rounded-lg focus:outline-none transition-colors placeholder-zinc-700 disabled:opacity-50 ${validationErrors.email ? 'border-rose-500/50 focus:border-rose-500' : 'border-zinc-800 focus:border-indigo-500'}`}
-                            />
-                            {validationErrors.email && (
-                                <p className="text-[10px] text-rose-400 mt-1.5 font-mono">{validationErrors.email}</p>
-                            )}
-                        </div>
-
-                        {/* Password */}
-                        <div>
-                            <label htmlFor="password" className="block text-[10px] tracking-widest uppercase text-zinc-500 mb-2 font-semibold">Password</label>
-                            <input
-                                type="password" id="password" name="password"
-                                value={formData.password} onChange={handleChange}
-                                placeholder="••••••••"
-                                disabled={isLoading}
-                                className={`w-full bg-zinc-950/50 border text-zinc-50 font-mono text-sm py-2.5 px-4 rounded-lg focus:outline-none transition-colors placeholder-zinc-700 disabled:opacity-50 ${validationErrors.password ? 'border-rose-500/50 focus:border-rose-500' : 'border-zinc-800 focus:border-indigo-500'}`}
-                            />
-                            {validationErrors.password && (
-                                <p className="text-[10px] text-rose-400 mt-1.5 font-mono">{validationErrors.password}</p>
-                            )}
-                        </div>
-
-                        {/* Submit */}
-                        <button
-                            type="submit"
-                            disabled={isLoading}
-                            className="w-full mt-4 py-3 bg-indigo-500 border border-indigo-500 text-white rounded-lg text-xs font-semibold uppercase tracking-wider transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:bg-indigo-600 hover:border-indigo-600 flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/20"
-                        >
-                            {isLoading ? (
-                                <>
-                                    <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
-                                        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" strokeDasharray="40" strokeDashoffset="10" />
-                                    </svg>
-                                    Creating...
-                                </>
-                            ) : (
-                                "Initialize"
-                            )}
-                        </button>
-                    </form>
 
                     {/* Footer link */}
                     <div className="px-8 pb-6 pt-4 text-center border-t border-zinc-800/50">
-                        <p className="text-xs text-zinc-500 font-medium">
-                            Already active?{' '}
-                            <Link to="/login" className="text-emerald-400 hover:text-emerald-300 transition-colors ml-1 font-semibold">
-                                Sign in →
-                            </Link>
-                        </p>
+                        {step === 'form' ? (
+                            <p className="text-xs text-zinc-500 font-medium">
+                                Already active?{' '}
+                                <Link to="/login" className="text-emerald-400 hover:text-emerald-300 transition-colors ml-1 font-semibold">
+                                    Sign in →
+                                </Link>
+                            </p>
+                        ) : (
+                            <p className="text-xs text-zinc-500 font-medium">
+                                <button type="button" onClick={() => setStep('form')} className="text-zinc-400 hover:text-zinc-300 transition-colors">
+                                    ← Back to registration
+                                </button>
+                            </p>
+                        )}
                     </div>
                 </div>
             </div>

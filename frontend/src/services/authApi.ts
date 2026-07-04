@@ -20,6 +20,16 @@ interface RegisterInput {
     password: string;
 }
 
+interface InitiateResponse {
+    success: boolean;
+    message: string;
+}
+
+interface VerifyOtpInput {
+    email: string;
+    otp: string;
+}
+
 interface LoginInput {
     email: string;
     password: string;
@@ -46,10 +56,19 @@ export const authApi = createApi({
     baseQuery, // Redux-aware: reads accessToken from state, NOT localStorage
     tagTypes: ['User'],
     endpoints: (builder) => ({
-        // Register mutation
-        register: builder.mutation<AuthResponse, RegisterInput>({
+        // Initiate registration
+        initiateRegistration: builder.mutation<InitiateResponse, RegisterInput>({
             query: (credentials) => ({
-                url: '/auth/register',
+                url: '/auth/register/initiate',
+                method: 'POST',
+                body: credentials,
+            }),
+        }),
+
+        // Verify OTP
+        verifyRegistration: builder.mutation<AuthResponse, VerifyOtpInput>({
+            query: (credentials) => ({
+                url: '/auth/register/verify',
                 method: 'POST',
                 body: credentials,
             }),
@@ -94,7 +113,8 @@ export const authApi = createApi({
 
 // Export auto-generated hooks
 export const {
-    useRegisterMutation,
+    useInitiateRegistrationMutation,
+    useVerifyRegistrationMutation,
     useLoginMutation,
     useLogoutMutation,
     useGetCurrentUserQuery,
