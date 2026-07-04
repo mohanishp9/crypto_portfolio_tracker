@@ -25,11 +25,12 @@ type UserModel = Model<IUser, {}, IUserMethods>;
 // --------------------------------------------------
 // Schema<DocType, ModelType, InstanceMethods>
 const userSchema = new Schema<IUser, UserModel, IUserMethods>({
-    // User's full name
+    // User's full name (must be unique now)
     name: {
         type: String,
         required: true,
         trim: true,
+        unique: true,
     },
 
     // User email - must be unique and stored lowercase

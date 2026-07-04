@@ -5,6 +5,7 @@ import { baseQuery } from './baseQuery';
 interface User {
     _id: string;
     name: string;
+    username?: string;
     email: string;
 }
 
@@ -16,6 +17,7 @@ interface AuthResponse {
 
 interface RegisterInput {
     name: string;
+    username?: string;
     email: string;
     password: string;
 }

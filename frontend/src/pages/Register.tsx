@@ -1,16 +1,19 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { FormEvent } from 'react';
 import { useInitiateRegistrationMutation, useVerifyRegistrationMutation } from '../services/authApi';
+import { useLazyCheckNameQuery } from '../services/userApi';
 import { useDispatch } from 'react-redux';
 import { setCredentials } from '../features/auth/authSlice';
 import { useNavigate, Link } from 'react-router-dom';
-import { Activity } from 'lucide-react';
+import { Activity, CheckCircle, XCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
+import useDebounce from '../hooks/useDebounce';
 
 const Register = () => {
     const [step, setStep] = useState<'form' | 'otp'>('form');
     const [initiateRegistration, { isLoading: isInitiating }] = useInitiateRegistrationMutation();
     const [verifyRegistration, { isLoading: isVerifying }] = useVerifyRegistrationMutation();
+    const [checkName, { isFetching: isCheckingName, data: nameData }] = useLazyCheckNameQuery();
     
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -18,6 +21,14 @@ const Register = () => {
     const [formData, setFormData] = useState({ name: '', email: '', password: '' });
     const [validationErrors, setValidationErrors] = useState({ name: '', email: '', password: '' });
     const [otp, setOtp] = useState('');
+
+    const debouncedName = useDebounce(formData.name, 500);
+
+    useEffect(() => {
+        if (debouncedName && debouncedName.trim().length >= 2) {
+            checkName(debouncedName.trim());
+        }
+    }, [debouncedName, checkName]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -29,6 +40,7 @@ const Register = () => {
         const errors = { name: '', email: '', password: '' };
         let isValid = true;
         if (formData.name.trim().length < 2) { errors.name = 'At least 2 characters'; isValid = false; }
+        if (nameData && !nameData.available) { errors.name = 'Name is already taken'; isValid = false; }
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) { errors.email = 'Valid email required'; isValid = false; }
         if (formData.password.length < 6) { errors.password = 'Minimum 6 characters'; isValid = false; }
         setValidationErrors(errors);
@@ -39,7 +51,7 @@ const Register = () => {
         e.preventDefault();
         if (!validateForm()) return;
         try {
-            await initiateRegistration({ name: formData.name, email: formData.email, password: formData.password }).unwrap();
+            await initiateRegistration({ name: formData.name.trim(), email: formData.email, password: formData.password }).unwrap();
             toast.success('OTP sent to your email!');
             setStep('otp');
         } catch (err: any) {
@@ -115,15 +127,35 @@ const Register = () => {
                         <form onSubmit={handleInitiate} className="px-8 py-6 space-y-4">
                             <div>
                                 <label htmlFor="name" className="block text-[10px] tracking-widest uppercase text-zinc-500 mb-2 font-semibold">Full Name</label>
-                                <input
-                                    type="text" id="name" name="name"
-                                    value={formData.name} onChange={handleChange}
-                                    placeholder="John Doe"
-                                    disabled={isInitiating}
-                                    className={`w-full bg-zinc-950/50 border text-zinc-50 font-mono text-sm py-2.5 px-4 rounded-lg focus:outline-none transition-colors placeholder-zinc-700 disabled:opacity-50 ${validationErrors.name ? 'border-rose-500/50 focus:border-rose-500' : 'border-zinc-800 focus:border-indigo-500'}`}
-                                />
+                                <div className="relative">
+                                    <input
+                                        type="text" id="name" name="name"
+                                        value={formData.name} onChange={handleChange}
+                                        placeholder="John Doe"
+                                        disabled={isInitiating}
+                                        className={`w-full bg-zinc-950/50 border text-zinc-50 font-mono text-sm py-2.5 px-4 pr-10 rounded-lg focus:outline-none transition-colors placeholder-zinc-700 disabled:opacity-50 ${validationErrors.name ? 'border-rose-500/50 focus:border-rose-500' : 'border-zinc-800 focus:border-indigo-500'}`}
+                                    />
+                                    {formData.name.trim().length >= 2 && (
+                                        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center">
+                                            {isCheckingName ? (
+                                                <svg className="w-4 h-4 animate-spin text-zinc-500" viewBox="0 0 24 24" fill="none">
+                                                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" strokeDasharray="40" strokeDashoffset="10" />
+                                                </svg>
+                                            ) : nameData?.available ? (
+                                                <CheckCircle className="w-4 h-4 text-emerald-500" />
+                                            ) : (
+                                                <XCircle className="w-4 h-4 text-rose-500" />
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
                                 {validationErrors.name && (
                                     <p className="text-[10px] text-rose-400 mt-1.5 font-mono">{validationErrors.name}</p>
+                                )}
+                                {formData.name.trim().length >= 2 && !isCheckingName && nameData && (
+                                    <p className={`text-[10px] mt-1.5 font-mono ${nameData.available ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                        {nameData.available ? 'Name is available' : 'Name is already taken'}
+                                    </p>
                                 )}
                             </div>
 
@@ -157,7 +189,7 @@ const Register = () => {
 
                             <button
                                 type="submit"
-                                disabled={isInitiating}
+                                disabled={isInitiating || (formData.name.trim().length >= 2 && nameData && !nameData.available)}
                                 className="w-full mt-4 py-3 bg-indigo-500 border border-indigo-500 text-white rounded-lg text-xs font-semibold uppercase tracking-wider transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:bg-indigo-600 hover:border-indigo-600 flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/20"
                             >
                                 {isInitiating ? "Sending OTP..." : "Continue"}
