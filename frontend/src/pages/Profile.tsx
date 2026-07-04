@@ -14,7 +14,7 @@ import { useDispatch } from "react-redux";
 import { logout as logoutAction } from "../features/auth/authSlice";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
-import { User, Wallet, Hash, ActivitySquare, Shield, Key, AlertTriangle, CheckCircle, XCircle } from "lucide-react";
+import { User, Wallet, Hash, ActivitySquare, Shield, Key, AlertTriangle, CheckCircle, XCircle, Eye, EyeOff } from "lucide-react";
 import toast from "react-hot-toast";
 import useDebounce from "../hooks/useDebounce";
 
@@ -32,6 +32,12 @@ const Profile = () => {
     const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '' });
     const [emailForm, setEmailForm] = useState({ currentPassword: '', newEmail: '', otp: '', step: 1 });
     const [deleteForm, setDeleteForm] = useState({ currentPassword: '', otp: '', step: 1 });
+    const [showPasswords, setShowPasswords] = useState({
+        changeCurrent: false,
+        changeNew: false,
+        emailCurrent: false,
+        deleteCurrent: false,
+    });
 
     const debouncedName = useDebounce(nameInput, 500);
     const [checkName, { isFetching: isCheckingName, data: nameData }] = useLazyCheckNameQuery();
@@ -345,22 +351,44 @@ const Profile = () => {
                             
                             <form onSubmit={handleChangePassword} className="space-y-4 max-w-md">
                                 <div>
-                                    <label className="block text-[10px] tracking-widest uppercase text-zinc-500 mb-2 font-semibold">Current Password</label>
-                                    <input
-                                        type="password"
-                                        value={passwordForm.currentPassword}
-                                        onChange={(e) => setPasswordForm(p => ({ ...p, currentPassword: e.target.value }))}
-                                        className="w-full bg-zinc-950/50 border border-zinc-800 text-zinc-50 font-mono text-sm py-2.5 px-4 rounded-lg focus:outline-none focus:border-indigo-500"
-                                    />
+                                    <div className="flex items-center justify-between mb-2">
+                                        <label className="block text-[10px] tracking-widest uppercase text-zinc-500 font-semibold">Current Password</label>
+                                    </div>
+                                    <div className="relative">
+                                        <input
+                                            type={showPasswords.changeCurrent ? "text" : "password"}
+                                            value={passwordForm.currentPassword}
+                                            onChange={(e) => setPasswordForm(p => ({ ...p, currentPassword: e.target.value }))}
+                                            className="w-full bg-zinc-950/50 border border-zinc-800 text-zinc-50 font-mono text-sm py-2.5 px-4 pr-10 rounded-lg focus:outline-none focus:border-indigo-500"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPasswords(p => ({ ...p, changeCurrent: !p.changeCurrent }))}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 focus:outline-none"
+                                        >
+                                            {showPasswords.changeCurrent ? <EyeOff size={16} /> : <Eye size={16} />}
+                                        </button>
+                                    </div>
                                 </div>
                                 <div>
-                                    <label className="block text-[10px] tracking-widest uppercase text-zinc-500 mb-2 font-semibold">New Password</label>
-                                    <input
-                                        type="password"
-                                        value={passwordForm.newPassword}
-                                        onChange={(e) => setPasswordForm(p => ({ ...p, newPassword: e.target.value }))}
-                                        className="w-full bg-zinc-950/50 border border-zinc-800 text-zinc-50 font-mono text-sm py-2.5 px-4 rounded-lg focus:outline-none focus:border-indigo-500"
-                                    />
+                                    <div className="flex items-center justify-between mb-2">
+                                        <label className="block text-[10px] tracking-widest uppercase text-zinc-500 font-semibold">New Password</label>
+                                    </div>
+                                    <div className="relative">
+                                        <input
+                                            type={showPasswords.changeNew ? "text" : "password"}
+                                            value={passwordForm.newPassword}
+                                            onChange={(e) => setPasswordForm(p => ({ ...p, newPassword: e.target.value }))}
+                                            className="w-full bg-zinc-950/50 border border-zinc-800 text-zinc-50 font-mono text-sm py-2.5 px-4 pr-10 rounded-lg focus:outline-none focus:border-indigo-500"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPasswords(p => ({ ...p, changeNew: !p.changeNew }))}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 focus:outline-none"
+                                        >
+                                            {showPasswords.changeNew ? <EyeOff size={16} /> : <Eye size={16} />}
+                                        </button>
+                                    </div>
                                 </div>
                                 <button
                                     type="submit"
@@ -382,13 +410,24 @@ const Profile = () => {
                             {emailForm.step === 1 ? (
                                 <form onSubmit={handleInitiateEmailChange} className="space-y-4 max-w-md">
                                     <div>
-                                        <label className="block text-[10px] tracking-widest uppercase text-zinc-500 mb-2 font-semibold">Current Password</label>
-                                        <input
-                                            type="password"
-                                            value={emailForm.currentPassword}
-                                            onChange={(e) => setEmailForm(p => ({ ...p, currentPassword: e.target.value }))}
-                                            className="w-full bg-zinc-950/50 border border-zinc-800 text-zinc-50 font-mono text-sm py-2.5 px-4 rounded-lg focus:outline-none focus:border-indigo-500"
-                                        />
+                                        <div className="flex items-center justify-between mb-2">
+                                            <label className="block text-[10px] tracking-widest uppercase text-zinc-500 font-semibold">Current Password</label>
+                                        </div>
+                                        <div className="relative">
+                                            <input
+                                                type={showPasswords.emailCurrent ? "text" : "password"}
+                                                value={emailForm.currentPassword}
+                                                onChange={(e) => setEmailForm(p => ({ ...p, currentPassword: e.target.value }))}
+                                                className="w-full bg-zinc-950/50 border border-zinc-800 text-zinc-50 font-mono text-sm py-2.5 px-4 pr-10 rounded-lg focus:outline-none focus:border-indigo-500"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowPasswords(p => ({ ...p, emailCurrent: !p.emailCurrent }))}
+                                                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 focus:outline-none"
+                                            >
+                                                {showPasswords.emailCurrent ? <EyeOff size={16} /> : <Eye size={16} />}
+                                            </button>
+                                        </div>
                                     </div>
                                     <div>
                                         <label className="block text-[10px] tracking-widest uppercase text-zinc-500 mb-2 font-semibold">New Email Address</label>
@@ -450,13 +489,24 @@ const Profile = () => {
                             {deleteForm.step === 1 ? (
                                 <form onSubmit={handleInitiateDelete} className="space-y-4 max-w-md">
                                     <div>
-                                        <label className="block text-[10px] tracking-widest uppercase text-rose-500/70 mb-2 font-semibold">Current Password</label>
-                                        <input
-                                            type="password"
-                                            value={deleteForm.currentPassword}
-                                            onChange={(e) => setDeleteForm(p => ({ ...p, currentPassword: e.target.value }))}
-                                            className="w-full bg-zinc-950/50 border border-rose-900/30 text-zinc-50 font-mono text-sm py-2.5 px-4 rounded-lg focus:outline-none focus:border-rose-500"
-                                        />
+                                        <div className="flex items-center justify-between mb-2">
+                                            <label className="block text-[10px] tracking-widest uppercase text-rose-500/70 font-semibold">Current Password</label>
+                                        </div>
+                                        <div className="relative">
+                                            <input
+                                                type={showPasswords.deleteCurrent ? "text" : "password"}
+                                                value={deleteForm.currentPassword}
+                                                onChange={(e) => setDeleteForm(p => ({ ...p, currentPassword: e.target.value }))}
+                                                className="w-full bg-zinc-950/50 border border-rose-900/30 text-zinc-50 font-mono text-sm py-2.5 px-4 pr-10 rounded-lg focus:outline-none focus:border-rose-500"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowPasswords(p => ({ ...p, deleteCurrent: !p.deleteCurrent }))}
+                                                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 focus:outline-none"
+                                            >
+                                                {showPasswords.deleteCurrent ? <EyeOff size={16} /> : <Eye size={16} />}
+                                            </button>
+                                        </div>
                                     </div>
                                     <button
                                         type="submit"

@@ -4,7 +4,7 @@ import { useLoginMutation } from '../services/authApi';
 import { useDispatch } from 'react-redux';
 import { setCredentials } from '../features/auth/authSlice';
 import { useNavigate, Link } from 'react-router-dom';
-import { Activity } from 'lucide-react';
+import { Activity, Eye, EyeOff } from 'lucide-react';
 
 const Login = () => {
     const [login, { isLoading, error }] = useLoginMutation();
@@ -13,6 +13,7 @@ const Login = () => {
 
     const [formData, setFormData] = useState({ email: '', password: '' });
     const [validationErrors, setValidationErrors] = useState({ email: '', password: '' });
+    const [showPassword, setShowPassword] = useState(false);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -103,14 +104,26 @@ const Login = () => {
 
                         {/* Password */}
                         <div>
-                            <label htmlFor="password" className="block text-[10px] tracking-widest uppercase text-zinc-500 mb-2 font-semibold">Password</label>
-                            <input
-                                type="password" id="password" name="password"
-                                value={formData.password} onChange={handleChange}
-                                placeholder="••••••••"
-                                disabled={isLoading}
-                                className={`w-full bg-zinc-950/50 border text-zinc-50 font-mono text-sm py-2.5 px-4 rounded-lg focus:outline-none transition-colors placeholder-zinc-700 disabled:opacity-50 ${validationErrors.password ? 'border-rose-500/50 focus:border-rose-500' : 'border-zinc-800 focus:border-indigo-500'}`}
-                            />
+                            <div className="flex items-center justify-between mb-2">
+                                <label htmlFor="password" className="block text-[10px] tracking-widest uppercase text-zinc-500 font-semibold">Password</label>
+                            </div>
+                            <div className="relative">
+                                <input
+                                    type={showPassword ? "text" : "password"} id="password" name="password"
+                                    value={formData.password} onChange={handleChange}
+                                    placeholder="••••••••"
+                                    disabled={isLoading}
+                                    className={`w-full bg-zinc-950/50 border text-zinc-50 font-mono text-sm py-2.5 px-4 pr-10 rounded-lg focus:outline-none transition-colors placeholder-zinc-700 disabled:opacity-50 ${validationErrors.password ? 'border-rose-500/50 focus:border-rose-500' : 'border-zinc-800 focus:border-indigo-500'}`}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 focus:outline-none disabled:opacity-50"
+                                    disabled={isLoading}
+                                >
+                                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                </button>
+                            </div>
                             {validationErrors.password && (
                                 <p className="text-[10px] text-rose-400 mt-1.5 font-mono">{validationErrors.password}</p>
                             )}
