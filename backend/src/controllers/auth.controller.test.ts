@@ -2,12 +2,35 @@ import request from "supertest";
 import app from "../app";
 import User from "../models/User.model";
 import RefreshToken from "../models/RefreshToken.model";
+import { redis } from "../config/redis";
+import { sendTransactionalEmail } from "../services/email.service";
 
 jest.mock("../models/User.model");
 jest.mock("../models/RefreshToken.model");
+jest.mock("../config/redis", () => ({
+    redis: {
+        set: jest.fn(),
+        get: jest.fn(),
+        del: jest.fn(),
+        watch: jest.fn(),
+        unwatch: jest.fn(),
+        multi: jest.fn().mockReturnValue({
+            set: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockResolvedValue([[null, 1]]),
+        }),
+    },
+}));
+jest.mock("../services/email.service", () => ({
+    sendTransactionalEmail: jest.fn().mockResolvedValue(true),
+}));
+jest.mock("express-rate-limit", () => ({
+    rateLimit: jest.fn().mockReturnValue((req: any, res: any, next: any) => next()),
+}));
 
 const MockedUser = User as jest.Mocked<typeof User>;
 const MockedRefreshToken = RefreshToken as jest.Mocked<typeof RefreshToken>;
+const MockedRedis = redis as jest.Mocked<any>;
+const MockedSendEmail = sendTransactionalEmail as jest.MockedFunction<typeof sendTransactionalEmail>;
 
 describe("Auth Controller Tests", () => {
     let consoleErrorSpy: jest.SpyInstance;
@@ -27,9 +50,126 @@ describe("Auth Controller Tests", () => {
         jest.clearAllMocks();
     });
 
-    describe("POST /api/auth/register", () => {
-        it("should register a new user successfully with valid details", async () => {
+    beforeEach(() => {
+        MockedRedis.set.mockResolvedValue("OK" as any);
+        MockedRedis.get.mockResolvedValue(null);
+        MockedRedis.del.mockResolvedValue(1 as any);
+        MockedRedis.watch.mockResolvedValue("OK" as any);
+        MockedRedis.unwatch.mockResolvedValue("OK" as any);
+        MockedRedis.multi.mockReturnValue({
+            set: jest.fn().mockReturnThis(),
+            exec: jest.fn().mockResolvedValue([[null, 1]]),
+        });
+        MockedSendEmail.mockResolvedValue(true);
+    });
+
+    describe("POST /api/auth/register/initiate", () => {
+        it("should initiate registration successfully with valid details", async () => {
             MockedUser.findOne.mockResolvedValue(null);
+            MockedRedis.set.mockResolvedValue("OK" as any);
+            MockedSendEmail.mockResolvedValue(true);
+
+            const res = await request(app)
+                .post("/api/auth/register/initiate")
+                .send({
+                    name: "John Doe",
+                    email: "john@example.com",
+                    password: "password123",
+                });
+
+            expect(res.status).toBe(200);
+            expect(res.body).toEqual({
+                success: true,
+                message: "OTP sent successfully to email"
+            });
+            expect(MockedUser.findOne).toHaveBeenCalledWith({ email: "john@example.com" });
+            expect(MockedRedis.set).toHaveBeenCalled();
+            expect(MockedSendEmail).toHaveBeenCalled();
+        });
+
+        it("should fail to initiate if user already exists", async () => {
+            MockedUser.findOne.mockResolvedValue({ email: "john@example.com" } as any);
+
+            const res = await request(app)
+                .post("/api/auth/register/initiate")
+                .send({
+                    name: "John Doe",
+                    email: "john@example.com",
+                    password: "password123",
+                });
+
+            expect(res.status).toBe(409);
+            expect(res.body.message).toContain("User already exists");
+        });
+
+        it("should fail to initiate if name is too short", async () => {
+            const res = await request(app)
+                .post("/api/auth/register/initiate")
+                .send({
+                    name: "J",
+                    email: "john@example.com",
+                    password: "password123",
+                });
+
+            expect(res.status).toBe(500);
+        });
+
+        it("should fail to initiate if password is too short", async () => {
+            const res = await request(app)
+                .post("/api/auth/register/initiate")
+                .send({
+                    name: "John Doe",
+                    email: "john@example.com",
+                    password: "123",
+                });
+
+            expect(res.status).toBe(500);
+        });
+
+        it("should fail to initiate if email is invalid", async () => {
+            const res = await request(app)
+                .post("/api/auth/register/initiate")
+                .send({
+                    name: "John Doe",
+                    email: "invalid-email",
+                    password: "password123",
+                });
+
+            expect(res.status).toBe(500);
+        });
+
+        it("should clean up and fail if email sending fails", async () => {
+            MockedUser.findOne.mockResolvedValue(null);
+            MockedRedis.set.mockResolvedValue("OK" as any);
+            MockedSendEmail.mockResolvedValue(false);
+            MockedRedis.del.mockResolvedValue(1 as any);
+
+            const res = await request(app)
+                .post("/api/auth/register/initiate")
+                .send({
+                    name: "John Doe",
+                    email: "john@example.com",
+                    password: "password123",
+                });
+
+            expect(res.status).toBe(500);
+            expect(res.body.message).toContain("Failed to send OTP email");
+            expect(MockedRedis.del).toHaveBeenCalled();
+        });
+    });
+
+    describe("POST /api/auth/register/verify", () => {
+        it("should register a new user successfully with valid OTP", async () => {
+            const mockRegistrationData = {
+                name: "John Doe",
+                email: "john@example.com",
+                hashedPassword: "hashedpassword123",
+                otp: "123456",
+                attempts: 3
+            };
+            MockedRedis.get.mockResolvedValue(JSON.stringify(mockRegistrationData));
+            MockedRedis.del.mockResolvedValue(1 as any);
+            
             const mockUserInstance = {
                 _id: "mockuserid123",
                 name: "John Doe",
@@ -39,11 +179,10 @@ describe("Auth Controller Tests", () => {
             MockedRefreshToken.create.mockResolvedValue({} as any);
 
             const res = await request(app)
-                .post("/api/auth/register")
+                .post("/api/auth/register/verify")
                 .send({
-                    name: "John Doe",
                     email: "john@example.com",
-                    password: "password123",
+                    otp: "123456",
                 });
 
             expect(res.status).toBe(201);
@@ -57,63 +196,43 @@ describe("Auth Controller Tests", () => {
                 accessToken: expect.any(String),
             });
             expect(res.headers["set-cookie"]).toBeDefined();
-            expect(MockedUser.findOne).toHaveBeenCalledWith({ email: "john@example.com" });
-            expect(MockedUser.create).toHaveBeenCalledWith({
+            expect(MockedUser.create).toHaveBeenCalled();
+            expect(MockedRedis.del).toHaveBeenCalled();
+        });
+
+        it("should fail to verify if OTP is incorrect", async () => {
+            const mockRegistrationData = {
                 name: "John Doe",
                 email: "john@example.com",
-                password: "password123",
-            });
-        });
-
-        it("should fail to register if user already exists", async () => {
-            MockedUser.findOne.mockResolvedValue({ email: "john@example.com" } as any);
+                hashedPassword: "hashedpassword123",
+                otp: "123456",
+                attempts: 3
+            };
+            MockedRedis.get.mockResolvedValue(JSON.stringify(mockRegistrationData));
 
             const res = await request(app)
-                .post("/api/auth/register")
+                .post("/api/auth/register/verify")
                 .send({
-                    name: "John Doe",
                     email: "john@example.com",
-                    password: "password123",
+                    otp: "654321",
                 });
 
-            expect(res.status).toBe(409);
-            expect(res.body.message).toContain("User already exists");
+            expect(res.status).toBe(400);
+            expect(res.body.message).toContain("Invalid OTP");
         });
 
-        it("should fail to register if name is too short", async () => {
+        it("should fail to verify if session expired", async () => {
+            MockedRedis.get.mockResolvedValue(null);
+
             const res = await request(app)
-                .post("/api/auth/register")
+                .post("/api/auth/register/verify")
                 .send({
-                    name: "J",
                     email: "john@example.com",
-                    password: "password123",
+                    otp: "123456",
                 });
 
-            expect(res.status).toBe(500);
-        });
-
-        it("should fail to register if password is too short", async () => {
-            const res = await request(app)
-                .post("/api/auth/register")
-                .send({
-                    name: "John Doe",
-                    email: "john@example.com",
-                    password: "123",
-                });
-
-            expect(res.status).toBe(500);
-        });
-
-        it("should fail to register if email is invalid", async () => {
-            const res = await request(app)
-                .post("/api/auth/register")
-                .send({
-                    name: "John Doe",
-                    email: "invalid-email",
-                    password: "password123",
-                });
-
-            expect(res.status).toBe(500);
+            expect(res.status).toBe(400);
+            expect(res.body.message).toContain("OTP expired or invalid");
         });
     });
 
