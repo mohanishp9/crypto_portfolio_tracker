@@ -1,17 +1,19 @@
 import express from "express";
 import {
-    registerUserController,
+    initiateRegistrationController,
+    verifyRegistrationController,
     loginUserController,
     logoutUserController,
     getCurrentUserProfileController,
     refreshTokenController,
 } from "../controllers/auth.controller";
 import { protect } from "../middleware/auth.middleware";
-import { authRateLimiter } from "../middleware/rateLimit.middleware";
+import { authRateLimiter, otpRateLimiter } from "../middleware/rateLimit.middleware";
 
 const router = express.Router();
 
-router.post("/register", authRateLimiter, registerUserController);
+router.post("/register/initiate", otpRateLimiter, initiateRegistrationController);
+router.post("/register/verify", authRateLimiter, verifyRegistrationController);
 router.post("/login", authRateLimiter, loginUserController);
 router.post("/logout", logoutUserController); 
 router.post("/refresh", refreshTokenController);

@@ -9,9 +9,12 @@ import LandingPage from './pages/LandingPage';
 import AuthLoader from './components/AuthLoader';
 
 
+import { Toaster } from 'react-hot-toast';
+
 function App() {
   return (
     <AuthLoader>
+      <Toaster position="top-right" toastOptions={{ style: { background: '#18181b', color: '#fafafa', border: '1px solid #27272a' } }} />
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/register" element={<Register />} />

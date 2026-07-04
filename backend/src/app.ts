@@ -3,6 +3,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
 import authRoutes from "./routes/auth.routes";
+import userRoutes from "./routes/user.routes";
 import portfolioRoutes from "./routes/portfolio.routes";
 import marketRoutes from "./routes/market.routes";
 import watchlistRoutes from "./routes/watchlist.routes";
@@ -35,6 +36,7 @@ app.use(
 app.use(cookieParser());
 
 app.use("/api/auth", authRoutes);
+app.use("/api/users/me", userRoutes);
 app.use('/api/portfolio', portfolioRoutes);
 app.use('/api/market', marketRoutes);
 app.use('/api/watchlist', watchlistRoutes);

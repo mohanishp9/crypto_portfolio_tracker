@@ -1,4 +1,6 @@
 import { rateLimit } from "express-rate-limit";
+import { RedisStore } from "rate-limit-redis";
+import { redis } from "../config/redis";
 
 export const authRateLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
@@ -8,5 +10,26 @@ export const authRateLimiter = rateLimit({
         message: "Too many login/register attempts from this IP. Please try again after 15 minutes.",
     },
     standardHeaders: true, // Return rate limit info in standard headers
-    legacyHeaders: false, // Disable legacy headers
+    legacyHeaders: false,
+});
+
+export const otpRateLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000, // 1 hour
+    max: 5, // Limit each (IP + email) to 5 OTP requests per hour
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: {
+        success: false,
+        message: "Too many OTP requests. Please try again after an hour.",
+    },
+    // Use Redis store if available
+    store: redis ? new RedisStore({
+        sendCommand: (...args: string[]) => redis!.call(args[0], ...args.slice(1)) as any,
+        prefix: "rl:otp:"
+    }) : undefined,
+    // Group by IP and Email
+    keyGenerator: (req) => {
+        const email = req.body?.email || "no-email";
+        return `${req.ip}_${email.toLowerCase()}`;
+    }
 });

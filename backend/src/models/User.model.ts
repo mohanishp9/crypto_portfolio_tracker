@@ -25,11 +25,12 @@ type UserModel = Model<IUser, {}, IUserMethods>;
 // --------------------------------------------------
 // Schema<DocType, ModelType, InstanceMethods>
 const userSchema = new Schema<IUser, UserModel, IUserMethods>({
-    // User's full name
+    // User's full name (must be unique now)
     name: {
         type: String,
         required: true,
         trim: true,
+        unique: true,
     },
 
     // User email - must be unique and stored lowercase
@@ -62,6 +63,11 @@ const userSchema = new Schema<IUser, UserModel, IUserMethods>({
 userSchema.pre<HydratedDocument<IUser>>("save", async function () {
     // If password was NOT changed → skip hashing
     if (!this.isModified("password")) {
+        return;
+    }
+
+    // Skip hashing if it already looks like a bcrypt hash (e.g. from Redis OTP flow)
+    if (this.password.startsWith("$2a$") || this.password.startsWith("$2b$")) {
         return;
     }
 

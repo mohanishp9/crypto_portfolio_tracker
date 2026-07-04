@@ -1,6 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit";
 import authSlice from "../features/auth/authSlice";
 import { authApi } from "../services/authApi";
+import { userApi } from "../services/userApi";
 import portfolioSlice from "../features/portfolio/portfolioSlice";
 import { portfolioApi } from "../services/portfolioApi";
 import toastSlice from "../features/toast/toastSlice";
@@ -12,11 +13,12 @@ export const store = configureStore({
         portfolio: portfolioSlice,
         toast: toastSlice,
         [authApi.reducerPath]: authApi.reducer,
+        [userApi.reducerPath]: userApi.reducer,
         [portfolioApi.reducerPath]: portfolioApi.reducer,
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware()
-            .concat(authApi.middleware, portfolioApi.middleware)
+            .concat(authApi.middleware, userApi.middleware, portfolioApi.middleware)
             .concat(errorToastMiddleware),
 });
 
