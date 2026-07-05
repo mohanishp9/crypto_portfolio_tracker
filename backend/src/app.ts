@@ -11,6 +11,7 @@ import alertsRoutes from "./routes/alerts.routes";
 import swaggerUi from "swagger-ui-express";
 import YAML from "yamljs";
 import path from "path";
+import { globalApiRateLimiter } from "./middleware/rateLimit.middleware";
 
 const app: Application = express();
 
@@ -34,6 +35,9 @@ app.use(
     })
 );
 app.use(cookieParser());
+
+// I'm applying this globally to all /api routes to prevent abuse (like DDoS or API quota exhaustion)
+app.use("/api", globalApiRateLimiter);
 
 app.use("/api/auth", authRoutes);
 app.use("/api/users/me", userRoutes);
