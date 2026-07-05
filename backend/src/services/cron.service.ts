@@ -1,5 +1,5 @@
 import cron from "node-cron";
-import { coinGeckoApi, getTopCoins, searchCoins, getCoinDetail } from "./coinGecko.service";
+import { coinGeckoApi, searchCoins, getCoinDetail } from "./coinGecko.service";
 import { setPersistentCache } from "./cache.service";
 import { MarketCoin } from "../types/coinsData.types";
 import { checkAndTriggerAllAlerts } from "./alerts.service";

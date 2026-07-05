@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import crypto from "crypto";
 import User from "../models/User.model";
 import Transaction from "../models/Transaction.model";
 import WatchlistItem from "../models/WatchlistItem.model";
@@ -165,7 +166,7 @@ export const initiateEmailChangeController = asyncHandler(async (req: Request, r
     }
 
     // Generate OTP
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otp = crypto.randomInt(100000, 1000000).toString();
 
     const redisKey = `email_change:otp:${req.user._id}`;
     if (!redis) {
@@ -340,7 +341,7 @@ export const initiateAccountDeletionController = asyncHandler(async (req: Reques
     }
 
     // Generate OTP
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otp = crypto.randomInt(100000, 1000000).toString();
 
     const redisKey = `delete:otp:${req.user._id}`;
     if (!redis) {

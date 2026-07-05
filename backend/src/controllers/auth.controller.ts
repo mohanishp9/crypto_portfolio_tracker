@@ -1,5 +1,6 @@
 import { asyncHandler } from "../utils/asyncHandler";
-import { registerSchema, RegisterInput, loginSchema, LoginInput, verifyOtpSchema, VerifyOtpInput } from "../utils/validation";
+import crypto from "crypto";
+import { registerSchema, RegisterInput, loginSchema, LoginInput, verifyOtpSchema, VerifyOtpInput, initiatePasswordResetSchema, verifyPasswordResetSchema } from "../utils/validation";
 import User from "../models/User.model";
 import RefreshToken from "../models/RefreshToken.model";
 import { generateAccessToken, generateRefreshToken, hashToken } from "../utils/jwt";
@@ -52,7 +53,7 @@ const initiateRegistrationController = asyncHandler(async (req: Request, res: Re
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otp = crypto.randomInt(100000, 1000000).toString();
 
     const payload = {
         name,
@@ -362,6 +363,100 @@ const refreshTokenController = asyncHandler(async (req: Request, res: Response) 
     });
 });
 
+// @desc Initiate password reset (Sends OTP)
+// @route POST /api/auth/password-reset/initiate
+// @access Public
+const initiatePasswordResetController = asyncHandler(async (req: Request, res: Response) => {
+    const { email } = initiatePasswordResetSchema.parse(req.body);
+
+    const user = await User.findOne({ email });
+
+    // I return a generic success message even if user isn't found to prevent email enumeration attacks
+    if (!user) {
+        res.status(200).json({ success: true, message: "If an account with that email exists, an OTP has been sent." });
+        return;
+    }
+
+    if (!redis) {
+        res.status(500);
+        throw new Error("Redis is not available. Cannot process password reset.");
+    }
+
+    const otp = crypto.randomInt(100000, 1000000).toString();
+
+    await redis.set(`pwdreset:${email}`, otp, "EX", 15 * 60);
+
+    if (process.env.NODE_ENV === "development") {
+        console.log(`[DEV ONLY] Password Reset OTP for ${email}: ${otp}`);
+    }
+
+    const emailSent = await sendTransactionalEmail({
+        to: email,
+        recipientName: user.name || "User",
+        subject: "Password Reset OTP - CypherSight",
+        htmlContent: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2>Password Reset</h2>
+            <p>You requested to reset your password. Use the following OTP to proceed:</p>
+            <div style="background-color: #f4f4f5; padding: 16px; border-radius: 8px; text-align: center; margin: 24px 0;">
+                <span style="font-size: 32px; font-weight: bold; letter-spacing: 4px; color: #18181b;">${otp}</span>
+            </div>
+            <p style="color: #71717a; font-size: 14px;">This OTP will expire in 15 minutes.</p>
+        </div>`,
+        type: 'otp'
+    });
+
+    if (!emailSent) {
+        await redis.del(`pwdreset:${email}`);
+        res.status(500);
+        throw new Error("Failed to send password reset email. Please try again later.");
+    }
+
+    res.status(200).json({
+        success: true,
+        message: "If an account with that email exists, an OTP has been sent.",
+    });
+});
+
+// @desc Verify password reset OTP and set new password
+// @route POST /api/auth/password-reset/verify
+// @access Public
+const verifyPasswordResetController = asyncHandler(async (req: Request, res: Response) => {
+    const { email, otp, newPassword } = verifyPasswordResetSchema.parse(req.body);
+
+    if (!redis) {
+        res.status(500);
+        throw new Error("Redis is not available. Cannot process password reset.");
+    }
+
+    const storedOtp = await redis.get(`pwdreset:${email}`);
+
+    if (!storedOtp || storedOtp !== otp) {
+        res.status(400);
+        throw new Error("Invalid or expired OTP");
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+        res.status(404);
+        throw new Error("User not found");
+    }
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
+
+    // I clear out the OTP so it can't be reused
+    await redis.del(`pwdreset:${email}`);
+
+    // I also invalidate all existing refresh tokens for this user for security
+    await RefreshToken.deleteMany({ userId: user._id });
+
+    res.status(200).json({
+        success: true,
+        message: "Password reset successful. You can now login.",
+    });
+});
+
 export {
     loginUserController,
     initiateRegistrationController,
@@ -369,4 +464,6 @@ export {
     logoutUserController,
     getCurrentUserProfileController,
     refreshTokenController,
+    initiatePasswordResetController,
+    verifyPasswordResetController,
 };

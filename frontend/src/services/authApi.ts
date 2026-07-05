@@ -37,6 +37,16 @@ interface LoginInput {
     password: string;
 }
 
+interface InitiatePasswordResetInput {
+    email: string;
+}
+
+interface VerifyPasswordResetInput {
+    email: string;
+    otp: string;
+    newPassword: string;
+}
+
 interface LogoutResponse {
     success: boolean;
     message: string;
@@ -109,6 +119,24 @@ export const authApi = createApi({
                 method: 'POST',
             }),
         }),
+
+        // Initiate password reset
+        initiatePasswordReset: builder.mutation<InitiateResponse, InitiatePasswordResetInput>({
+            query: (data) => ({
+                url: '/auth/password-reset/initiate',
+                method: 'POST',
+                body: data,
+            }),
+        }),
+
+        // Verify password reset
+        verifyPasswordReset: builder.mutation<InitiateResponse, VerifyPasswordResetInput>({
+            query: (data) => ({
+                url: '/auth/password-reset/verify',
+                method: 'POST',
+                body: data,
+            }),
+        }),
     }),
 });
 
@@ -121,4 +149,6 @@ export const {
     useLogoutMutation,
     useGetCurrentUserQuery,
     useRefreshMutation,
+    useInitiatePasswordResetMutation,
+    useVerifyPasswordResetMutation,
 } = authApi;
