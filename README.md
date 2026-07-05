@@ -40,6 +40,11 @@ Users can define `ABOVE` or `BELOW` target price thresholds. The backend cron wo
 * **Automated Testing & CI:** Unit tests (Vitest) cover core backend logic and validation. A GitHub Actions pipeline automatically runs the test suite on pushes to `main` as a basic quality gate.
 * **Containerized Deployment:** The backend API and Redis cache are deployed using Docker, ensuring environment parity between local development and the Render production server.
 
+### 7. Product Analytics (PostHog)
+Integrated PostHog across both frontend and backend to measure user activation and feature adoption.
+* **Frontend:** Tracks client-side funnel events ("User Signed Up", "First Portfolio Added", "Added to Watchlist") utilizing `posthog-js`.
+* **Backend:** Leverages `posthog-node` to ensure absolute-truth event tracking for irreversible server-side actions like "Account Deleted" or "Email Changed".
+
 ## 💻 Tech Stack
 
 **Frontend:**
@@ -48,6 +53,7 @@ Users can define `ABOVE` or `BELOW` target price thresholds. The backend cron wo
 * Redux Toolkit (RTK Query for data fetching & caching)
 * Tailwind CSS & custom CSS modules (vibrant dark-mode glassmorphism design)
 * Recharts (for portfolio allocation and 7-day performance visualizations)
+* PostHog (Product analytics and event tracking)
 
 **Backend:**
 * Node.js & Express
@@ -56,6 +62,7 @@ Users can define `ABOVE` or `BELOW` target price thresholds. The backend cron wo
 * JWT Authentication (HttpOnly Cookies)
 * WebSockets (`ws`)
 * Node-Cron & Brevo API
+* PostHog (Server-side analytics)
 
 ## 🛠 Local Development Setup
 
@@ -93,11 +100,15 @@ BREVO_API_KEY=your-brevo-key
 BREVO_SENDER_EMAIL=your@email.com
 BREVO_SENDER_NAME="Grove Portfolio Tracker"
 CLIENT_URL=http://localhost:5173
+POSTHOG_KEY=your-posthog-project-api-key
+POSTHOG_HOST=https://us.i.posthog.com
 ```
 
 Create a `.env` file in the `frontend/` directory:
 ```env
 VITE_API_URL=http://localhost:5000/api
+VITE_POSTHOG_KEY=your-posthog-project-api-key
+VITE_POSTHOG_HOST=https://us.i.posthog.com
 ```
 
 ### 3. Run the Application
