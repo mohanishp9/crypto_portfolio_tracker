@@ -5,6 +5,7 @@ import {
     changePasswordController,
     initiateEmailChangeController,
     verifyEmailChangeController,
+    revertEmailChangeController,
     initiateAccountDeletionController,
     deleteAccountController
 } from "../controllers/user.controller";
@@ -15,6 +16,9 @@ const router = express.Router();
 
 // Public check for name availability
 router.get("/check-name", checkNameController);
+
+// Public email revert route
+router.get("/revert-email/:token", revertEmailChangeController);
 
 // Protected routes
 router.put("/name", protect, updateNameController);

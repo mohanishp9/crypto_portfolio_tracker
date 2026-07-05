@@ -15,6 +15,8 @@ import { globalApiRateLimiter } from "./middleware/rateLimit.middleware";
 
 const app: Application = express();
 
+app.get('/health', (_req, res) => res.json({ ok: true }));
+
 const swaggerDocument = YAML.load(path.join(__dirname, "./docs/swagger.yaml"));
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
@@ -40,6 +42,7 @@ app.use(cookieParser());
 app.use("/api", globalApiRateLimiter);
 
 app.use("/api/auth", authRoutes);
+app.use("/api/users/revert-email", (req, res) => res.redirect(`/api/users/me/revert-email${req.url}`));
 app.use("/api/users/me", userRoutes);
 app.use('/api/portfolio', portfolioRoutes);
 app.use('/api/market', marketRoutes);
