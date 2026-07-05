@@ -35,7 +35,9 @@ export const checkNameController = asyncHandler(async (req: Request, res: Respon
     }
 
     // Check exact name without lowercase if it's display name, but user wanted uniqueness. Let's assume unique case-insensitive or not. Wait, MongoDB name isn't lowercase by default. We'll use case-insensitive query.
-    const userExists = await User.findOne({ name: { $regex: new RegExp(`^${name.trim()}$`, 'i') } });
+    // Escape regex characters to prevent ReDoS
+    const escapedName = name.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const userExists = await User.findOne({ name: { $regex: new RegExp(`^${escapedName}$`, 'i') } });
     res.status(200).json({ available: !userExists });
 });
 
@@ -60,7 +62,8 @@ export const updateNameController = asyncHandler(async (req: Request, res: Respo
         return throwError(res, 401, "Not authorized");
     }
 
-    const existingUser = await User.findOne({ name: { $regex: new RegExp(`^${name.trim()}$`, 'i') } });
+    const escapedName = name.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const existingUser = await User.findOne({ name: { $regex: new RegExp(`^${escapedName}$`, 'i') } });
     if (existingUser && existingUser._id?.toString() !== req.user._id.toString()) {
         res.status(409).json({ success: false, message: "Name is already taken." });
         return;
