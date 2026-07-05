@@ -78,7 +78,7 @@ const Register = () => {
                 email: result.user.email,
                 name: result.user.name,
             });
-            posthog?.capture('Signed Up');
+            posthog?.capture('User Signed Up');
 
             toast.success('Registration successful! Welcome to CypherSight.');
             navigate('/dashboard');
