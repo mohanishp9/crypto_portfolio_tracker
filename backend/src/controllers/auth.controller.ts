@@ -65,6 +65,10 @@ const initiateRegistrationController = asyncHandler(async (req: Request, res: Re
     const redisKey = `registration:otp:${email}`;
     await redis.set(redisKey, JSON.stringify(payload), "EX", 600); // 10 minutes expiry
 
+    if (process.env.NODE_ENV === "development") {
+        console.log(`[Development OTP] Registration OTP for ${email}: ${otp}`);
+    }
+
     const emailSent = await sendTransactionalEmail({
         to: email,
         recipientName: name,

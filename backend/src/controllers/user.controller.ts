@@ -180,6 +180,10 @@ export const initiateEmailChangeController = asyncHandler(async (req: Request, r
 
     await redis.set(redisKey, payload, 'EX', 600); // 10 minutes
 
+    if (process.env.NODE_ENV === "development") {
+        console.log(`[Development OTP] Email Update OTP for ${newEmail}: ${otp}`);
+    }
+
     // Send Email to NEW email
     const emailSent = await sendTransactionalEmail({
         to: newEmail,
@@ -349,6 +353,10 @@ export const initiateAccountDeletionController = asyncHandler(async (req: Reques
     });
 
     await redis.set(redisKey, payload, 'EX', 600); // 10 minutes
+
+    if (process.env.NODE_ENV === "development") {
+        console.log(`[Development OTP] Account Deletion OTP for ${user.email}: ${otp}`);
+    }
 
     // Send Email to CURRENT email
     const emailSent = await sendTransactionalEmail({
