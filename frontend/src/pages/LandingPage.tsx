@@ -49,7 +49,7 @@ const CHART_COINS = [
     { id: 'ripple', symbol: 'XRP', color: '#00AAE4' },
 ];
 
-// Mock constants removed
+
 
 function isFresh<T>(entry: CacheEntry<T> | null): entry is CacheEntry<T> {
     return entry !== null && Date.now() - entry.timestamp < CACHE_TTL;

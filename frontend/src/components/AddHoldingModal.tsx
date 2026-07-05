@@ -119,7 +119,7 @@ const AddHoldingModal = () => {
             } else {
                 await addTransaction(payload).unwrap();
                 posthog?.capture('Added Coin to Portfolio', { coin: payload.coinSymbol, type: payload.type });
-                if (statsData && statsData.assets && statsData.assets.length === 0) {
+                if (statsData && statsData.portfolio && statsData.portfolio.length === 0) {
                     posthog?.capture('First Portfolio Added');
                 }
             }
