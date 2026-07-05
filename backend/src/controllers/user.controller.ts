@@ -6,7 +6,9 @@ import WatchlistItem from "../models/WatchlistItem.model";
 import PriceAlert from "../models/PriceAlert.model";
 import PortfolioSnapshot from "../models/PortfolioSnapshot.model";
 import RefreshToken from "../models/RefreshToken.model";
+import { AuthRequest } from "../middleware/auth.middleware";
 import { redis } from "../config/redis";
+import { getPostHogClient } from "../utils/posthog";
 import {
     updateNameSchema,
     initiateEmailChangeSchema,
@@ -312,6 +314,14 @@ export const verifyEmailChangeController = asyncHandler(async (req: Request, res
         return throwError(res, 404, "User not found");
     }
 
+    const ph = getPostHogClient();
+    if (ph) {
+        ph.capture({
+            distinctId: req.user._id.toString(),
+            event: 'Email Changed'
+        });
+    }
+
     // Generate Rollback Token
     const rollbackToken = crypto.randomBytes(32).toString('hex');
     await redis.set(`rollback:${rollbackToken}`, JSON.stringify({ userId: req.user._id, oldEmail }), 'EX', 7 * 24 * 60 * 60);
@@ -574,6 +584,15 @@ export const deleteAccountController = asyncHandler(async (req: Request, res: Re
 
     // 6. Delete user
     await User.findByIdAndDelete(req.user._id);
+
+    // Track deletion in PostHog
+    const ph = getPostHogClient();
+    if (ph) {
+        ph.capture({
+            distinctId: userIdString,
+            event: 'Account Deleted'
+        });
+    }
 
     // 7. Clear cookie
     res.clearCookie("refreshToken", {

@@ -4,12 +4,14 @@ import { useLoginMutation } from '../services/authApi';
 import { useDispatch } from 'react-redux';
 import { setCredentials } from '../features/auth/authSlice';
 import { useNavigate, Link } from 'react-router-dom';
-import { Activity, Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Activity } from 'lucide-react';
+import { usePostHog } from 'posthog-js/react';
 
 const Login = () => {
     const [login, { isLoading, error }] = useLoginMutation();
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const posthog = usePostHog();
 
     const [formData, setFormData] = useState({ email: '', password: '' });
     const [validationErrors, setValidationErrors] = useState({ email: '', password: '' });
@@ -36,6 +38,13 @@ const Login = () => {
         try {
             const result = await login({ email: formData.email, password: formData.password }).unwrap();
             dispatch(setCredentials({ user: result.user, accessToken: result.accessToken }));
+            
+            posthog?.identify(result.user._id, {
+                email: result.user.email,
+                name: result.user.name,
+            });
+            posthog?.capture('Logged In');
+            
             navigate('/dashboard');
         } catch (err) {
             console.error('Login failed:', err);

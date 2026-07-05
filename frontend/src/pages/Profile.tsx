@@ -17,11 +17,13 @@ import Navbar from "../components/Navbar";
 import { User, Wallet, Hash, ActivitySquare, Shield, Key, AlertTriangle, CheckCircle, XCircle, Eye, EyeOff } from "lucide-react";
 import toast from "react-hot-toast";
 import useDebounce from "../hooks/useDebounce";
+import { usePostHog } from 'posthog-js/react';
 
 const Profile = () => {
     const { data: userData, isLoading: userLoading, error: userError } = useGetCurrentUserQuery();
     const { statsData, transactionsData, statsLoading, transactionsLoading } = usePortfolioData();
     const [logoutMutation, { isLoading: isLoggingOut }] = useLogoutMutation();
+    const posthog = usePostHog();
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
@@ -65,9 +67,11 @@ const Profile = () => {
         try {
             await logoutMutation().unwrap();
             dispatch(logoutAction());
+            posthog?.reset();
             navigate("/");
         } catch {
             dispatch(logoutAction());
+            posthog?.reset();
             navigate("/");
         }
     };
