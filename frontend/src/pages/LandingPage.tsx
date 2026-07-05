@@ -49,37 +49,7 @@ const CHART_COINS = [
     { id: 'ripple', symbol: 'XRP', color: '#00AAE4' },
 ];
 
-const MOCK_COINS: CoinMarket[] = [
-    { id: 'bitcoin', symbol: 'btc', name: 'Bitcoin', image: 'https://coin-images.coingecko.com/coins/images/1/large/bitcoin.png', current_price: 65000, market_cap: 1200000000000, price_change_percentage_24h: 2.5, market_cap_rank: 1 },
-    { id: 'ethereum', symbol: 'eth', name: 'Ethereum', image: 'https://coin-images.coingecko.com/coins/images/279/large/ethereum.png', current_price: 3500, market_cap: 400000000000, price_change_percentage_24h: 1.2, market_cap_rank: 2 },
-    { id: 'tether', symbol: 'usdt', name: 'Tether', image: 'https://coin-images.coingecko.com/coins/images/325/large/Tether.png', current_price: 1, market_cap: 100000000000, price_change_percentage_24h: 0.01, market_cap_rank: 3 },
-    { id: 'binancecoin', symbol: 'bnb', name: 'BNB', image: 'https://coin-images.coingecko.com/coins/images/825/large/bnb-icon2_2x.png', current_price: 600, market_cap: 90000000000, price_change_percentage_24h: -1.5, market_cap_rank: 4 },
-    { id: 'solana', symbol: 'sol', name: 'Solana', image: 'https://coin-images.coingecko.com/coins/images/4128/large/solana.png', current_price: 150, market_cap: 70000000000, price_change_percentage_24h: 5.5, market_cap_rank: 5 },
-    { id: 'usd-coin', symbol: 'usdc', name: 'USDC', image: 'https://coin-images.coingecko.com/coins/images/6319/large/usdc.png', current_price: 1, market_cap: 32000000000, price_change_percentage_24h: -0.01, market_cap_rank: 6 },
-    { id: 'ripple', symbol: 'xrp', name: 'XRP', image: 'https://coin-images.coingecko.com/coins/images/44/large/xrp-symbol-white-128.png', current_price: 0.6, market_cap: 30000000000, price_change_percentage_24h: 0.5, market_cap_rank: 7 },
-    { id: 'steth', symbol: 'steth', name: 'Lido Staked Ether', image: 'https://coin-images.coingecko.com/coins/images/13442/large/steth_logo.png', current_price: 3500, market_cap: 25000000000, price_change_percentage_24h: 1.2, market_cap_rank: 8 },
-    { id: 'dogecoin', symbol: 'doge', name: 'Dogecoin', image: 'https://coin-images.coingecko.com/coins/images/5/large/dogecoin.png', current_price: 0.15, market_cap: 22000000000, price_change_percentage_24h: 10.2, market_cap_rank: 9 },
-    { id: 'toncoin', symbol: 'ton', name: 'Toncoin', image: 'https://coin-images.coingecko.com/coins/images/17980/large/ton_symbol.png', current_price: 6.5, market_cap: 20000000000, price_change_percentage_24h: 3.1, market_cap_rank: 10 }
-];
 
-const MOCK_GLOBAL: GlobalData = {
-    total_market_cap: 2500000000000,
-    total_volume_24h: 100000000000,
-    btc_dominance: 52.5
-};
-
-const MOCK_CHART = Array.from({ length: 7 * 24 }, (_, i) => ({
-    timestamp: Date.now() - (7 * 24 - i) * 3600000,
-    price: 60000 + Math.random() * 5000
-}));
-
-const MOCK_CHARTS: CoinCharts = {
-    bitcoin: MOCK_CHART,
-    ethereum: MOCK_CHART.map(p => ({ ...p, price: p.price * 0.05 })),
-    solana: MOCK_CHART.map(p => ({ ...p, price: p.price * 0.002 })),
-    binancecoin: MOCK_CHART.map(p => ({ ...p, price: p.price * 0.01 })),
-    ripple: MOCK_CHART.map(p => ({ ...p, price: p.price * 0.00001 }))
-};
 
 function isFresh<T>(entry: CacheEntry<T> | null): entry is CacheEntry<T> {
     return entry !== null && Date.now() - entry.timestamp < CACHE_TTL;
@@ -201,13 +171,12 @@ const LandingPage = () => {
             setGlobalData(parsedGlobal);
         } catch (err) {
             console.warn('Failed to fetch market data, using fallback data', err);
-            // Fallback to cache (even if stale) or mock data
+            // Fallback to cache (even if stale) or stale cache
             if (cachedCoins && cachedGlobal) {
                 setCoins((cachedCoins as CacheEntry<CoinMarket[]>).data);
                 setGlobalData((cachedGlobal as CacheEntry<GlobalData>).data);
             } else {
-                setCoins(MOCK_COINS);
-                setGlobalData(MOCK_GLOBAL);
+                setError('Market data unavailable');
             }
         } finally {
             setLoading(false);
@@ -253,7 +222,7 @@ const LandingPage = () => {
             if (cachedCharts) {
                 setChartData((cachedCharts as CacheEntry<CoinCharts>).data);
             } else {
-                setChartData(MOCK_CHARTS);
+                setChartData({});
             }
         } finally {
             setChartLoading(false);
@@ -1294,6 +1263,9 @@ const LandingPage = () => {
                             </Link>
                             <Link to="/privacy" style={{ fontSize: '0.55rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#a1a1aa', fontFamily: "'DM Mono', monospace", textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fafafa'} onMouseLeave={e => e.currentTarget.style.color = '#a1a1aa'}>
                                 Privacy
+                            </Link>
+                            <Link to="/forgot-password" style={{ fontSize: '0.55rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#a1a1aa', fontFamily: "'DM Mono', monospace", textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fafafa'} onMouseLeave={e => e.currentTarget.style.color = '#a1a1aa'}>
+                                Forgot Password
                             </Link>
                             <a href="https://github.com/mohanishp9/crypto_portfolio_tracker" target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.55rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#a1a1aa', fontFamily: "'DM Mono', monospace", textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fafafa'} onMouseLeave={e => e.currentTarget.style.color = '#a1a1aa'}>
                                 GitHub

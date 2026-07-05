@@ -7,6 +7,7 @@ import {
     useAddTransactionMutation,
     useSearchCoinsQuery,
     useUpdateTransactionMutation,
+    useGetPortfolioStatsQuery,
 } from "../services/portfolioApi";
 import { clearSelectedTransaction, closeAddModal } from "../features/portfolio/portfolioSlice";
 import type { TransactionType } from "../types/portfolio.types";
@@ -21,6 +22,7 @@ const AddHoldingModal = () => {
     const [addTransaction, { isLoading: isAdding }] = useAddTransactionMutation();
     const [updateTransaction, { isLoading: isUpdating }] = useUpdateTransactionMutation();
     const posthog = usePostHog();
+    const { data: statsData } = useGetPortfolioStatsQuery();
 
     const [coinInput, setCoinInput] = useState("");
     const [showDropdown, setShowDropdown] = useState(false);
@@ -117,6 +119,9 @@ const AddHoldingModal = () => {
             } else {
                 await addTransaction(payload).unwrap();
                 posthog?.capture('Added Coin to Portfolio', { coin: payload.coinSymbol, type: payload.type });
+                if (statsData && statsData.portfolio && statsData.portfolio.length === 0) {
+                    posthog?.capture('First Portfolio Added');
+                }
             }
             handleClose();
         } catch (err: unknown) {

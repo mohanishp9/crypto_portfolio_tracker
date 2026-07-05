@@ -6,7 +6,7 @@ const PrivacyPolicy: React.FC = () => {
         <div style={{ minHeight: '100vh', backgroundColor: '#09090b', color: '#fafafa', fontFamily: 'ui-sans-serif, system-ui, sans-serif', padding: '40px 20px' }}>
             <div style={{ maxWidth: '800px', margin: '0 auto', backgroundColor: '#18181b', padding: '40px', borderRadius: '16px', border: '1px solid #27272a' }}>
                 <h1 style={{ fontSize: '2rem', marginBottom: '24px', color: '#10b981' }}>Privacy Policy</h1>
-                <p style={{ color: '#a1a1aa', marginBottom: '32px' }}>Last Updated: {new Date().toLocaleDateString()}</p>
+                <p style={{ color: '#a1a1aa', marginBottom: '32px' }}>Last Updated: July 6, 2026</p>
 
                 <section style={{ marginBottom: '32px' }}>
                     <h2 style={{ fontSize: '1.25rem', marginBottom: '16px', color: '#e4e4e7' }}>1. Information We Collect</h2>
