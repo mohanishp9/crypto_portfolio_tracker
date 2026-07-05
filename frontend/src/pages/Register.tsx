@@ -6,6 +6,7 @@ import { useDispatch } from 'react-redux';
 import { setCredentials } from '../features/auth/authSlice';
 import { useNavigate, Link } from 'react-router-dom';
 import { Activity, CheckCircle, XCircle, Eye, EyeOff } from 'lucide-react';
+import { usePostHog } from 'posthog-js/react';
 import toast from 'react-hot-toast';
 import useDebounce from '../hooks/useDebounce';
 
@@ -17,6 +18,7 @@ const Register = () => {
     
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const posthog = usePostHog();
 
     const [formData, setFormData] = useState({ name: '', email: '', password: '' });
     const [validationErrors, setValidationErrors] = useState({ name: '', email: '', password: '' });
@@ -53,6 +55,7 @@ const Register = () => {
         if (!validateForm()) return;
         try {
             await initiateRegistration({ name: formData.name.trim(), email: formData.email, password: formData.password }).unwrap();
+            posthog?.capture('Sign Up Started');
             toast.success('OTP sent to your email!');
             setStep('otp');
         } catch (err: any) {
@@ -70,6 +73,13 @@ const Register = () => {
         try {
             const result = await verifyRegistration({ email: formData.email, otp }).unwrap();
             dispatch(setCredentials({ user: result.user, accessToken: result.accessToken }));
+            
+            posthog?.identify(result.user._id, {
+                email: result.user.email,
+                name: result.user.name,
+            });
+            posthog?.capture('Signed Up');
+
             toast.success('Registration successful! Welcome to CypherSight.');
             navigate('/dashboard');
         } catch (err: any) {

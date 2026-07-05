@@ -23,7 +23,8 @@ export const getUserTransactions = async (
     const query: Record<string, any> = { user: userId };
     
     if (search.trim() !== "") {
-        const regex = new RegExp(search.trim(), "i");
+        const escapedSearch = search.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(escapedSearch, "i");
         query.$or = [
             { coinName: regex },
             { coinSymbol: regex },

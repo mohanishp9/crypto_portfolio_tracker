@@ -1,6 +1,7 @@
 import { memo, useState } from "react";
 import useDebounce from "../hooks/useDebounce";
 import { useLivePrices } from "../context/LivePriceContext";
+import { usePostHog } from 'posthog-js/react';
 import {
     useAddAlertMutation,
     useAddToWatchlistMutation,
@@ -117,6 +118,7 @@ const WatchlistPanel = ({ onSelectCoin }: { onSelectCoin: (coinId: string) => vo
     const [coinInput, setCoinInput] = useState("");
     const [selectedCoin, setSelectedCoin] = useState<{ coinId: string; coinName: string; coinSymbol: string } | null>(null);
     const [showDropdown, setShowDropdown] = useState(false);
+    const posthog = usePostHog();
 
     // Only tracks WHICH coin has the form open — not the form's field values
     const [alertOpenCoinId, setAlertOpenCoinId] = useState<string | null>(null);
@@ -129,6 +131,7 @@ const WatchlistPanel = ({ onSelectCoin }: { onSelectCoin: (coinId: string) => vo
     const handleAdd = async () => {
         if (!selectedCoin) return;
         await addToWatchlist(selectedCoin).unwrap();
+        posthog?.capture('Added to Watchlist', { coin: selectedCoin.coinSymbol });
         setSelectedCoin(null);
         setCoinInput("");
         setShowDropdown(false);
@@ -146,6 +149,7 @@ const WatchlistPanel = ({ onSelectCoin }: { onSelectCoin: (coinId: string) => vo
             direction,
             targetPrice,
         });
+        posthog?.capture('Created Price Alert', { coin: item.coinSymbol, direction, targetPrice });
         setAlertOpenCoinId(null);
     };
 

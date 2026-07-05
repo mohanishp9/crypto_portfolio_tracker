@@ -58,6 +58,7 @@ export const emailWorker = new Worker<AlertJobData>(
             recipientName: userName,
             subject,
             htmlContent,
+            type: 'alert'
         });
 
         console.log(`[Email Worker] Successfully sent alert email for ${coinSymbol} to ${email}`);

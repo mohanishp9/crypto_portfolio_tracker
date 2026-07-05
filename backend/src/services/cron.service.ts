@@ -1,15 +1,16 @@
 import cron from "node-cron";
-import { coinGeckoApi } from "./coinGecko.service";
+import { coinGeckoApi, searchCoins, getCoinDetail } from "./coinGecko.service";
 import { setPersistentCache } from "./cache.service";
 import { MarketCoin } from "../types/coinsData.types";
 import { checkAndTriggerAllAlerts } from "./alerts.service";
 
-const CHART_COINS = ["bitcoin", "ethereum", "binancecoin"];
+const CHART_COINS = ["bitcoin", "ethereum", "binancecoin", "solana", "ripple"];
+const COMMON_SEARCH_QUERIES = ["bitcoin", "ethereum", "solana", "ripple", "dogecoin"];
 
 export const refreshMarketDataCache = async (): Promise<void> => {
     console.log("[Cron] Starting market data cache refresh...");
 
-    // 1. Fetch Top 100 Coins
+    // 1. Fetch Top 100 Coins (this pre-warms getTopCoins)
     try {
         const response = await coinGeckoApi.get<MarketCoin[]>("/coins/markets", {
             params: {
@@ -26,6 +27,17 @@ export const refreshMarketDataCache = async (): Promise<void> => {
                 staleTtlMs: 1000 * 60 * 60 * 6, // 6h stale grace
             });
             console.log("[Cron] Successfully cached Top 100 coins.");
+            
+            // 4. Pre-warm getCoinDetail for the top 10 coins (do this sequentially to avoid rate limits)
+            const top10 = response.data.slice(0, 10);
+            for (const coin of top10) {
+                try {
+                    await getCoinDetail(coin.id);
+                    await new Promise((resolve) => setTimeout(resolve, 1000));
+                } catch (err: any) {
+                    console.error(`[Cron] Failed to pre-warm detail for ${coin.id}:`, err.message || err);
+                }
+            }
         }
     } catch (error: any) {
         console.error("[Cron] Failed to fetch top coins:", error.message || error);
@@ -65,6 +77,16 @@ export const refreshMarketDataCache = async (): Promise<void> => {
             await new Promise((resolve) => setTimeout(resolve, 2000));
         } catch (error: any) {
             console.error(`[Cron] Failed to fetch chart for ${coinId}:`, error.message || error);
+        }
+    }
+
+    // 5. Pre-warm search queries
+    for (const query of COMMON_SEARCH_QUERIES) {
+        try {
+            await searchCoins(query);
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+        } catch (error: any) {
+            console.error(`[Cron] Failed to pre-warm search for "${query}":`, error.message || error);
         }
     }
 

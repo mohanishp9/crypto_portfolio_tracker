@@ -1,11 +1,14 @@
 import { Request, Response } from "express";
+import crypto from "crypto";
 import User from "../models/User.model";
 import Transaction from "../models/Transaction.model";
 import WatchlistItem from "../models/WatchlistItem.model";
 import PriceAlert from "../models/PriceAlert.model";
 import PortfolioSnapshot from "../models/PortfolioSnapshot.model";
 import RefreshToken from "../models/RefreshToken.model";
+import { AuthRequest } from "../middleware/auth.middleware";
 import { redis } from "../config/redis";
+import { getPostHogClient } from "../utils/posthog";
 import {
     updateNameSchema,
     initiateEmailChangeSchema,
@@ -15,6 +18,8 @@ import {
 } from "../utils/validation";
 import { sendTransactionalEmail } from "../services/email.service";
 import { asyncHandler } from "../utils/asyncHandler";
+
+
 
 // Utility for throwing async errors inside asyncHandler
 const throwError = (res: Response, status: number, message: string) => {
@@ -34,7 +39,9 @@ export const checkNameController = asyncHandler(async (req: Request, res: Respon
     }
 
     // Check exact name without lowercase if it's display name, but user wanted uniqueness. Let's assume unique case-insensitive or not. Wait, MongoDB name isn't lowercase by default. We'll use case-insensitive query.
-    const userExists = await User.findOne({ name: { $regex: new RegExp(`^${name.trim()}$`, 'i') } });
+    // Escape regex characters to prevent ReDoS
+    const escapedName = name.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const userExists = await User.findOne({ name: { $regex: new RegExp(`^${escapedName}$`, 'i') } });
     res.status(200).json({ available: !userExists });
 });
 
@@ -59,7 +66,8 @@ export const updateNameController = asyncHandler(async (req: Request, res: Respo
         return throwError(res, 401, "Not authorized");
     }
 
-    const existingUser = await User.findOne({ name: { $regex: new RegExp(`^${name.trim()}$`, 'i') } });
+    const escapedName = name.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const existingUser = await User.findOne({ name: { $regex: new RegExp(`^${escapedName}$`, 'i') } });
     if (existingUser && existingUser._id?.toString() !== req.user._id.toString()) {
         res.status(409).json({ success: false, message: "Name is already taken." });
         return;
@@ -165,7 +173,7 @@ export const initiateEmailChangeController = asyncHandler(async (req: Request, r
     }
 
     // Generate OTP
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otp = crypto.randomInt(100000, 1000000).toString();
 
     const redisKey = `email_change:otp:${req.user._id}`;
     if (!redis) {
@@ -179,6 +187,10 @@ export const initiateEmailChangeController = asyncHandler(async (req: Request, r
     });
 
     await redis.set(redisKey, payload, 'EX', 600); // 10 minutes
+
+    if (process.env.NODE_ENV === "development") {
+        console.log(`[Development OTP] Email Update OTP for ${newEmail}: ${otp}`);
+    }
 
     // Send Email to NEW email
     const emailSent = await sendTransactionalEmail({
@@ -290,6 +302,8 @@ export const verifyEmailChangeController = asyncHandler(async (req: Request, res
         return;
     }
 
+    const oldEmail = req.user.email;
+    
     const updatedUser = await User.findByIdAndUpdate(
         req.user._id,
         { email: data.newEmail },
@@ -300,7 +314,93 @@ export const verifyEmailChangeController = asyncHandler(async (req: Request, res
         return throwError(res, 404, "User not found");
     }
 
+    const ph = getPostHogClient();
+    if (ph) {
+        ph.capture({
+            distinctId: req.user._id.toString(),
+            event: 'Email Changed'
+        });
+    }
+
+    // Generate Rollback Token
+    const rollbackToken = crypto.randomBytes(32).toString('hex');
+    await redis.set(`rollback:${rollbackToken}`, JSON.stringify({ userId: req.user._id, oldEmail }), 'EX', 7 * 24 * 60 * 60);
+
+    const revertUrl = `${req.protocol}://${req.get('host')}/api/users/me/revert-email/${rollbackToken}`;
+
+    await sendTransactionalEmail({
+        to: oldEmail,
+        recipientName: updatedUser.name,
+        subject: "Security Alert: Email Address Changed",
+        htmlContent: `
+            <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; background-color: #09090b; color: #fafafa; padding: 32px; border-radius: 16px; border: 1px solid #27272a;">
+                <h1 style="color: #ef4444; font-size: 24px; margin-bottom: 8px;">Security Alert</h1>
+                <p style="color: #d4d4d8; line-height: 1.6; margin-bottom: 24px;">
+                    Your CypherSight account email was just changed to <strong>${data.newEmail}</strong>.
+                </p>
+                <p style="color: #d4d4d8; line-height: 1.6; margin-bottom: 24px;">
+                    If you made this change, you can safely ignore this email.
+                </p>
+                <div style="background-color: #7f1d1d; border: 1px solid #b91c1c; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+                    <h3 style="color: #fca5a5; margin-top: 0; margin-bottom: 8px;">Wasn't you?</h3>
+                    <p style="color: #fecaca; font-size: 14px; margin-bottom: 16px;">
+                        If you did not authorize this change, your account may be compromised. Click the button below immediately to revert this change and secure your account.
+                    </p>
+                    <a href="${revertUrl}" style="display: inline-block; background-color: #ef4444; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: bold; text-transform: uppercase; font-size: 14px; letter-spacing: 1px;">Revert & Lock Account</a>
+                </div>
+            </div>
+        `,
+        type: 'alert'
+    });
+
     res.status(200).json({ success: true, message: "Email updated successfully.", user: updatedUser });
+});
+
+// ---------------------------------------------------------
+// REVERT EMAIL CHANGE (Emergency Rollback)
+// GET /api/users/revert-email/:token
+// ---------------------------------------------------------
+export const revertEmailChangeController = asyncHandler(async (req: Request, res: Response) => {
+    const { token } = req.params;
+
+    if (!redis) {
+        res.status(500).send("Service temporarily unavailable.");
+        return;
+    }
+
+    const redisKey = `rollback:${token}`;
+    const dataStr = await redis.get(redisKey);
+
+    if (!dataStr) {
+        res.status(400).send(`
+            <div style="font-family: sans-serif; text-align: center; margin-top: 50px;">
+                <h1>Link Expired or Invalid</h1>
+                <p>This rollback link is no longer valid. If you believe your account is compromised, please contact support.</p>
+            </div>
+        `);
+        return;
+    }
+
+    const data = JSON.parse(dataStr);
+
+    // Revert email in DB
+    await User.findByIdAndUpdate(data.userId, { email: data.oldEmail });
+
+    // Invalidate all sessions globally to kick out attacker
+    await RefreshToken.deleteMany({ userId: data.userId });
+
+    // Mark token as used
+    await redis.del(redisKey);
+
+    res.status(200).send(`
+        <div style="font-family: sans-serif; text-align: center; margin-top: 50px; background-color: #09090b; color: #fafafa; padding: 40px; min-height: 100vh;">
+            <h1 style="color: #10b981;">Account Secured</h1>
+            <p>Your email has been reverted to <strong>${data.oldEmail}</strong>.</p>
+            <p>All active sessions have been terminated for your security.</p>
+            <p>Please log in and change your password immediately.</p>
+            <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/login" style="display: inline-block; margin-top: 20px; color: #60a5fa;">Go to Login</a>
+        </div>
+    `);
 });
 
 // ---------------------------------------------------------
@@ -336,7 +436,7 @@ export const initiateAccountDeletionController = asyncHandler(async (req: Reques
     }
 
     // Generate OTP
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otp = crypto.randomInt(100000, 1000000).toString();
 
     const redisKey = `delete:otp:${req.user._id}`;
     if (!redis) {
@@ -349,6 +449,10 @@ export const initiateAccountDeletionController = asyncHandler(async (req: Reques
     });
 
     await redis.set(redisKey, payload, 'EX', 600); // 10 minutes
+
+    if (process.env.NODE_ENV === "development") {
+        console.log(`[Development OTP] Account Deletion OTP for ${user.email}: ${otp}`);
+    }
 
     // Send Email to CURRENT email
     const emailSent = await sendTransactionalEmail({
@@ -480,6 +584,15 @@ export const deleteAccountController = asyncHandler(async (req: Request, res: Re
 
     // 6. Delete user
     await User.findByIdAndDelete(req.user._id);
+
+    // Track deletion in PostHog
+    const ph = getPostHogClient();
+    if (ph) {
+        ph.capture({
+            distinctId: userIdString,
+            event: 'Account Deleted'
+        });
+    }
 
     // 7. Clear cookie
     res.clearCookie("refreshToken", {

@@ -41,3 +41,13 @@ export const verifyActionOtpSchema = z.object({
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type VerifyOtpInput = z.infer<typeof verifyOtpSchema>;
+
+export const initiatePasswordResetSchema = z.object({
+    email: z.string().email({ message: "Invalid email" }),
+});
+
+export const verifyPasswordResetSchema = z.object({
+    email: z.string().email({ message: "Invalid email" }),
+    otp: z.string().length(6, { message: "OTP must be exactly 6 digits" }),
+    newPassword: z.string().min(6, { message: "Password must have at least 6 characters" }).max(100),
+});

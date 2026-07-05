@@ -11,6 +11,7 @@ import {
 import { clearSelectedTransaction, closeAddModal } from "../features/portfolio/portfolioSlice";
 import type { TransactionType } from "../types/portfolio.types";
 import { X, Search } from "lucide-react";
+import { usePostHog } from 'posthog-js/react';
 
 const AddHoldingModal = () => {
     const dispatch = useDispatch();
@@ -19,6 +20,7 @@ const AddHoldingModal = () => {
     const isEditing = Boolean(selectedTransaction?._id);
     const [addTransaction, { isLoading: isAdding }] = useAddTransactionMutation();
     const [updateTransaction, { isLoading: isUpdating }] = useUpdateTransactionMutation();
+    const posthog = usePostHog();
 
     const [coinInput, setCoinInput] = useState("");
     const [showDropdown, setShowDropdown] = useState(false);
@@ -111,8 +113,10 @@ const AddHoldingModal = () => {
         try {
             if (selectedTransaction?._id) {
                 await updateTransaction({ id: selectedTransaction._id, transaction: payload }).unwrap();
+                posthog?.capture('Updated Coin in Portfolio', { coin: payload.coinSymbol, type: payload.type });
             } else {
                 await addTransaction(payload).unwrap();
+                posthog?.capture('Added Coin to Portfolio', { coin: payload.coinSymbol, type: payload.type });
             }
             handleClose();
         } catch (err: unknown) {

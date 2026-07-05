@@ -33,3 +33,18 @@ export const otpRateLimiter = rateLimit({
         return `${req.ip}_${email.toLowerCase()}`;
     }
 });
+
+export const globalApiRateLimiter = rateLimit({
+    windowMs: 60 * 1000, // 1 minute
+    max: 100, // I set this to 100 to protect our shared CoinGecko budget from abuse
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: {
+        success: false,
+        message: "Too many requests from this IP. Please try again later.",
+    },
+    store: redis ? new RedisStore({
+        sendCommand: (...args: string[]) => redis!.call(args[0], ...args.slice(1)) as any,
+        prefix: "rl:global:"
+    }) : undefined,
+});
