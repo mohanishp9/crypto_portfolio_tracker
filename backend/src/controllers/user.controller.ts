@@ -6,7 +6,6 @@ import WatchlistItem from "../models/WatchlistItem.model";
 import PriceAlert from "../models/PriceAlert.model";
 import PortfolioSnapshot from "../models/PortfolioSnapshot.model";
 import RefreshToken from "../models/RefreshToken.model";
-import { AuthRequest } from "../middleware/auth.middleware";
 import { redis } from "../config/redis";
 import { getPostHogClient } from "../utils/posthog";
 import {
