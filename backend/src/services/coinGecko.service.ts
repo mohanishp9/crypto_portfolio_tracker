@@ -1,4 +1,5 @@
 import axios from "axios";
+import ApiCache from "../models/ApiCache.model";
 import {
     CachedResponse,
     CoinDetail,
@@ -95,6 +96,14 @@ export const getCurrentPrice = async (coinIds: string[]): Promise<CachedResponse
     }
 
     const key = `prices:${[...uniqueIds].sort().join(",")}`;
+    
+    // Fetch unconditional raw cache in case we need a last-resort fallback
+    let rawCache: any = null;
+    try {
+        rawCache = await ApiCache.findOne({ key }).lean();
+    } catch (e) {
+        // Ignore DB errors here, we'll try the main flow
+    }
 
     try {
         const result = await getCachedOrFetch<CoinPriceResponse>(
@@ -117,6 +126,15 @@ export const getCurrentPrice = async (coinIds: string[]): Promise<CachedResponse
             result.stale ? "Showing cached prices because live market data is temporarily unavailable." : undefined
         );
     } catch (error: unknown) {
+        if (rawCache) {
+            console.warn(`[CoinGecko] Rate limit/error encountered. Serving stale cache for prices. Error: ${normalizeError(error)}`);
+            return {
+                data: rawCache.data as CoinPriceResponse,
+                lastUpdated: new Date(rawCache.lastUpdatedAt).toISOString(),
+                stale: true,
+                staleReason: "CoinGecko is temporarily offline. Showing stale cached data.",
+            };
+        }
         console.error("Error fetching current prices:", normalizeError(error));
         throw new Error("Failed to fetch coin prices");
     }
