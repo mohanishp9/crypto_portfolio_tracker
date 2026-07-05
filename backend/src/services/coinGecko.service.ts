@@ -97,12 +97,12 @@ export const getCurrentPrice = async (coinIds: string[]): Promise<CachedResponse
 
     const key = `prices:${[...uniqueIds].sort().join(",")}`;
     
-    // Fetch unconditional raw cache in case we need a last-resort fallback
+    // Fetch unconditional raw cache in case I need a last-resort fallback
     let rawCache: any = null;
     try {
         rawCache = await ApiCache.findOne({ key }).lean();
     } catch (e) {
-        // Ignore DB errors here, we'll try the main flow
+        // Ignore DB errors here, I'll try the main flow
     }
 
     try {
