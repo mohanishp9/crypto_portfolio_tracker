@@ -1256,7 +1256,7 @@ const LandingPage = () => {
                     <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start gap-6">
                         
                         {/* Brand & Tagline */}
-                        <div className="text-center sm:text-left">
+                        <div className="text-center sm:text-left flex-1">
                             <div className="flex items-center justify-center sm:justify-start gap-2 mb-2">
                                 <div style={{ width: 16, height: 16, borderRadius: '50%', border: '1px solid rgba(129, 140, 248,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                     <div style={{ width: 4, height: 4, borderRadius: '50%', background: '#818cf8', opacity: 0.8 }} />
@@ -1265,13 +1265,16 @@ const LandingPage = () => {
                                     CypherSight
                                 </span>
                             </div>
-                            <p style={{ fontFamily: "'DM Mono', monospace", fontSize: '0.55rem', letterSpacing: '0.12em', color: '#71717a', textTransform: 'uppercase' }}>
+                            <p style={{ fontFamily: "'DM Mono', monospace", fontSize: '0.55rem', letterSpacing: '0.12em', color: '#71717a', textTransform: 'uppercase', marginBottom: '16px' }}>
                                 A refined crypto portfolio tracker.
+                            </p>
+                            <p style={{ fontFamily: "ui-sans-serif, system-ui, sans-serif", fontSize: '0.65rem', color: '#52525b', maxWidth: '400px', margin: '0 auto sm:0' }}>
+                                Disclaimer: CypherSight is for informational purposes only. The data provided is not financial, legal, or investment advice. Cryptocurrency markets are highly volatile.
                             </p>
                         </div>
                         
                         {/* Links */}
-                        <div className="flex items-center gap-6">
+                        <div className="flex flex-wrap justify-center items-center gap-6 flex-1">
                             {isAuthenticated ? (
                                 <Link to="/dashboard" style={{ fontSize: '0.55rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#a1a1aa', fontFamily: "'DM Mono', monospace", textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fafafa'} onMouseLeave={e => e.currentTarget.style.color = '#a1a1aa'}>
                                     Dashboard
@@ -1286,13 +1289,19 @@ const LandingPage = () => {
                                     </Link>
                                 </>
                             )}
+                            <Link to="/terms" style={{ fontSize: '0.55rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#a1a1aa', fontFamily: "'DM Mono', monospace", textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fafafa'} onMouseLeave={e => e.currentTarget.style.color = '#a1a1aa'}>
+                                Terms
+                            </Link>
+                            <Link to="/privacy" style={{ fontSize: '0.55rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#a1a1aa', fontFamily: "'DM Mono', monospace", textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fafafa'} onMouseLeave={e => e.currentTarget.style.color = '#a1a1aa'}>
+                                Privacy
+                            </Link>
                             <a href="https://github.com/mohanishp9/crypto_portfolio_tracker" target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.55rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#a1a1aa', fontFamily: "'DM Mono', monospace", textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fafafa'} onMouseLeave={e => e.currentTarget.style.color = '#a1a1aa'}>
                                 GitHub
                             </a>
                         </div>
                         
                         {/* Credits */}
-                        <div className="text-center sm:text-right mt-2 sm:mt-0">
+                        <div className="text-center sm:text-right flex-1 mt-4 sm:mt-0">
                             <p style={{ fontFamily: "'DM Mono', monospace", fontSize: '0.5rem', letterSpacing: '0.1em', color: '#818cf8', textTransform: 'uppercase' }}>
                                 Data provided by
                             </p>
