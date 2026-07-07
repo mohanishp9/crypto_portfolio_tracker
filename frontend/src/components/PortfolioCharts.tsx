@@ -142,10 +142,11 @@ const PortfolioCharts = ({ statsData, isLoading }: { statsData?: PortfolioStatsR
                         <h3 className="font-semibold text-lg text-zinc-50 tracking-tight mt-2">
                             Value Over Time
                         </h3>
-                        <div className="h-72 mt-6">
+                        <div className="h-72 mt-6 overflow-x-auto custom-scrollbar">
                             {chartData.length > 0 ? (
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <AreaChart data={chartData}>
+                                <div style={{ minWidth: '550px', height: '100%' }}>
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <AreaChart data={chartData}>
                                         <defs>
                                             <linearGradient id="portfolioValue" x1="0" y1="0" x2="0" y2="1">
                                                 <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.5} />
@@ -183,7 +184,8 @@ const PortfolioCharts = ({ statsData, isLoading }: { statsData?: PortfolioStatsR
                                             fill="url(#portfolioValue)" 
                                         />
                                     </AreaChart>
-                                </ResponsiveContainer>
+                                    </ResponsiveContainer>
+                                </div>
                             ) : (
                                 <div className="h-full flex items-center justify-center text-sm text-zinc-500">
                                     Snapshot history will accumulate as you keep using the dashboard.

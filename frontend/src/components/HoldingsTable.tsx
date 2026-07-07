@@ -23,7 +23,7 @@ const HoldingsTable = ({ statsData, onSelectCoin, isLoading }: HoldingsTableProp
                 </p>
             </div>
 
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto custom-scrollbar">
                 <table className="min-w-full">
                     <thead>
                         <tr className="border-b border-zinc-800 bg-zinc-900/50">

@@ -7,6 +7,7 @@ import type {
     AddWatchlistItemInput,
     AlertsResponse,
     CoinDetailResponse,
+    CoinChartResponse,
     PortfolioMutationResponse,
     PortfolioStatsResponse,
     PortfolioAnalyticsResponse,
@@ -72,6 +73,10 @@ export const portfolioApi = createApi({
         getCoinDetail: builder.query<CoinDetailResponse, string>({
             query: (coinId) => `/market/coins/${coinId}`,
             providesTags: (_result, _error, coinId) => [{ type: "Market", id: coinId }],
+        }),
+        getCoinChart: builder.query<CoinChartResponse, { coinId: string; days?: number }>({
+            query: ({ coinId, days = 7 }) => `/market/chart/${coinId}?days=${days}`,
+            providesTags: (_result, _error, arg) => [{ type: "Market", id: `chart-${arg.coinId}` }],
         }),
         getWatchlist: builder.query<WatchlistResponse, void>({
             query: () => "/watchlist",
@@ -155,6 +160,7 @@ export const {
     useExportTaxReportMutation,
     useGetAlertsQuery,
     useGetCoinDetailQuery,
+    useGetCoinChartQuery,
     useGetPortfolioStatsQuery,
     useGetPortfolioAnalyticsQuery,
     useGetTopCoinsQuery,

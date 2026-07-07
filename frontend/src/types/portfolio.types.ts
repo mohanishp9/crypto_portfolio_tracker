@@ -196,3 +196,16 @@ export interface CoinDetailResponse {
     stale: boolean;
     staleReason?: string;
 }
+
+export interface CoinChartPoint {
+    timestamp: number;
+    price: number;
+}
+
+export interface CoinChartResponse {
+    success: boolean;
+    prices: CoinChartPoint[];
+    lastUpdated: string;
+    stale: boolean;
+    staleReason?: string;
+}
