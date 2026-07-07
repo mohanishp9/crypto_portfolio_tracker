@@ -692,7 +692,7 @@ const LandingPage = () => {
 
                     {/* Loading skeleton */}
                     {loading && (
-                        <div style={{ background: '#18181b', border: '1px solid rgba(63, 63, 70,0.3)', overflowX: 'auto' }}>
+                        <div className="custom-scrollbar" style={{ background: '#18181b', border: '1px solid rgba(63, 63, 70,0.3)', overflowX: 'auto' }}>
                             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '600px' }}>
                                 <thead>
                                     <tr style={{ borderBottom: '1px solid rgba(63, 63, 70,0.3)', background: 'rgba(39, 39, 42, 0.5)' }}>
@@ -739,7 +739,7 @@ const LandingPage = () => {
 
                     {/* Coin table */}
                     {!loading && !error && coins.length > 0 && (
-                        <div style={{ background: '#18181b', border: '1px solid rgba(63, 63, 70,0.3)', overflowX: 'auto' }}>
+                        <div className="custom-scrollbar" style={{ background: '#18181b', border: '1px solid rgba(63, 63, 70,0.3)', overflowX: 'auto' }}>
                             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '600px' }}>
                                 <thead>
                                     <tr style={{ borderBottom: '1px solid rgba(63, 63, 70,0.3)', background: 'rgba(39, 39, 42, 0.5)' }}>
@@ -902,31 +902,33 @@ const LandingPage = () => {
                                 </button>
                             ))}
                         </div>
-                        <div style={{ height: 300 }}>
+                        <div className="custom-scrollbar" style={{ height: 300, overflowX: 'auto' }}>
                             {chartLoading ? (
                                 <div className="w-full h-full flex items-center justify-center" style={{ background: 'rgba(63, 63, 70,0.1)', animation: 'skeletonPulse 1.6s ease-in-out infinite' }}>
                                     <span style={{ fontFamily: "'DM Mono', monospace", fontSize: '0.7rem', color: '#71717a' }}>Loading chart...</span>
                                 </div>
                             ) : (
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <AreaChart data={chartData[activeChartTab] || []} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                                        <defs>
-                                            <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
-                                                <stop offset="5%" stopColor={CHART_COINS.find(c => c.id === activeChartTab)?.color || '#818cf8'} stopOpacity={0.3}/>
-                                                <stop offset="95%" stopColor={CHART_COINS.find(c => c.id === activeChartTab)?.color || '#818cf8'} stopOpacity={0}/>
-                                            </linearGradient>
-                                        </defs>
-                                        <XAxis dataKey="timestamp" tickFormatter={formatAxisDate} tick={{ fill: '#71717a', fontSize: 10, fontFamily: "'DM Mono', monospace" }} axisLine={false} tickLine={false} minTickGap={30} />
-                                        <YAxis tickFormatter={(val) => `$${val >= 1000 ? (val / 1000).toFixed(1) + 'K' : val}`} tick={{ fill: '#71717a', fontSize: 10, fontFamily: "'DM Mono', monospace" }} axisLine={false} tickLine={false} domain={['auto', 'auto']} />
-                                        <Tooltip 
-                                            contentStyle={{ background: '#09090b', border: '1px solid rgba(63, 63, 70,0.5)', borderRadius: '4px', fontFamily: "'DM Mono', monospace", fontSize: '0.7rem' }}
-                                            labelFormatter={(l) => formatTooltipDate(l as number)}
-                                            itemStyle={{ color: '#fafafa' }}
-                                            formatter={(val: number) => [fmtPrice(val), 'Price']}
-                                        />
-                                        <Area type="monotone" dataKey="price" stroke={CHART_COINS.find(c => c.id === activeChartTab)?.color || '#818cf8'} fillOpacity={1} fill="url(#colorPrice)" strokeWidth={2} isAnimationActive={true} />
-                                    </AreaChart>
-                                </ResponsiveContainer>
+                                <div style={{ minWidth: '600px', height: '100%' }}>
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <AreaChart data={chartData[activeChartTab] || []} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                                            <defs>
+                                                <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
+                                                    <stop offset="5%" stopColor={CHART_COINS.find(c => c.id === activeChartTab)?.color || '#818cf8'} stopOpacity={0.3}/>
+                                                    <stop offset="95%" stopColor={CHART_COINS.find(c => c.id === activeChartTab)?.color || '#818cf8'} stopOpacity={0}/>
+                                                </linearGradient>
+                                            </defs>
+                                            <XAxis dataKey="timestamp" tickFormatter={formatAxisDate} tick={{ fill: '#71717a', fontSize: 10, fontFamily: "'DM Mono', monospace" }} axisLine={false} tickLine={false} minTickGap={30} />
+                                            <YAxis tickFormatter={(val) => `$${val >= 1000 ? (val / 1000).toFixed(1) + 'K' : val}`} tick={{ fill: '#71717a', fontSize: 10, fontFamily: "'DM Mono', monospace" }} axisLine={false} tickLine={false} domain={['auto', 'auto']} />
+                                            <Tooltip 
+                                                contentStyle={{ background: '#09090b', border: '1px solid rgba(63, 63, 70,0.5)', borderRadius: '4px', fontFamily: "'DM Mono', monospace", fontSize: '0.7rem' }}
+                                                labelFormatter={(l) => formatTooltipDate(l as number)}
+                                                itemStyle={{ color: '#fafafa' }}
+                                                formatter={(val: number) => [fmtPrice(val), 'Price']}
+                                            />
+                                            <Area type="monotone" dataKey="price" stroke={CHART_COINS.find(c => c.id === activeChartTab)?.color || '#818cf8'} fillOpacity={1} fill="url(#colorPrice)" strokeWidth={2} isAnimationActive={true} />
+                                        </AreaChart>
+                                    </ResponsiveContainer>
+                                </div>
                             )}
                         </div>
                     </div>
@@ -936,7 +938,7 @@ const LandingPage = () => {
                         {/* Donut Chart: Market Cap */}
                         <div style={{ background: '#18181b', border: '1px solid rgba(63, 63, 70,0.3)', padding: '24px', flex: 1 }}>
                             <h3 style={{ fontFamily: "ui-sans-serif, system-ui, sans-serif", fontSize: '1.2rem', color: '#fafafa', letterSpacing: '0.04em', marginBottom: '16px' }}>Market Cap Distribution</h3>
-                            <div style={{ height: 250 }}>
+                            <div className="flex items-center justify-center" style={{ height: 250, minHeight: 250 }}>
                                 {!loading && coins.length > 0 ? (
                                     <ResponsiveContainer width="100%" height="100%">
                                         <PieChart>
@@ -949,8 +951,8 @@ const LandingPage = () => {
                                                 nameKey="symbol"
                                                 cx="50%"
                                                 cy="50%"
-                                                innerRadius={60}
-                                                outerRadius={90}
+                                                innerRadius={50}
+                                                outerRadius={80}
                                                 stroke="none"
                                                 isAnimationActive={true}
                                             >

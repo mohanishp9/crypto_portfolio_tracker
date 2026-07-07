@@ -77,7 +77,7 @@ const PortfolioAnalytics = () => {
                         MongoDB <span className="font-normal text-zinc-500 italic">Aggregation Pipeline Analytics</span>
                     </h3>
                 </div>
-                <div className="p-6 overflow-x-auto">
+                <div className="p-6 overflow-x-auto custom-scrollbar">
                     <table className="min-w-full">
                         <thead>
                             <tr className="border-b border-zinc-800">
@@ -161,10 +161,10 @@ const PortfolioAnalytics = () => {
                         id="extremes"
                         title="Best / Worst Day"
                         value={
-                            <div className="flex items-center gap-2">
-                                <p className="text-lg font-semibold tracking-tight text-emerald-400">+{metrics.bestDay.toFixed(2)}%</p>
+                            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                                <p className="text-base sm:text-lg font-semibold tracking-tight text-emerald-400">+{metrics.bestDay.toFixed(2)}%</p>
                                 <span className="text-zinc-700">/</span>
-                                <p className="text-lg font-semibold tracking-tight text-rose-400">{metrics.worstDay.toFixed(2)}%</p>
+                                <p className="text-base sm:text-lg font-semibold tracking-tight text-rose-400">{metrics.worstDay.toFixed(2)}%</p>
                             </div>
                         }
                         description="Single period extremes"
@@ -215,7 +215,7 @@ const PortfolioAnalytics = () => {
                 </button>
 
                 {isOpen && (
-                    <div className="overflow-x-auto border-t border-zinc-800 bg-zinc-950/50">
+                    <div className="overflow-x-auto custom-scrollbar border-t border-zinc-800 bg-zinc-950/50">
                         <table className="min-w-full">
                             <thead>
                                 <tr className="border-b border-zinc-800">
