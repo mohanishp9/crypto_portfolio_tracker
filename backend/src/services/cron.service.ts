@@ -96,13 +96,21 @@ export const refreshMarketDataCache = async (): Promise<void> => {
 export const startCronJobs = (): void => {
     console.log("[Cron] Initializing cron scheduler...");
     
-    // Schedule cache refresh and alerts check every 5 minutes
+    // Schedule cache refresh every 5 minutes
     cron.schedule("*/5 * * * *", async () => {
         try {
             await refreshMarketDataCache();
+        } catch (error) {
+            console.error("[Cron] Error in cache refresh:", error);
+        }
+    });
+
+    // Schedule alerts check every 1 minute for faster dispatch
+    cron.schedule("* * * * *", async () => {
+        try {
             await checkAndTriggerAllAlerts();
         } catch (error) {
-            console.error("[Cron] Error in cron execution tasks:", error);
+            console.error("[Cron] Error in alerts check:", error);
         }
     });
 

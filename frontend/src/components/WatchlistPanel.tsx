@@ -1,4 +1,5 @@
 import { memo, useState } from "react";
+import toast from "react-hot-toast";
 import useDebounce from "../hooks/useDebounce";
 import { useLivePrices } from "../context/LivePriceContext";
 import { usePostHog } from 'posthog-js/react';
@@ -33,9 +34,23 @@ const AlertInlineForm = memo(({ coinName, initialPrice, onSubmit, onCancel }: Al
     const handleSubmit = async () => {
         const price = parseFloat(targetPrice);
         if (isNaN(price) || price <= 0) return;
+        
+        if (direction === "ABOVE" && price <= initialPrice) {
+            toast.error("Target price must be above the current price.");
+            return;
+        }
+        if (direction === "BELOW" && price >= initialPrice) {
+            toast.error("Target price must be below the current price.");
+            return;
+        }
+
         setSaving(true);
-        await onSubmit(direction, price);
-        // onSubmit closes the form; no need to setSaving(false) after unmount
+        try {
+            await onSubmit(direction, price);
+        } catch (err: any) {
+            toast.error(err?.data?.message || err?.error || "Failed to set alert.");
+            setSaving(false);
+        }
     };
 
     return (
@@ -148,7 +163,7 @@ const WatchlistPanel = ({ onSelectCoin }: { onSelectCoin: (coinId: string) => vo
             coinSymbol: item.coinSymbol,
             direction,
             targetPrice,
-        });
+        }).unwrap();
         posthog?.capture('Created Price Alert', { coin: item.coinSymbol, direction, targetPrice });
         setAlertOpenCoinId(null);
     };

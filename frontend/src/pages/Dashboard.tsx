@@ -275,15 +275,9 @@ const Dashboard = () => {
         <div className="flex flex-wrap gap-3 mb-6">
           <button
             onClick={() => dispatch(openAddModal())}
-            className="bg-zinc-50 text-zinc-950 hover:bg-zinc-200 px-5 py-2 rounded-md text-sm font-semibold transition-colors shadow-sm"
+            className="bg-indigo-500 text-zinc-50 hover:bg-indigo-400 px-6 py-2.5 rounded-md text-sm font-bold transition-all shadow-[0_0_15px_rgba(99,102,241,0.4)] hover:shadow-[0_0_25px_rgba(99,102,241,0.6)] uppercase tracking-wider"
           >
-            Add Transaction
-          </button>
-          <button
-            onClick={refetchPortfolio}
-            className="bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-zinc-50 hover:bg-zinc-800/70 px-5 py-2 rounded-md text-sm font-medium transition-colors"
-          >
-            Refresh Prices
+            + Add Transaction
           </button>
         </div>
 
