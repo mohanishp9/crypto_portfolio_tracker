@@ -7,6 +7,7 @@ import './index.css'
 import App from './App.tsx'
 import ToastContainer from './components/ToastContainer.tsx'
 import { LivePriceProvider } from './context/LivePriceContext.tsx'
+import { ThemeProvider } from './context/ThemeContext.tsx'
 import posthog from 'posthog-js'
 import { PostHogProvider } from 'posthog-js/react'
 
@@ -20,14 +21,16 @@ if (import.meta.env.VITE_POSTHOG_KEY) {
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <PostHogProvider client={posthog}>
-      <Provider store={store}>
-        <BrowserRouter>
-          <LivePriceProvider>
-            <App />
-            <ToastContainer />
-          </LivePriceProvider>
-        </BrowserRouter>
-      </Provider>
+      <ThemeProvider>
+        <Provider store={store}>
+          <BrowserRouter>
+            <LivePriceProvider>
+              <App />
+              <ToastContainer />
+            </LivePriceProvider>
+          </BrowserRouter>
+        </Provider>
+      </ThemeProvider>
     </PostHogProvider>
   </StrictMode>,
 )

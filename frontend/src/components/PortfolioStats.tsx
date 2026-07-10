@@ -23,7 +23,7 @@ interface PortfolioStatsProps {
     isLoading?: boolean;
 }
 
-const accentFor = (value: number) => (value < 0 ? "text-rose-500" : "text-emerald-500");
+const accentFor = (value: number) => (value < 0 ? "text-negative" : "text-positive");
 
 const MetricCard = ({
     label,
@@ -36,15 +36,14 @@ const MetricCard = ({
     caption: string;
     accentClass?: string;
 }) => (
-    <div className="p-5 bg-zinc-900 border border-zinc-800 rounded-xl shadow-sm flex flex-col justify-center group hover:bg-zinc-800/60 transition-colors duration-300 h-full">
-        <h3 className="text-[10px] tracking-widest uppercase text-zinc-500 mb-3 flex items-center gap-2">
-            <span className="block w-2 h-2 rounded-full bg-indigo-500/50" />
+    <div className="p-5 bg-surface-secondary border border-border-primary rounded-sm flex flex-col justify-center group hover:bg-surface-tertiary transition-colors duration-300 h-full">
+        <h3 className="text-xs font-medium text-text-tertiary mb-3">
             {label}
         </h3>
-        <p className={`font-mono text-3xl font-semibold tracking-tight ${accentClass ?? "text-zinc-50"}`}>
+        <p className={`font-mono text-3xl font-semibold tracking-tight ${accentClass ?? "text-text-primary"}`}>
             {value}
         </p>
-        <span className="mt-3 block text-[10px] tracking-widest text-zinc-600 uppercase group-hover:text-zinc-400 transition-colors">
+        <span className="mt-3 block text-xs text-text-tertiary group-hover:text-text-secondary transition-colors">
             {caption}
         </span>
     </div>
@@ -59,15 +58,15 @@ const InsightCard = ({
     holding?: { coinName: string; coinSymbol: string } | null;
     value: string;
 }) => (
-    <div className="p-5 bg-zinc-900 border border-zinc-800 rounded-xl shadow-sm h-full">
-        <p className="text-[10px] tracking-widest uppercase text-zinc-500 mb-4">{title}</p>
-        <div className="font-semibold text-xl text-zinc-50">
+    <div className="p-5 bg-surface-secondary border border-border-primary rounded-sm h-full">
+        <p className="text-xs font-medium text-text-tertiary mb-4">{title}</p>
+        <div className="font-semibold text-xl text-text-primary">
             {holding?.coinName ?? "Waiting for data"}
         </div>
-        <div className="text-xs tracking-wider uppercase text-zinc-500 font-mono mt-1">
+        <div className="text-xs text-text-tertiary font-mono mt-1">
             {holding?.coinSymbol ?? "N/A"}
         </div>
-        <div className="text-sm text-zinc-300 mt-4 font-mono font-medium">{value}</div>
+        <div className="text-sm text-text-secondary mt-4 font-medium">{value}</div>
     </div>
 );
 
