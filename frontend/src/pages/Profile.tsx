@@ -14,7 +14,7 @@ import { useDispatch } from "react-redux";
 import { logout as logoutAction } from "../features/auth/authSlice";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
-import { User, Wallet, Hash, ActivitySquare, Shield, Key, AlertTriangle, CheckCircle, XCircle, Eye, EyeOff } from "lucide-react";
+import { User, Wallet, Hash, ActivitySquare, Shield, Key, AlertTriangle, CheckCircle, XCircle, Eye, EyeOff, Activity } from "lucide-react";
 import toast from "react-hot-toast";
 import useDebounce from "../hooks/useDebounce";
 import { usePostHog } from 'posthog-js/react';
@@ -165,8 +165,8 @@ const Profile = () => {
         return (
             <div className="min-h-screen flex items-center justify-center bg-surface-primary">
                 <div className="flex flex-col items-center gap-6">
-                    <div className="w-14 h-14 rounded-full border border-accent/30 flex items-center justify-center animate-pulse  shadow-accent/10">
-                        <div className="w-5 h-5 rounded-full bg-accent/50 animate-pulse" />
+                    <div className="w-14 h-14 rounded-md bg-surface-secondary border border-border-primary flex items-center justify-center mb-4 animate-pulse">
+                        <Activity className="text-accent" size={28} />
                     </div>
                     <p className="text-text-tertiary text-sm">
                         Gathering identity...
