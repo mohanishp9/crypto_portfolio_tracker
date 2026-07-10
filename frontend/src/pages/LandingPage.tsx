@@ -2,8 +2,9 @@ import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../app/store';
-import { BarChart3, Bell, Eye, ArrowLeftRight, Activity, FolderInput } from 'lucide-react';
+import { BarChart3, Bell, Eye, ArrowLeftRight, Activity, FolderInput, Sun, Moon } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar, LabelList } from 'recharts';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
@@ -92,6 +93,7 @@ const formatTooltipDate = (ts: number) => new Date(ts).toLocaleString('en-US', {
 // ── Component ──────────────────────────────────────────────────
 
 const LandingPage = () => {
+    const { theme, toggleTheme } = useTheme();
     const { isAuthenticated } = useSelector((state: RootState) => state.auth);
     const [coins, setCoins] = useState<CoinMarket[]>([]);
     const [globalData, setGlobalData] = useState<GlobalData | null>(null);
@@ -230,6 +232,14 @@ const LandingPage = () => {
 
                         {/* Nav actions */}
                         <div className="flex items-center gap-3">
+                            {/* Theme Toggle */}
+                            <button
+                                onClick={toggleTheme}
+                                title="Toggle theme"
+                                className="p-2 mr-2 rounded-sm text-text-secondary hover:text-text-primary hover:bg-surface-tertiary transition-colors"
+                            >
+                                {theme === 'dark' ? <Sun size={18} strokeWidth={1.5} /> : <Moon size={18} strokeWidth={1.5} />}
+                            </button>
                             {isAuthenticated ? (
                                 <Link to="/dashboard">
                                     <Button variant="primary" size="sm">Dashboard</Button>

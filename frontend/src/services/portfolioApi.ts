@@ -77,6 +77,15 @@ export const portfolioApi = createApi({
         getCoinChart: builder.query<CoinChartResponse, { coinId: string; days?: number }>({
             query: ({ coinId, days = 7 }) => `/market/chart/${coinId}?days=${days}`,
             providesTags: (_result, _error, arg) => [{ type: "Market", id: `chart-${arg.coinId}` }],
+            transformResponse: (response: any) => {
+                return {
+                    ...response,
+                    prices: response.prices?.map((p: [number, number]) => ({
+                        timestamp: p[0],
+                        price: p[1]
+                    })) ?? []
+                };
+            }
         }),
         getWatchlist: builder.query<WatchlistResponse, void>({
             query: () => "/watchlist",
