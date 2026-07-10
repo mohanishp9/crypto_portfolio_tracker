@@ -14,6 +14,8 @@ import path from "path";
 import { globalApiRateLimiter } from "./middleware/rateLimit.middleware";
 
 const app: Application = express();
+app.set('trust proxy', 1); // Trust the reverse proxy (Render) to get real client IPs for rate limiting
+
 
 app.get('/health', (_req, res) => res.json({ ok: true }));
 
