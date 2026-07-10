@@ -60,25 +60,25 @@ const ImportExportPanel = () => {
     };
 
     return (
-        <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl shadow-sm">
-            <p className="text-[10px] tracking-widest uppercase text-zinc-500">
+        <div className="p-6 bg-surface-secondary border border-border-primary rounded-sm shadow-sm">
+            <p className="text-xs font-medium text-text-tertiary">
                 Data Management
             </p>
-            <h3 className="font-semibold text-lg text-zinc-50 tracking-tight mt-2 flex items-center gap-2">
+            <h3 className="font-semibold text-lg text-text-primary tracking-tight mt-2 flex items-center gap-2">
                 Import, Export & Tax Reports
             </h3>
             <textarea
                 value={csv}
                 onChange={(e) => setCsv(e.target.value)}
                 placeholder="Paste CSV with header: coinId,coinName,coinSymbol,type,quantity,price,fee,timestamp"
-                className="w-full min-h-[150px] mt-4 bg-zinc-950 border border-zinc-800 rounded-lg text-zinc-50 font-mono text-xs p-4 focus:outline-none focus:border-indigo-500 transition-colors resize-y placeholder-zinc-700"
+                className="w-full min-h-[150px] mt-4 bg-surface-primary border border-border-primary rounded-sm text-text-primary font-mono text-xs p-4 focus:outline-none focus:border-accent transition-colors resize-y placeholder-text-tertiary"
             />
             <div className="flex flex-wrap gap-3 mt-4">
                 <button 
                     type="button" 
                     onClick={() => handleImport(true)} 
                     disabled={!csv || isImporting} 
-                    className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 hover:text-zinc-50 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex items-center gap-2 px-4 py-2 bg-surface-tertiary hover:bg-surface-tertiary border border-border-secondary text-text-secondary hover:text-text-primary rounded-sm text-xs font-semibold  transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     <FileText size={14} /> Preview CSV
                 </button>
@@ -86,7 +86,7 @@ const ImportExportPanel = () => {
                     type="button" 
                     onClick={() => handleImport(false)} 
                     disabled={!csv || isImporting} 
-                    className="flex items-center gap-2 px-4 py-2 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 text-indigo-400 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex items-center gap-2 px-4 py-2 bg-accent-subtle hover:bg-accent-subtle border border-accent/30 text-accent rounded-sm text-xs font-semibold  transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     <Upload size={14} /> Import CSV
                 </button>
@@ -94,7 +94,7 @@ const ImportExportPanel = () => {
                     type="button" 
                     onClick={handleExport} 
                     disabled={isExporting} 
-                    className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 hover:text-zinc-50 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors disabled:opacity-50 disabled:cursor-not-allowed ml-auto"
+                    className="flex items-center gap-2 px-4 py-2 bg-surface-tertiary hover:bg-surface-tertiary border border-border-secondary text-text-secondary hover:text-text-primary rounded-sm text-xs font-semibold  transition-colors disabled:opacity-50 disabled:cursor-not-allowed ml-auto"
                 >
                     <Download size={14} /> Backup Data
                 </button>
@@ -102,13 +102,13 @@ const ImportExportPanel = () => {
                     type="button" 
                     onClick={handleTaxExport} 
                     disabled={isExportingTax} 
-                    className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex items-center gap-2 px-4 py-2 bg-positive-subtle hover:bg-positive-subtle border border-positive/30 text-positive rounded-sm text-xs font-semibold  transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     <FileSpreadsheet size={14} /> Tax Report
                 </button>
             </div>
             {message && (
-                <p className={`mt-4 text-xs font-mono px-3 py-2 rounded border ${message.includes("failed") ? "bg-rose-500/10 text-rose-400 border-rose-500/20" : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"}`}>
+                <p className={`mt-4 text-xs px-3 py-2 rounded border ${message.includes("failed") ? "bg-negative-subtle text-negative border-negative/20" : "bg-positive-subtle text-positive border-positive/20"}`}>
                     {message}
                 </p>
             )}

@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { User, LayoutDashboard } from "lucide-react";
+import { User, LayoutDashboard, Activity } from "lucide-react";
 
 interface NavbarProps {
     email?: string;
@@ -11,64 +11,36 @@ const Navbar = ({ email, handleLogout, isLoggingOut }: NavbarProps) => {
     const navigate = useNavigate();
 
     return (
-        <nav className="sticky top-0 z-50 bg-zinc-950/70 backdrop-blur-md border-b border-zinc-800">
+        <nav className="sticky top-0 z-50 bg-surface-primary/95 border-b border-border-primary ">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
                     {/* Logo */}
-                    <button 
+                    <button
                         onClick={() => navigate("/")}
-                        className="flex items-center gap-3 transition-opacity hover:opacity-80"
+                        className="flex items-center gap-2.5 transition-opacity hover:opacity-80"
                     >
-                        <div
-                            style={{
-                                width: 28,
-                                height: 28,
-                                borderRadius: '50%',
-                                border: '1px solid rgba(129, 140, 248,0.5)',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                flexShrink: 0,
-                            }}
-                        >
-                            <div
-                                style={{
-                                    width: 8,
-                                    height: 8,
-                                    borderRadius: '50%',
-                                    background: '#818cf8',
-                                    opacity: 0.8,
-                                }}
-                            />
+                        <div className="w-7 h-7 rounded-md bg-accent-subtle border border-accent/20 flex items-center justify-center flex-shrink-0">
+                            <Activity className="text-accent" size={16} />
                         </div>
-                        <span
-                            className="font-light"
-                            style={{
-                                fontFamily: "ui-sans-serif, system-ui, sans-serif",
-                                fontSize: '1.25rem', // Fixed size for navbar instead of clamp to prevent jumps
-                                color: '#fafafa',
-                                letterSpacing: '0.06em',
-                            }}
-                        >
-                            CypherSight{' '}
-                            <span style={{ color: '#818cf8', fontStyle: 'italic' }}>Portfolio</span>
+                        <span className="text-lg font-semibold text-text-primary tracking-tight">
+                            CypherSight
                         </span>
                     </button>
 
                     {/* Right side */}
                     <div className="flex items-center gap-4 sm:gap-6">
                         {/* Email */}
-                        <span className="hidden sm:block text-xs font-mono text-zinc-400">
+                        <span className="hidden sm:block text-xs text-text-secondary">
                             {email}
                         </span>
 
-                        <div className="hidden sm:block w-px h-5 bg-zinc-800" />
+                        <div className="hidden sm:block w-px h-5 bg-border-primary" />
 
                         {/* Dashboard button */}
                         <button
                             onClick={() => navigate("/dashboard")}
                             title="View dashboard"
-                            className="p-2 rounded-md text-zinc-400 hover:text-zinc-50 hover:bg-zinc-800/50 transition-colors"
+                            className="p-2 rounded-sm text-text-secondary hover:text-text-primary hover:bg-surface-tertiary transition-colors"
                         >
                             <LayoutDashboard size={18} strokeWidth={1.5} />
                         </button>
@@ -77,7 +49,7 @@ const Navbar = ({ email, handleLogout, isLoggingOut }: NavbarProps) => {
                         <button
                             onClick={() => navigate("/profile")}
                             title="View profile"
-                            className="p-2 rounded-md text-zinc-400 hover:text-zinc-50 hover:bg-zinc-800/50 transition-colors"
+                            className="p-2 rounded-sm text-text-secondary hover:text-text-primary hover:bg-surface-tertiary transition-colors"
                         >
                             <User size={18} strokeWidth={1.5} />
                         </button>
@@ -86,9 +58,9 @@ const Navbar = ({ email, handleLogout, isLoggingOut }: NavbarProps) => {
                         <button
                             onClick={handleLogout}
                             disabled={isLoggingOut}
-                            className="text-xs uppercase tracking-wider font-semibold text-zinc-500 hover:text-rose-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="text-sm font-medium text-text-secondary hover:text-negative transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            {isLoggingOut ? "Leaving..." : "Logout"}
+                            {isLoggingOut ? "Signing out..." : "Sign out"}
                         </button>
                     </div>
                 </div>

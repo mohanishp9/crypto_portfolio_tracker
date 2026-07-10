@@ -51,28 +51,16 @@ const ToastItem = ({ id, type, message }: { id: string; type: ToastType; message
     return (
         <div
             role="alert"
+            className="flex items-start gap-2.5 py-3.5 px-[18px] rounded-md text-xs tracking-[0.03em] leading-relaxed max-w-[360px] w-full cursor-pointer animate-[toastSlideIn_0.25s_ease-out]"
             style={{
-                display: "flex",
-                alignItems: "flex-start",
-                gap: "10px",
-                padding: "14px 18px",
-                borderRadius: "6px",
                 background: s.bg,
                 border: s.border,
                 color: s.color,
-                fontFamily: "'DM Mono', monospace",
-                fontSize: "0.75rem",
-                letterSpacing: "0.03em",
-                lineHeight: 1.5,
                 boxShadow: "0 4px 24px rgba(0,0,0,0.5)",
-                maxWidth: "360px",
-                width: "100%",
-                cursor: "pointer",
-                animation: "toastSlideIn 0.25s ease-out",
             }}
             onClick={() => dispatch(removeToast(id))}
         >
-            <span style={{ fontSize: "0.85rem", flexShrink: 0 }}>{s.icon}</span>
+            <span className="text-[0.85rem] shrink-0">{s.icon}</span>
             <span>{message}</span>
         </div>
     );
@@ -85,27 +73,25 @@ const ToastContainer = () => {
         <>
             {/* Keyframe injected once */}
             <style>{`
-                @keyframes toastSlideIn {
-                    from { opacity: 0; transform: translateX(20px); }
-                    to   { opacity: 1; transform: translateX(0); }
+                @media (prefers-reduced-motion: no-preference) {
+                    @keyframes toastSlideIn {
+                        from { opacity: 0; transform: translateX(20px); }
+                        to   { opacity: 1; transform: translateX(0); }
+                    }
+                }
+                @media (prefers-reduced-motion: reduce) {
+                    @keyframes toastSlideIn {
+                        from { opacity: 0; transform: none; }
+                        to   { opacity: 1; transform: none; }
+                    }
                 }
             `}</style>
             <div
                 aria-live="polite"
-                style={{
-                    position: "fixed",
-                    bottom: "24px",
-                    right: "24px",
-                    zIndex: 9999,
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "10px",
-                    alignItems: "flex-end",
-                    pointerEvents: "none",
-                }}
+                className="fixed bottom-6 right-6 z-[9999] flex flex-col gap-2.5 items-end pointer-events-none"
             >
                 {toasts.map((toast) => (
-                    <div key={toast.id} style={{ pointerEvents: "auto" }}>
+                    <div key={toast.id} className="pointer-events-auto">
                         <ToastItem {...toast} />
                     </div>
                 ))}

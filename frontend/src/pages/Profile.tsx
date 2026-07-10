@@ -163,12 +163,12 @@ const Profile = () => {
 
     if (userLoading || statsLoading || transactionsLoading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-zinc-950">
+            <div className="min-h-screen flex items-center justify-center bg-surface-primary">
                 <div className="flex flex-col items-center gap-6">
-                    <div className="w-14 h-14 rounded-full border border-indigo-500/30 flex items-center justify-center animate-pulse shadow-xl shadow-indigo-500/10">
-                        <div className="w-5 h-5 rounded-full bg-indigo-500/50 animate-pulse" />
+                    <div className="w-14 h-14 rounded-full border border-accent/30 flex items-center justify-center animate-pulse  shadow-accent/10">
+                        <div className="w-5 h-5 rounded-full bg-accent/50 animate-pulse" />
                     </div>
-                    <p className="text-zinc-500 text-sm tracking-widest font-mono uppercase">
+                    <p className="text-text-tertiary text-sm">
                         Gathering identity...
                     </p>
                 </div>
@@ -178,9 +178,9 @@ const Profile = () => {
 
     if (userError) {
         return (
-            <div className="min-h-screen flex items-center justify-center px-4 bg-zinc-950">
-                <div className="text-center p-10 bg-zinc-900 border border-zinc-800 rounded-2xl">
-                    <p className="text-rose-500 text-xs font-mono tracking-widest uppercase">Error loading profile</p>
+            <div className="min-h-screen flex items-center justify-center px-4 bg-surface-primary">
+                <div className="text-center p-10 bg-surface-secondary border border-border-primary rounded-sm">
+                    <p className="text-negative text-xs font-medium">Error loading profile</p>
                 </div>
             </div>
         );
@@ -192,7 +192,7 @@ const Profile = () => {
     const isProfit = (statsData?.profitLoss || 0) >= 0;
 
     return (
-        <div className="min-h-screen bg-zinc-950">
+        <div className="min-h-screen bg-surface-primary">
             <Navbar
                 email={userData?.user.email}
                 handleLogout={handleLogout}
@@ -202,37 +202,36 @@ const Profile = () => {
             <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 
                 {/* Profile Header */}
-                <div className="mb-8 p-8 bg-zinc-900/50 border border-zinc-800 rounded-2xl flex flex-col md:flex-row items-center md:items-start gap-6 backdrop-blur-md relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-[100px] pointer-events-none" />
-                    
-                    <div className="w-24 h-24 rounded-full bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center shrink-0">
-                        <User size={40} className="text-indigo-400" />
+                <div className="mb-8 p-8 bg-surface-secondary/50 border border-border-primary rounded-sm flex flex-col md:flex-row items-center md:items-start gap-6">
+                                        
+                    <div className="w-24 h-24 rounded-full bg-accent/10 border border-accent/30 flex items-center justify-center shrink-0">
+                        <User size={40} className="text-accent" />
                     </div>
                     
                     <div className="text-center md:text-left flex-1 relative z-10">
-                        <p className="text-[10px] tracking-widest uppercase text-indigo-400 mb-2 font-semibold">
+                        <p className="text-xs font-medium text-accent mb-2 font-semibold">
                             Investor Profile
                         </p>
-                        <h2 className="text-4xl font-semibold text-zinc-50 tracking-tight flex items-center gap-3 justify-center md:justify-start">
+                        <h2 className="text-4xl font-semibold text-text-primary tracking-tight flex items-center gap-3 justify-center md:justify-start">
                             {userData?.user.name} 
                         </h2>
-                        <p className="text-sm text-zinc-400 font-mono mt-2">
+                        <p className="text-sm text-text-tertiary mt-2">
                             {userData?.user.email}
                         </p>
                     </div>
                 </div>
 
                 {/* Tabs */}
-                <div className="flex space-x-4 mb-6 border-b border-zinc-800">
+                <div className="flex space-x-4 mb-6 border-b border-border-primary">
                     <button
                         onClick={() => setActiveTab('profile')}
-                        className={`pb-3 px-4 text-sm font-semibold uppercase tracking-wider transition-colors ${activeTab === 'profile' ? 'text-indigo-400 border-b-2 border-indigo-500' : 'text-zinc-500 hover:text-zinc-300'}`}
+                        className={`pb-3 px-4 text-sm font-semibold  transition-colors ${activeTab === 'profile' ? 'text-accent border-b-2 border-accent' : 'text-text-tertiary hover:text-text-secondary'}`}
                     >
                         Overview
                     </button>
                     <button
                         onClick={() => setActiveTab('settings')}
-                        className={`pb-3 px-4 text-sm font-semibold uppercase tracking-wider transition-colors ${activeTab === 'settings' ? 'text-indigo-400 border-b-2 border-indigo-500' : 'text-zinc-500 hover:text-zinc-300'}`}
+                        className={`pb-3 px-4 text-sm font-semibold  transition-colors ${activeTab === 'settings' ? 'text-accent border-b-2 border-accent' : 'text-text-tertiary hover:text-text-secondary'}`}
                     >
                         Settings
                     </button>
@@ -241,26 +240,26 @@ const Profile = () => {
                 {activeTab === 'profile' && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-fade-in">
                         {/* User Details */}
-                        <div className="p-8 bg-zinc-900 border border-zinc-800 rounded-2xl shadow-sm">
-                            <h3 className="mb-6 font-semibold text-xl text-zinc-50 tracking-tight flex items-center gap-2">
-                                <ActivitySquare className="text-zinc-500" size={20} /> Account Details
+                        <div className="p-8 bg-surface-secondary border border-border-primary rounded-sm ">
+                            <h3 className="mb-6 font-semibold text-xl text-text-primary tracking-tight flex items-center gap-2">
+                                <ActivitySquare className="text-text-tertiary" size={20} /> Account Details
                             </h3>
                             <div className="space-y-6">
                                 <div>
-                                    <p className="text-[10px] tracking-widest uppercase text-zinc-500 mb-2">System ID</p>
-                                    <p className="text-sm text-zinc-300 font-mono bg-zinc-950 px-3 py-2 rounded-lg border border-zinc-800 break-all">
+                                    <p className="text-xs font-medium text-text-tertiary mb-2">System ID</p>
+                                    <p className="text-sm text-text-secondary bg-surface-primary px-3 py-2 rounded-sm border border-border-primary break-all">
                                         {userData?.user._id}
                                     </p>
                                 </div>
                                 <div>
-                                    <p className="text-[10px] tracking-widest uppercase text-zinc-500 mb-2">Full Name</p>
-                                    <p className="text-sm text-zinc-300 font-medium px-1">
+                                    <p className="text-xs font-medium text-text-tertiary mb-2">Full Name</p>
+                                    <p className="text-sm text-text-secondary font-medium px-1">
                                         {userData?.user.name}
                                     </p>
                                 </div>
                                 <div>
-                                    <p className="text-[10px] tracking-widest uppercase text-zinc-500 mb-2">Email Address</p>
-                                    <p className="text-sm text-zinc-300 font-medium px-1">
+                                    <p className="text-xs font-medium text-text-tertiary mb-2">Email Address</p>
+                                    <p className="text-sm text-text-secondary font-medium px-1">
                                         {userData?.user.email}
                                     </p>
                                 </div>
@@ -268,32 +267,32 @@ const Profile = () => {
                         </div>
 
                         {/* Portfolio Stats */}
-                        <div className="p-8 bg-zinc-900 border border-zinc-800 rounded-2xl shadow-sm">
-                            <h3 className="mb-6 font-semibold text-xl text-zinc-50 tracking-tight flex items-center gap-2">
-                                <Wallet className="text-zinc-500" size={20} /> Portfolio Summary
+                        <div className="p-8 bg-surface-secondary border border-border-primary rounded-sm ">
+                            <h3 className="mb-6 font-semibold text-xl text-text-primary tracking-tight flex items-center gap-2">
+                                <Wallet className="text-text-tertiary" size={20} /> Portfolio Summary
                             </h3>
                             <div className="grid grid-cols-2 gap-4">
-                                <div className="p-4 bg-zinc-950 rounded-xl border border-zinc-800/50">
-                                    <p className="text-[10px] tracking-widest uppercase text-zinc-500 mb-2">Total Value</p>
-                                    <p className="text-lg font-semibold text-zinc-100">
+                                <div className="p-4 bg-surface-primary rounded-sm border border-border-primary/50">
+                                    <p className="text-xs font-medium text-text-tertiary mb-2">Total Value</p>
+                                    <p className="text-lg font-semibold text-text-primary">
                                         ${totalValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                     </p>
                                 </div>
-                                <div className="p-4 bg-zinc-950 rounded-xl border border-zinc-800/50">
-                                    <p className="text-[10px] tracking-widest uppercase text-zinc-500 mb-2">P/L</p>
-                                    <p className={`text-lg font-semibold ${isProfit ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                <div className="p-4 bg-surface-primary rounded-sm border border-border-primary/50">
+                                    <p className="text-xs font-medium text-text-tertiary mb-2">P/L</p>
+                                    <p className={`text-lg font-semibold ${isProfit ? 'text-positive' : 'text-negative'}`}>
                                         {isProfit ? '+' : ''}{(statsData?.profitLoss || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                     </p>
                                 </div>
-                                <div className="p-4 bg-zinc-950 rounded-xl border border-zinc-800/50">
-                                    <p className="text-[10px] tracking-widest uppercase text-zinc-500 mb-2">Unique Assets</p>
-                                    <p className="text-lg font-semibold text-zinc-100">
+                                <div className="p-4 bg-surface-primary rounded-sm border border-border-primary/50">
+                                    <p className="text-xs font-medium text-text-tertiary mb-2">Unique Assets</p>
+                                    <p className="text-lg font-semibold text-text-primary">
                                         {uniqueAssets}
                                     </p>
                                 </div>
-                                <div className="p-4 bg-zinc-950 rounded-xl border border-zinc-800/50">
-                                    <p className="text-[10px] tracking-widest uppercase text-zinc-500 mb-2">Transactions</p>
-                                    <p className="text-lg font-semibold text-zinc-100">
+                                <div className="p-4 bg-surface-primary rounded-sm border border-border-primary/50">
+                                    <p className="text-xs font-medium text-text-tertiary mb-2">Transactions</p>
+                                    <p className="text-lg font-semibold text-text-primary">
                                         {totalTransactions}
                                     </p>
                                 </div>
@@ -305,11 +304,11 @@ const Profile = () => {
                 {activeTab === 'settings' && (
                     <div className="space-y-6 animate-fade-in">
                         {/* Change Name */}
-                        <div className="p-8 bg-zinc-900 border border-zinc-800 rounded-2xl shadow-sm">
-                            <h3 className="mb-2 font-semibold text-xl text-zinc-50 tracking-tight flex items-center gap-2">
-                                <Hash className="text-zinc-500" size={20} /> Update Display Name
+                        <div className="p-8 bg-surface-secondary border border-border-primary rounded-sm ">
+                            <h3 className="mb-2 font-semibold text-xl text-text-primary tracking-tight flex items-center gap-2">
+                                <Hash className="text-text-tertiary" size={20} /> Update Display Name
                             </h3>
-                            <p className="text-xs text-zinc-500 mb-6">Choose a unique name to identify yourself on the platform.</p>
+                            <p className="text-xs text-text-tertiary mb-6">Choose a unique name to identify yourself on the platform.</p>
                             
                             <form onSubmit={handleUpdateName} className="flex gap-4 items-start">
                                 <div className="flex-1">
@@ -319,18 +318,18 @@ const Profile = () => {
                                             value={nameInput}
                                             onChange={(e) => setNameInput(e.target.value)}
                                             placeholder="John Doe"
-                                            className="w-full bg-zinc-950/50 border border-zinc-800 text-zinc-50 font-mono text-sm py-2.5 px-4 pr-10 rounded-lg focus:outline-none focus:border-indigo-500 transition-colors placeholder-zinc-700"
+                                            className="w-full bg-surface-primary/50 border border-border-primary text-text-primary text-sm py-2.5 px-4 pr-10 rounded-sm focus:outline-none focus:border-accent transition-colors placeholder-text-tertiary"
                                         />
                                         {nameInput.trim().length >= 2 && nameInput.trim() !== userData?.user.name && (
                                             <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center">
                                                 {isCheckingName ? (
-                                                    <svg className="w-4 h-4 animate-spin text-zinc-500" viewBox="0 0 24 24" fill="none">
+                                                    <svg className="w-4 h-4 animate-spin text-text-tertiary" viewBox="0 0 24 24" fill="none">
                                                         <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" strokeDasharray="40" strokeDashoffset="10" />
                                                     </svg>
                                                 ) : nameData?.available ? (
-                                                    <CheckCircle className="w-4 h-4 text-emerald-500" />
+                                                    <CheckCircle className="w-4 h-4 text-positive" />
                                                 ) : (
-                                                    <XCircle className="w-4 h-4 text-rose-500" />
+                                                    <XCircle className="w-4 h-4 text-negative" />
                                                 )}
                                             </div>
                                         )}
@@ -339,7 +338,7 @@ const Profile = () => {
                                 <button
                                     type="submit"
                                     disabled={isUpdatingName || nameInput.trim() === userData?.user.name || (nameInput.trim().length >= 2 && nameData && !nameData.available)}
-                                    className="px-6 py-2.5 bg-indigo-500 border border-indigo-500 text-white rounded-lg text-xs font-semibold uppercase tracking-wider transition-all disabled:opacity-50 hover:bg-indigo-600 shadow-lg shadow-indigo-500/20"
+                                    className="px-6 py-2.5 bg-accent border border-accent text-white rounded-sm text-xs font-semibold  transition-all disabled:opacity-50 hover:bg-accent-hover  shadow-accent/20"
                                 >
                                     {isUpdatingName ? "Saving..." : "Save"}
                                 </button>
@@ -347,28 +346,28 @@ const Profile = () => {
                         </div>
 
                         {/* Change Password */}
-                        <div className="p-8 bg-zinc-900 border border-zinc-800 rounded-2xl shadow-sm">
-                            <h3 className="mb-2 font-semibold text-xl text-zinc-50 tracking-tight flex items-center gap-2">
-                                <Key className="text-zinc-500" size={20} /> Change Password
+                        <div className="p-8 bg-surface-secondary border border-border-primary rounded-sm ">
+                            <h3 className="mb-2 font-semibold text-xl text-text-primary tracking-tight flex items-center gap-2">
+                                <Key className="text-text-tertiary" size={20} /> Change Password
                             </h3>
-                            <p className="text-xs text-zinc-500 mb-6">Ensure your account is using a long, random password to stay secure.</p>
+                            <p className="text-xs text-text-tertiary mb-6">Ensure your account is using a long, random password to stay secure.</p>
                             
                             <form onSubmit={handleChangePassword} className="space-y-4 max-w-md">
                                 <div>
                                     <div className="flex items-center justify-between mb-2">
-                                        <label className="block text-[10px] tracking-widest uppercase text-zinc-500 font-semibold">Current Password</label>
+                                        <label className="block text-xs font-medium text-text-tertiary font-semibold">Current Password</label>
                                     </div>
                                     <div className="relative">
                                         <input
                                             type={showPasswords.changeCurrent ? "text" : "password"}
                                             value={passwordForm.currentPassword}
                                             onChange={(e) => setPasswordForm(p => ({ ...p, currentPassword: e.target.value }))}
-                                            className="w-full bg-zinc-950/50 border border-zinc-800 text-zinc-50 font-mono text-sm py-2.5 px-4 pr-10 rounded-lg focus:outline-none focus:border-indigo-500"
+                                            className="w-full bg-surface-primary/50 border border-border-primary text-text-primary text-sm py-2.5 px-4 pr-10 rounded-sm focus:outline-none focus:border-accent"
                                         />
                                         <button
                                             type="button"
                                             onClick={() => setShowPasswords(p => ({ ...p, changeCurrent: !p.changeCurrent }))}
-                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 focus:outline-none"
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-text-secondary focus:outline-none"
                                         >
                                             {showPasswords.changeCurrent ? <EyeOff size={16} /> : <Eye size={16} />}
                                         </button>
@@ -376,19 +375,19 @@ const Profile = () => {
                                 </div>
                                 <div>
                                     <div className="flex items-center justify-between mb-2">
-                                        <label className="block text-[10px] tracking-widest uppercase text-zinc-500 font-semibold">New Password</label>
+                                        <label className="block text-xs font-medium text-text-tertiary font-semibold">New Password</label>
                                     </div>
                                     <div className="relative">
                                         <input
                                             type={showPasswords.changeNew ? "text" : "password"}
                                             value={passwordForm.newPassword}
                                             onChange={(e) => setPasswordForm(p => ({ ...p, newPassword: e.target.value }))}
-                                            className="w-full bg-zinc-950/50 border border-zinc-800 text-zinc-50 font-mono text-sm py-2.5 px-4 pr-10 rounded-lg focus:outline-none focus:border-indigo-500"
+                                            className="w-full bg-surface-primary/50 border border-border-primary text-text-primary text-sm py-2.5 px-4 pr-10 rounded-sm focus:outline-none focus:border-accent"
                                         />
                                         <button
                                             type="button"
                                             onClick={() => setShowPasswords(p => ({ ...p, changeNew: !p.changeNew }))}
-                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 focus:outline-none"
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-text-secondary focus:outline-none"
                                         >
                                             {showPasswords.changeNew ? <EyeOff size={16} /> : <Eye size={16} />}
                                         </button>
@@ -397,7 +396,7 @@ const Profile = () => {
                                 <button
                                     type="submit"
                                     disabled={isChangingPassword}
-                                    className="w-full py-3 bg-indigo-500 border border-indigo-500 text-white rounded-lg text-xs font-semibold uppercase tracking-wider transition-all disabled:opacity-50 hover:bg-indigo-600 shadow-lg shadow-indigo-500/20"
+                                    className="w-full py-3 bg-accent border border-accent text-white rounded-sm text-xs font-semibold  transition-all disabled:opacity-50 hover:bg-accent-hover  shadow-accent/20"
                                 >
                                     {isChangingPassword ? "Updating..." : "Update Password"}
                                 </button>
@@ -405,76 +404,76 @@ const Profile = () => {
                         </div>
 
                         {/* Change Email */}
-                        <div className="p-8 bg-zinc-900 border border-zinc-800 rounded-2xl shadow-sm">
-                            <h3 className="mb-2 font-semibold text-xl text-zinc-50 tracking-tight flex items-center gap-2">
-                                <Shield className="text-zinc-500" size={20} /> Change Email
+                        <div className="p-8 bg-surface-secondary border border-border-primary rounded-sm ">
+                            <h3 className="mb-2 font-semibold text-xl text-text-primary tracking-tight flex items-center gap-2">
+                                <Shield className="text-text-tertiary" size={20} /> Change Email
                             </h3>
-                            <p className="text-xs text-zinc-500 mb-6">Update the email address associated with your account.</p>
+                            <p className="text-xs text-text-tertiary mb-6">Update the email address associated with your account.</p>
                             
                             {emailForm.step === 1 ? (
                                 <form onSubmit={handleInitiateEmailChange} className="space-y-4 max-w-md">
                                     <div>
                                         <div className="flex items-center justify-between mb-2">
-                                            <label className="block text-[10px] tracking-widest uppercase text-zinc-500 font-semibold">Current Password</label>
+                                            <label className="block text-xs font-medium text-text-tertiary font-semibold">Current Password</label>
                                         </div>
                                         <div className="relative">
                                             <input
                                                 type={showPasswords.emailCurrent ? "text" : "password"}
                                                 value={emailForm.currentPassword}
                                                 onChange={(e) => setEmailForm(p => ({ ...p, currentPassword: e.target.value }))}
-                                                className="w-full bg-zinc-950/50 border border-zinc-800 text-zinc-50 font-mono text-sm py-2.5 px-4 pr-10 rounded-lg focus:outline-none focus:border-indigo-500"
+                                                className="w-full bg-surface-primary/50 border border-border-primary text-text-primary text-sm py-2.5 px-4 pr-10 rounded-sm focus:outline-none focus:border-accent"
                                             />
                                             <button
                                                 type="button"
                                                 onClick={() => setShowPasswords(p => ({ ...p, emailCurrent: !p.emailCurrent }))}
-                                                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 focus:outline-none"
+                                                className="absolute right-3 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-text-secondary focus:outline-none"
                                             >
                                                 {showPasswords.emailCurrent ? <EyeOff size={16} /> : <Eye size={16} />}
                                             </button>
                                         </div>
                                     </div>
                                     <div>
-                                        <label className="block text-[10px] tracking-widest uppercase text-zinc-500 mb-2 font-semibold">New Email Address</label>
+                                        <label className="block text-xs font-medium text-text-tertiary mb-2 font-semibold">New Email Address</label>
                                         <input
                                             type="email"
                                             value={emailForm.newEmail}
                                             onChange={(e) => setEmailForm(p => ({ ...p, newEmail: e.target.value }))}
-                                            className="w-full bg-zinc-950/50 border border-zinc-800 text-zinc-50 font-mono text-sm py-2.5 px-4 rounded-lg focus:outline-none focus:border-indigo-500"
+                                            className="w-full bg-surface-primary/50 border border-border-primary text-text-primary text-sm py-2.5 px-4 rounded-sm focus:outline-none focus:border-accent"
                                         />
                                     </div>
                                     <button
                                         type="submit"
                                         disabled={isInitiatingEmail}
-                                        className="w-full py-3 bg-indigo-500 border border-indigo-500 text-white rounded-lg text-xs font-semibold uppercase tracking-wider transition-all disabled:opacity-50 hover:bg-indigo-600 shadow-lg shadow-indigo-500/20"
+                                        className="w-full py-3 bg-accent border border-accent text-white rounded-sm text-xs font-semibold  transition-all disabled:opacity-50 hover:bg-accent-hover  shadow-accent/20"
                                     >
                                         {isInitiatingEmail ? "Sending OTP..." : "Continue"}
                                     </button>
                                 </form>
                             ) : (
                                 <form onSubmit={handleVerifyEmailChange} className="space-y-4 max-w-md animate-fade-in">
-                                    <p className="text-sm text-emerald-400 font-medium mb-4">OTP sent to {emailForm.newEmail}</p>
+                                    <p className="text-sm text-positive font-medium mb-4">OTP sent to {emailForm.newEmail}</p>
                                     <div>
-                                        <label className="block text-[10px] tracking-widest uppercase text-zinc-500 mb-2 font-semibold">Verification Code</label>
+                                        <label className="block text-xs font-medium text-text-tertiary mb-2 font-semibold">Verification Code</label>
                                         <input
                                             type="text"
                                             value={emailForm.otp}
                                             onChange={(e) => setEmailForm(p => ({ ...p, otp: e.target.value.replace(/\D/g, '').slice(0, 6) }))}
                                             placeholder="123456"
-                                            className="w-full bg-zinc-950/50 border border-zinc-800 text-zinc-50 font-mono text-2xl tracking-[0.5em] text-center py-4 rounded-lg focus:outline-none focus:border-indigo-500"
+                                            className="w-full bg-surface-primary/50 border border-border-primary text-text-primary text-2xl tracking-[0.5em] text-center py-4 rounded-sm focus:outline-none focus:border-accent"
                                         />
                                     </div>
                                     <div className="flex gap-4">
                                         <button
                                             type="button"
                                             onClick={() => setEmailForm(p => ({ ...p, step: 1, otp: '' }))}
-                                            className="flex-1 py-3 bg-zinc-800 text-zinc-300 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all hover:bg-zinc-700"
+                                            className="flex-1 py-3 bg-surface-tertiary text-text-secondary rounded-sm text-xs font-semibold  transition-all hover:bg-surface-tertiary"
                                         >
                                             Cancel
                                         </button>
                                         <button
                                             type="submit"
                                             disabled={isVerifyingEmail || emailForm.otp.length !== 6}
-                                            className="flex-1 py-3 bg-emerald-500 text-zinc-950 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all disabled:opacity-50 hover:bg-emerald-400 shadow-lg shadow-emerald-500/20"
+                                            className="flex-1 py-3 bg-positive text-surface-primary rounded-sm text-xs font-semibold  transition-all disabled:opacity-50 hover:bg-positive  shadow-positive/20"
                                         >
                                             {isVerifyingEmail ? "Verifying..." : "Verify & Update"}
                                         </button>
@@ -484,29 +483,29 @@ const Profile = () => {
                         </div>
 
                         {/* Delete Account */}
-                        <div className="p-8 bg-rose-950/10 border border-rose-900/30 rounded-2xl shadow-sm">
-                            <h3 className="mb-2 font-semibold text-xl text-rose-500 tracking-tight flex items-center gap-2">
-                                <AlertTriangle className="text-rose-500" size={20} /> Danger Zone
+                        <div className="p-8 bg-negative-subtle border border-negative/30 rounded-sm ">
+                            <h3 className="mb-2 font-semibold text-xl text-negative tracking-tight flex items-center gap-2">
+                                <AlertTriangle className="text-negative" size={20} /> Danger Zone
                             </h3>
-                            <p className="text-xs text-rose-400/70 mb-6">Once you delete your account, there is no going back. Please be certain.</p>
+                            <p className="text-xs text-negative/70 mb-6">Once you delete your account, there is no going back. Please be certain.</p>
                             
                             {deleteForm.step === 1 ? (
                                 <form onSubmit={handleInitiateDelete} className="space-y-4 max-w-md">
                                     <div>
                                         <div className="flex items-center justify-between mb-2">
-                                            <label className="block text-[10px] tracking-widest uppercase text-rose-500/70 font-semibold">Current Password</label>
+                                            <label className="block text-xs font-medium text-negative/70 font-semibold">Current Password</label>
                                         </div>
                                         <div className="relative">
                                             <input
                                                 type={showPasswords.deleteCurrent ? "text" : "password"}
                                                 value={deleteForm.currentPassword}
                                                 onChange={(e) => setDeleteForm(p => ({ ...p, currentPassword: e.target.value }))}
-                                                className="w-full bg-zinc-950/50 border border-rose-900/30 text-zinc-50 font-mono text-sm py-2.5 px-4 pr-10 rounded-lg focus:outline-none focus:border-rose-500"
+                                                className="w-full bg-surface-primary/50 border border-negative/30 text-text-primary text-sm py-2.5 px-4 pr-10 rounded-sm focus:outline-none focus:border-negative"
                                             />
                                             <button
                                                 type="button"
                                                 onClick={() => setShowPasswords(p => ({ ...p, deleteCurrent: !p.deleteCurrent }))}
-                                                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 focus:outline-none"
+                                                className="absolute right-3 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-text-secondary focus:outline-none"
                                             >
                                                 {showPasswords.deleteCurrent ? <EyeOff size={16} /> : <Eye size={16} />}
                                             </button>
@@ -515,36 +514,36 @@ const Profile = () => {
                                     <button
                                         type="submit"
                                         disabled={isInitiatingDeletion}
-                                        className="w-full py-3 bg-rose-500/10 border border-rose-500/30 text-rose-500 hover:bg-rose-500 hover:text-white rounded-lg text-xs font-semibold uppercase tracking-wider transition-all disabled:opacity-50"
+                                        className="w-full py-3 bg-negative-subtle border border-negative/30 text-negative hover:bg-negative hover:text-white rounded-sm text-xs font-semibold transition-all disabled:opacity-50"
                                     >
                                         {isInitiatingDeletion ? "Preparing..." : "Delete Account"}
                                     </button>
                                 </form>
                             ) : (
                                 <form onSubmit={handleVerifyDelete} className="space-y-4 max-w-md animate-fade-in">
-                                    <p className="text-sm text-rose-400 font-medium mb-4">OTP sent to {userData?.user.email}</p>
+                                    <p className="text-sm text-negative font-medium mb-4">OTP sent to {userData?.user.email}</p>
                                     <div>
-                                        <label className="block text-[10px] tracking-widest uppercase text-rose-500/70 mb-2 font-semibold">Verification Code</label>
+                                        <label className="block text-xs font-medium text-negative/70 mb-2 font-semibold">Verification Code</label>
                                         <input
                                             type="text"
                                             value={deleteForm.otp}
                                             onChange={(e) => setDeleteForm(p => ({ ...p, otp: e.target.value.replace(/\D/g, '').slice(0, 6) }))}
                                             placeholder="123456"
-                                            className="w-full bg-zinc-950/50 border border-rose-900/30 text-zinc-50 font-mono text-2xl tracking-[0.5em] text-center py-4 rounded-lg focus:outline-none focus:border-rose-500"
+                                            className="w-full bg-surface-primary/50 border border-negative/30 text-text-primary text-2xl tracking-[0.5em] text-center py-4 rounded-sm focus:outline-none focus:border-negative"
                                         />
                                     </div>
                                     <div className="flex gap-4">
                                         <button
                                             type="button"
                                             onClick={() => setDeleteForm(p => ({ ...p, step: 1, otp: '' }))}
-                                            className="flex-1 py-3 bg-zinc-800 text-zinc-300 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all hover:bg-zinc-700"
+                                            className="flex-1 py-3 bg-surface-tertiary text-text-secondary rounded-sm text-xs font-semibold  transition-all hover:bg-surface-tertiary"
                                         >
                                             Cancel
                                         </button>
                                         <button
                                             type="submit"
                                             disabled={isDeletingAccount || deleteForm.otp.length !== 6}
-                                            className="flex-1 py-3 bg-rose-600 text-white rounded-lg text-xs font-semibold uppercase tracking-wider transition-all disabled:opacity-50 hover:bg-rose-500 shadow-lg shadow-rose-500/20"
+                                            className="flex-1 py-3 bg-negative text-white rounded-sm text-xs font-semibold  transition-all disabled:opacity-50 hover:bg-negative  shadow-negative/20"
                                         >
                                             {isDeletingAccount ? "Deleting..." : "Confirm Deletion"}
                                         </button>

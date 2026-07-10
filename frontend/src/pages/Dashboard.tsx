@@ -27,6 +27,8 @@ import AlertsPanel from "../components/AlertsPanel";
 import CoinDetailDrawer from "../components/CoinDetailDrawer";
 import ImportExportPanel from "../components/ImportExportPanel";
 import { Skeleton } from "../components/common/Skeleton";
+import { Button } from "../components/ui/Button";
+import { Card } from "../components/ui/Card";
 import {
     DndContext,
     closestCenter,
@@ -236,11 +238,11 @@ const Dashboard = () => {
 
   if (error && !("status" in error && error.status === 401)) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4">
-        <div className="w-full max-w-sm text-center p-10 bg-zinc-900 border border-zinc-800 rounded-xl shadow-lg">
-          <h3 className="text-xl font-semibold text-zinc-50">Something went wrong</h3>
-          <p className="mt-3 text-zinc-400">We couldn't load your data. Please try again later.</p>
-        </div>
+      <div className="min-h-screen flex items-center justify-center px-4 bg-surface-primary">
+        <Card elevation="raised" className="w-full max-w-sm text-center p-8">
+          <h3 className="text-lg font-semibold text-text-primary">Something went wrong</h3>
+          <p className="mt-3 text-sm text-text-secondary">We couldn&apos;t load your data. Please try again later.</p>
+        </Card>
       </div>
     );
   }
@@ -250,35 +252,30 @@ const Dashboard = () => {
       <Navbar email={data?.user.email} handleLogout={handleLogout} isLoggingOut={isLoggingOut} />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div className="mb-8 p-8 bg-zinc-900 border border-zinc-800 rounded-xl shadow-sm relative overflow-hidden">
-          {/* Subtle background glow effect */}
-          <div className="absolute -top-24 -right-24 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
-          
-          <p className="text-xs tracking-widest uppercase text-zinc-500 mb-3">
+        <Card elevation="raised" className="mb-8 p-6 sm:p-8">
+          <p className="text-xs font-medium text-text-secondary mb-3">
             Welcome back
           </p>
-          <h2 className="text-3xl md:text-4xl font-semibold text-zinc-50 tracking-tight flex items-center gap-3">
+          <h2 className="text-2xl sm:text-3xl font-bold text-text-primary tracking-tight flex items-center gap-3">
             {isLoading ? (
               <Skeleton className="w-48 h-8 my-1" />
             ) : (
               data?.user.name
             )}
-            <span className="text-lg font-normal text-zinc-500 italic hidden sm:inline-block">
-              your cyphersight
-            </span>
           </h2>
-          <p className="text-xs text-zinc-400 mt-4 font-mono">
-            Polling every {(pollingInterval / 1000).toFixed(0)}s while this tab stays open.
+          <p className="text-xs text-text-tertiary mt-3">
+            Prices refresh every {(pollingInterval / 1000).toFixed(0)}s while this tab is open
           </p>
-        </div>
+        </Card>
 
         <div className="flex flex-wrap gap-3 mb-6">
-          <button
+          <Button
+            variant="primary"
+            size="md"
             onClick={() => dispatch(openAddModal())}
-            className="bg-indigo-500 text-zinc-50 hover:bg-indigo-400 px-6 py-2.5 rounded-md text-sm font-bold transition-all shadow-[0_0_15px_rgba(99,102,241,0.4)] hover:shadow-[0_0_25px_rgba(99,102,241,0.6)] uppercase tracking-wider"
           >
-            + Add Transaction
-          </button>
+            Add transaction
+          </Button>
         </div>
 
         <MarketStaleBanner
@@ -340,9 +337,9 @@ const MarketPulse = ({
   tone: "up" | "down";
   isLoading?: boolean;
 }) => (
-  <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl shadow-sm">
-    <p className="text-xs tracking-widest uppercase text-zinc-500">{title}</p>
-    <div className="space-y-4 mt-5">
+  <Card elevation="raised" className="p-5">
+    <p className="text-xs font-medium text-text-secondary mb-4">{title}</p>
+    <div className="space-y-4">
       {isLoading ? (
         <>
           <div className="flex items-center justify-between">
@@ -361,21 +358,21 @@ const MarketPulse = ({
           </div>
         </>
       ) : items.length > 0 ? items.map((item) => (
-        <div key={item.coinSymbol} className="flex items-center justify-between group">
+        <div key={item.coinSymbol} className="flex items-center justify-between">
           <div>
-            <div className="text-sm font-medium text-zinc-50 group-hover:text-white transition-colors">{item.coinName}</div>
-            <div className="text-xs font-mono text-zinc-500 uppercase mt-0.5">{item.coinSymbol}</div>
+            <div className="text-sm font-medium text-text-primary">{item.coinName}</div>
+            <div className="text-xs font-mono text-text-secondary uppercase mt-0.5">{item.coinSymbol}</div>
           </div>
-          <div className={`font-mono text-sm font-medium ${tone === "up" ? "text-emerald-500" : "text-rose-500"}`}>
+          <div className={`font-mono text-sm tabular-nums font-medium ${tone === "up" ? "text-positive" : "text-negative"}`}>
             {item.priceChange24h >= 0 ? "+" : ""}
             {item.priceChange24h.toFixed(2)}%
           </div>
         </div>
       )) : (
-        <p className="text-sm text-zinc-500">Add holdings to unlock this view.</p>
+        <p className="text-sm text-text-tertiary">Add holdings to unlock this view.</p>
       )}
     </div>
-  </div>
+  </Card>
 );
 
 export default Dashboard;

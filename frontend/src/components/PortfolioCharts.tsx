@@ -92,11 +92,11 @@ const PortfolioCharts = ({ statsData, isLoading }: { statsData?: PortfolioStatsR
         if (id === "allocation") {
             return (
                 <SortableDashboardWidget key="allocation" id="allocation">
-                    <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl shadow-sm h-full">
-                        <p className="text-[10px] tracking-widest uppercase text-zinc-500">
+                    <div className="p-6 bg-surface-secondary border border-border-primary rounded-sm shadow-sm h-full">
+                        <p className="text-xs font-medium text-text-tertiary">
                             Allocation
                         </p>
-                        <h3 className="font-semibold text-lg text-zinc-50 tracking-tight mt-2">
+                        <h3 className="font-semibold text-lg text-text-primary tracking-tight mt-2">
                             Portfolio Mix
                         </h3>
                         <div className="h-72 mt-6">
@@ -118,13 +118,13 @@ const PortfolioCharts = ({ statsData, isLoading }: { statsData?: PortfolioStatsR
                                         </Pie>
                                         <Tooltip 
                                             formatter={(value: number) => `${value.toFixed(2)}%`}
-                                            contentStyle={{ backgroundColor: '#09090b', borderColor: '#27272a', color: '#fafafa', borderRadius: '8px' }}
-                                            itemStyle={{ color: '#fafafa' }}
+                                            contentStyle={{ backgroundColor: 'var(--color-surface-primary)', borderColor: 'var(--color-border-primary)', color: 'var(--color-text-primary)', borderRadius: '4px' }}
+                                            itemStyle={{ color: 'var(--color-text-primary)' }}
                                         />
                                     </PieChart>
                                 </ResponsiveContainer>
                             ) : (
-                                <div className="h-full flex items-center justify-center text-sm text-zinc-500">
+                                <div className="h-full flex items-center justify-center text-sm text-text-tertiary">
                                     Allocation appears after your first holding.
                                 </div>
                             )}
@@ -135,16 +135,16 @@ const PortfolioCharts = ({ statsData, isLoading }: { statsData?: PortfolioStatsR
         } else {
             return (
                 <SortableDashboardWidget key="performance" id="performance">
-                    <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl shadow-sm h-full">
-                        <p className="text-[10px] tracking-widest uppercase text-zinc-500">
+                    <div className="p-6 bg-surface-secondary border border-border-primary rounded-sm shadow-sm h-full">
+                        <p className="text-xs font-medium text-text-tertiary">
                             Performance
                         </p>
-                        <h3 className="font-semibold text-lg text-zinc-50 tracking-tight mt-2">
+                        <h3 className="font-semibold text-lg text-text-primary tracking-tight mt-2">
                             Value Over Time
                         </h3>
                         <div className="h-72 mt-6 overflow-x-auto custom-scrollbar">
                             {chartData.length > 0 ? (
-                                <div style={{ minWidth: '550px', height: '100%' }}>
+                                <div className="min-w-[550px] h-full">
                                     <ResponsiveContainer width="100%" height="100%">
                                         <AreaChart data={chartData}>
                                         <defs>
@@ -172,7 +172,7 @@ const PortfolioCharts = ({ statsData, isLoading }: { statsData?: PortfolioStatsR
                                         />
                                         <Tooltip 
                                             formatter={(value: number) => currency(value)}
-                                            contentStyle={{ backgroundColor: '#09090b', borderColor: '#27272a', color: '#fafafa', borderRadius: '8px' }}
+                                            contentStyle={{ backgroundColor: 'var(--color-surface-primary)', borderColor: 'var(--color-border-primary)', color: 'var(--color-text-primary)', borderRadius: '4px' }}
                                             itemStyle={{ color: '#4f46e5', fontWeight: 600 }}
                                         />
                                         <Area 
@@ -187,7 +187,7 @@ const PortfolioCharts = ({ statsData, isLoading }: { statsData?: PortfolioStatsR
                                     </ResponsiveContainer>
                                 </div>
                             ) : (
-                                <div className="h-full flex items-center justify-center text-sm text-zinc-500">
+                                <div className="h-full flex items-center justify-center text-sm text-text-tertiary">
                                     Snapshot history will accumulate as you keep using the dashboard.
                                 </div>
                             )}

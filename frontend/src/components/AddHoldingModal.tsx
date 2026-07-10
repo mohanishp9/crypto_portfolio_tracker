@@ -131,20 +131,20 @@ const AddHoldingModal = () => {
     };
 
     return (
-        <div className="fixed inset-0 flex items-center justify-center z-[100] px-4 bg-zinc-950/80 backdrop-blur-sm animate-fade-in">
-            <div className="w-full max-w-xl bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden animate-slide-up">
-                <div className="px-8 py-5 border-b border-zinc-800 bg-zinc-900 flex items-center justify-between">
+        <div className="fixed inset-0 flex items-center justify-center z-[100] px-4 bg-surface-primary/80  animate-fade-in">
+            <div className="w-full max-w-xl bg-surface-secondary border border-border-primary rounded-sm shadow-2xl overflow-hidden animate-slide-up">
+                <div className="px-8 py-5 border-b border-border-primary bg-surface-secondary flex items-center justify-between">
                     <div>
-                        <p className="text-[10px] tracking-widest uppercase text-indigo-400 mb-1 font-semibold">
+                        <p className="text-xs font-medium text-accent mb-1 font-semibold">
                             Portfolio
                         </p>
-                        <h2 className="font-semibold text-2xl text-zinc-50 tracking-tight flex gap-2">
-                            {isEditing ? "Edit" : "Add"} <span className="font-normal text-zinc-500 italic">Transaction</span>
+                        <h2 className="font-semibold text-2xl text-text-primary tracking-tight flex gap-2">
+                            {isEditing ? "Edit" : "Add"} <span className="font-normal text-text-tertiary italic">Transaction</span>
                         </h2>
                     </div>
                     <button
                         onClick={handleClose}
-                        className="p-2 text-zinc-500 hover:text-zinc-50 hover:bg-zinc-800 rounded-md transition-colors"
+                        className="p-2 text-text-tertiary hover:text-text-primary hover:bg-surface-tertiary rounded-sm transition-colors"
                     >
                         <X size={20} />
                     </button>
@@ -152,9 +152,9 @@ const AddHoldingModal = () => {
 
                 <form onSubmit={handleSubmit} className="px-8 py-7 space-y-6">
                     <div className="relative z-20">
-                        <label className="block text-[10px] tracking-widest uppercase text-zinc-500 mb-2 font-semibold">Coin</label>
+                        <label className="block text-xs font-medium text-text-tertiary mb-2 font-semibold">Coin</label>
                         <div className="relative">
-                            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" />
+                            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary pointer-events-none" />
                             <input
                                 type="text"
                                 value={coinInput}
@@ -170,21 +170,21 @@ const AddHoldingModal = () => {
                                     setTimeout(() => setShowDropdown(false), 150);
                                 }}
                                 autoComplete="off"
-                                className="w-full bg-zinc-950 border border-zinc-800 text-zinc-50 text-sm py-2.5 pl-9 pr-4 rounded-lg focus:outline-none focus:border-indigo-500 transition-colors placeholder-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="w-full bg-surface-primary border border-border-primary text-text-primary text-sm py-2.5 pl-9 pr-4 rounded-sm focus:outline-none focus:border-accent transition-colors placeholder-text-tertiary disabled:opacity-50 disabled:cursor-not-allowed"
                                 placeholder="Search by coin name..."
                             />
                         </div>
 
                         {showDropdown && coins && coins.length > 0 && (
-                            <ul className="absolute top-full left-0 right-0 mt-1 bg-zinc-950 border border-zinc-800 rounded-lg max-h-56 overflow-y-auto shadow-xl py-1 z-30">
+                            <ul className="absolute top-full left-0 right-0 mt-1 bg-surface-primary border border-border-primary rounded-sm max-h-56 overflow-y-auto shadow-xl py-1 z-30">
                                 {coins.map((coin) => (
                                     <li
                                         key={coin.id}
                                         onMouseDown={() => handleCoinSelect(coin)}
-                                        className="px-4 py-2.5 hover:bg-zinc-800 cursor-pointer flex items-center justify-between transition-colors"
+                                        className="px-4 py-2.5 hover:bg-surface-tertiary cursor-pointer flex items-center justify-between transition-colors"
                                     >
-                                        <span className="text-sm text-zinc-300 font-medium">{coin.name}</span>
-                                        <span className="text-[10px] tracking-widest font-mono text-zinc-500 uppercase">{coin.symbol}</span>
+                                        <span className="text-sm text-text-secondary font-medium">{coin.name}</span>
+                                        <span className="text-[10px]  font-mono text-text-tertiary ">{coin.symbol}</span>
                                     </li>
                                 ))}
                             </ul>
@@ -193,12 +193,12 @@ const AddHoldingModal = () => {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 relative z-10">
                         <div>
-                            <label className="block text-[10px] tracking-widest uppercase text-zinc-500 mb-3 font-semibold">Type</label>
+                            <label className="block text-xs font-medium text-text-tertiary mb-3 font-semibold">Type</label>
                             <div className="flex gap-4">
                                 {(["BUY", "SELL"] as TransactionType[]).map((type) => (
                                     <label key={type} className="flex items-center gap-2 cursor-pointer group">
-                                        <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors ${formData.type === type ? (type === "BUY" ? "border-emerald-500 bg-emerald-500/10" : "border-rose-500 bg-rose-500/10") : "border-zinc-700 group-hover:border-zinc-500"}`}>
-                                            {formData.type === type && <div className={`w-2 h-2 rounded-full ${type === "BUY" ? "bg-emerald-500" : "bg-rose-500"}`} />}
+                                        <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors ${formData.type === type ? (type === "BUY" ? "border-positive bg-positive-subtle" : "border-negative bg-negative-subtle") : "border-border-secondary group-hover:border-border-secondary"}`}>
+                                            {formData.type === type && <div className={`w-2 h-2 rounded-full ${type === "BUY" ? "bg-positive" : "bg-negative"}`} />}
                                         </div>
                                         <input
                                             type="radio"
@@ -208,7 +208,7 @@ const AddHoldingModal = () => {
                                             onChange={() => setFormData((prev) => ({ ...prev, type }))}
                                             className="hidden"
                                         />
-                                        <span className={`text-xs font-semibold tracking-wider font-mono ${formData.type === type ? (type === "BUY" ? "text-emerald-500" : "text-rose-500") : "text-zinc-500 group-hover:text-zinc-300"}`}>
+                                        <span className={`text-xs font-semibold  font-mono ${formData.type === type ? (type === "BUY" ? "text-positive" : "text-negative") : "text-text-tertiary group-hover:text-text-secondary"}`}>
                                             {type}
                                         </span>
                                     </label>
@@ -217,70 +217,70 @@ const AddHoldingModal = () => {
                         </div>
 
                         <div>
-                            <label className="block text-[10px] tracking-widest uppercase text-zinc-500 mb-2 font-semibold">Date</label>
+                            <label className="block text-xs font-medium text-text-tertiary mb-2 font-semibold">Date</label>
                             <input
                                 type="datetime-local"
                                 value={formData.timestamp}
                                 onChange={(e) => setFormData((prev) => ({ ...prev, timestamp: e.target.value }))}
-                                className="w-full bg-zinc-950 border border-zinc-800 text-zinc-50 font-mono text-xs py-2.5 px-3 rounded-lg focus:outline-none focus:border-indigo-500 transition-colors"
+                                className="w-full bg-surface-primary border border-border-primary text-text-primary font-mono text-xs py-2.5 px-3 rounded-sm focus:outline-none focus:border-accent transition-colors"
                             />
                         </div>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 relative z-10">
                         <div>
-                            <label className="block text-[10px] tracking-widest uppercase text-zinc-500 mb-2 font-semibold">Quantity</label>
+                            <label className="block text-xs font-medium text-text-tertiary mb-2 font-semibold">Quantity</label>
                             <input
                                 type="number"
                                 step="any"
                                 value={formData.quantity}
                                 onChange={(e) => setFormData((prev) => ({ ...prev, quantity: e.target.value }))}
                                 placeholder="0.00"
-                                className="w-full bg-zinc-950 border border-zinc-800 text-zinc-50 font-mono text-sm py-2.5 px-3 rounded-lg focus:outline-none focus:border-indigo-500 transition-colors placeholder-zinc-700"
+                                className="w-full bg-surface-primary border border-border-primary text-text-primary font-mono text-sm py-2.5 px-3 rounded-sm focus:outline-none focus:border-accent transition-colors placeholder-text-tertiary"
                             />
                         </div>
                         <div>
-                            <label className="block text-[10px] tracking-widest uppercase text-zinc-500 mb-2 font-semibold">Price / USD</label>
+                            <label className="block text-xs font-medium text-text-tertiary mb-2 font-semibold">Price / USD</label>
                             <input
                                 type="number"
                                 step="any"
                                 value={formData.price}
                                 onChange={(e) => setFormData((prev) => ({ ...prev, price: e.target.value }))}
                                 placeholder="0.00"
-                                className="w-full bg-zinc-950 border border-zinc-800 text-zinc-50 font-mono text-sm py-2.5 px-3 rounded-lg focus:outline-none focus:border-indigo-500 transition-colors placeholder-zinc-700"
+                                className="w-full bg-surface-primary border border-border-primary text-text-primary font-mono text-sm py-2.5 px-3 rounded-sm focus:outline-none focus:border-accent transition-colors placeholder-text-tertiary"
                             />
                         </div>
                         <div>
-                            <label className="block text-[10px] tracking-widest uppercase text-zinc-500 mb-2 font-semibold">Fee / USD</label>
+                            <label className="block text-xs font-medium text-text-tertiary mb-2 font-semibold">Fee / USD</label>
                             <input
                                 type="number"
                                 step="any"
                                 value={formData.fee}
                                 onChange={(e) => setFormData((prev) => ({ ...prev, fee: e.target.value }))}
                                 placeholder="0.00"
-                                className="w-full bg-zinc-950 border border-zinc-800 text-zinc-50 font-mono text-sm py-2.5 px-3 rounded-lg focus:outline-none focus:border-indigo-500 transition-colors placeholder-zinc-700"
+                                className="w-full bg-surface-primary border border-border-primary text-text-primary font-mono text-sm py-2.5 px-3 rounded-sm focus:outline-none focus:border-accent transition-colors placeholder-text-tertiary"
                             />
                         </div>
                     </div>
 
                     {errorMessage && (
-                        <div className="text-rose-500 text-xs font-mono bg-rose-500/10 border border-rose-500/20 px-3 py-2 rounded-lg">
+                        <div className="text-negative text-xs font-mono bg-negative-subtle border border-negative/20 px-3 py-2 rounded-sm">
                             {errorMessage}
                         </div>
                     )}
 
-                    <div className="flex justify-end gap-3 pt-6 border-t border-zinc-800 relative z-10">
+                    <div className="flex justify-end gap-3 pt-6 border-t border-border-primary relative z-10">
                         <button
                             type="button"
                             onClick={handleClose}
-                            className="px-6 py-2.5 bg-zinc-950 border border-zinc-800 text-zinc-400 hover:text-zinc-50 hover:bg-zinc-800 rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors"
+                            className="px-6 py-2.5 bg-surface-primary border border-border-primary text-text-tertiary hover:text-text-primary hover:bg-surface-tertiary rounded-sm text-xs font-semibold   transition-colors"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className="px-6 py-2.5 bg-indigo-500 border border-indigo-500 text-white hover:bg-indigo-600 hover:border-indigo-600 rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-md shadow-indigo-500/20"
+                            className="px-6 py-2.5 bg-accent border border-accent text-white hover:bg-accent-hover hover:border-accent-hover rounded-sm text-xs font-semibold   transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2  shadow-accent/20"
                         >
                             {isLoading ? "Saving..." : isEditing ? "Save Changes" : "Add Transaction"}
                         </button>
