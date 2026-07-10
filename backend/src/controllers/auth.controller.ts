@@ -75,14 +75,19 @@ const initiateRegistrationController = asyncHandler(async (req: Request, res: Re
         recipientName: name,
         subject: "Your Registration Verification Code",
         htmlContent: `
-        <html>
-            <body style="font-family: sans-serif; padding: 20px;">
-                <h2>Verify Your Registration</h2>
-                <p>Your One-Time Password (OTP) is:</p>
-                <h1 style="background: #f3f4f6; padding: 10px; display: inline-block; letter-spacing: 2px;">${otp}</h1>
-                <p>It is valid for 10 minutes.</p>
-            </body>
-        </html>
+        <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #fafafa; padding: 40px 20px; color: #171717;">
+            <div style="max-width: 500px; margin: 0 auto; background: #ffffff; border: 1px solid #e4e4e7; border-radius: 6px; padding: 32px;">
+                <h1 style="font-size: 20px; font-weight: 600; margin-top: 0; margin-bottom: 24px; color: #171717;">CypherSight</h1>
+                <h2 style="font-size: 18px; font-weight: 600; margin-top: 0; margin-bottom: 16px;">Verify your registration</h2>
+                <p style="font-size: 14px; color: #52525b; line-height: 1.6; margin-bottom: 24px;">Your One-Time Password (OTP) for completing your registration is:</p>
+                <div style="background-color: #f4f4f5; border: 1px solid #e4e4e7; border-radius: 6px; padding: 24px; text-align: center; margin-bottom: 24px;">
+                    <span style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 32px; font-weight: 600; letter-spacing: 0.25em; color: #171717;">${otp}</span>
+                </div>
+                <p style="font-size: 12px; color: #71717a; margin-bottom: 0;">This code will expire in 10 minutes.</p>
+                <hr style="border: none; border-top: 1px solid #e4e4e7; margin: 32px 0 24px 0;" />
+                <p style="font-size: 12px; color: #71717a; margin: 0; text-align: center;">Sent from CypherSight Crypto Tracker</p>
+            </div>
+        </div>
         `
     });
 
@@ -394,14 +399,21 @@ const initiatePasswordResetController = asyncHandler(async (req: Request, res: R
         to: email,
         recipientName: user.name || "User",
         subject: "Password Reset OTP - CypherSight",
-        htmlContent: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2>Password Reset</h2>
-            <p>You requested to reset your password. Use the following OTP to proceed:</p>
-            <div style="background-color: #f4f4f5; padding: 16px; border-radius: 8px; text-align: center; margin: 24px 0;">
-                <span style="font-size: 32px; font-weight: bold; letter-spacing: 4px; color: #18181b;">${otp}</span>
+        htmlContent: `
+        <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #fafafa; padding: 40px 20px; color: #171717;">
+            <div style="max-width: 500px; margin: 0 auto; background: #ffffff; border: 1px solid #e4e4e7; border-radius: 6px; padding: 32px;">
+                <h1 style="font-size: 20px; font-weight: 600; margin-top: 0; margin-bottom: 24px; color: #171717;">CypherSight</h1>
+                <h2 style="font-size: 18px; font-weight: 600; margin-top: 0; margin-bottom: 16px;">Password Reset</h2>
+                <p style="font-size: 14px; color: #52525b; line-height: 1.6; margin-bottom: 24px;">You requested to reset your password. Use the following OTP to proceed:</p>
+                <div style="background-color: #f4f4f5; border: 1px solid #e4e4e7; border-radius: 6px; padding: 24px; text-align: center; margin-bottom: 24px;">
+                    <span style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 32px; font-weight: 600; letter-spacing: 0.25em; color: #171717;">${otp}</span>
+                </div>
+                <p style="font-size: 12px; color: #71717a; margin-bottom: 0;">This code will expire in 15 minutes. If you didn't request this, you can safely ignore this email.</p>
+                <hr style="border: none; border-top: 1px solid #e4e4e7; margin: 32px 0 24px 0;" />
+                <p style="font-size: 12px; color: #71717a; margin: 0; text-align: center;">Sent from CypherSight Crypto Tracker</p>
             </div>
-            <p style="color: #71717a; font-size: 14px;">This OTP will expire in 15 minutes.</p>
-        </div>`,
+        </div>
+        `,
         type: 'otp'
     });
 

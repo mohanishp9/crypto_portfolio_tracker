@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import { User, LayoutDashboard, Activity } from "lucide-react";
+import { User, LayoutDashboard, Activity, Sun, Moon } from "lucide-react";
+import { useTheme } from "../context/ThemeContext";
 
 interface NavbarProps {
     email?: string;
@@ -9,6 +10,7 @@ interface NavbarProps {
 
 const Navbar = ({ email, handleLogout, isLoggingOut }: NavbarProps) => {
     const navigate = useNavigate();
+    const { theme, toggleTheme } = useTheme();
 
     return (
         <nav className="sticky top-0 z-50 bg-surface-primary/95 border-b border-border-primary ">
@@ -35,6 +37,15 @@ const Navbar = ({ email, handleLogout, isLoggingOut }: NavbarProps) => {
                         </span>
 
                         <div className="hidden sm:block w-px h-5 bg-border-primary" />
+
+                        {/* Theme Toggle */}
+                        <button
+                            onClick={toggleTheme}
+                            title="Toggle theme"
+                            className="p-2 rounded-sm text-text-secondary hover:text-text-primary hover:bg-surface-tertiary transition-colors"
+                        >
+                            {theme === 'dark' ? <Sun size={18} strokeWidth={1.5} /> : <Moon size={18} strokeWidth={1.5} />}
+                        </button>
 
                         {/* Dashboard button */}
                         <button

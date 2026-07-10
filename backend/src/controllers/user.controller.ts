@@ -197,25 +197,19 @@ export const initiateEmailChangeController = asyncHandler(async (req: Request, r
         recipientName: user.name,
         subject: "Verify Your New Email Address - CypherSight",
         htmlContent: `
-            <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; background-color: #09090b; color: #fafafa; padding: 32px; border-radius: 16px; border: 1px solid #27272a;">
-                <h1 style="color: #10b981; font-size: 24px; margin-bottom: 8px;">CypherSight</h1>
-                <p style="color: #a1a1aa; font-size: 14px; margin-bottom: 24px; letter-spacing: 0.05em; text-transform: uppercase;">Security Notice</p>
-                
-                <h2 style="font-size: 20px; font-weight: 600; margin-bottom: 16px;">Verify your new email</h2>
-                <p style="color: #d4d4d8; line-height: 1.6; margin-bottom: 24px;">
-                    You recently requested to change your CypherSight account email to this address. Use the verification code below to confirm this change.
-                </p>
-                
-                <div style="background-color: #18181b; border: 1px solid #3f3f46; border-radius: 8px; padding: 24px; text-align: center; margin-bottom: 24px;">
-                    <span style="font-family: monospace; font-size: 32px; letter-spacing: 0.25em; color: #fafafa;">${otp}</span>
+            <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #fafafa; padding: 40px 20px; color: #171717;">
+                <div style="max-width: 500px; margin: 0 auto; background: #ffffff; border: 1px solid #e4e4e7; border-radius: 6px; padding: 32px;">
+                    <h1 style="font-size: 20px; font-weight: 600; margin-top: 0; margin-bottom: 24px; color: #171717;">CypherSight</h1>
+                    <h2 style="font-size: 18px; font-weight: 600; margin-top: 0; margin-bottom: 16px;">Verify your new email</h2>
+                    <p style="font-size: 14px; color: #52525b; line-height: 1.6; margin-bottom: 24px;">You recently requested to change your CypherSight account email to this address. Use the verification code below to confirm this change.</p>
+                    <div style="background-color: #f4f4f5; border: 1px solid #e4e4e7; border-radius: 6px; padding: 24px; text-align: center; margin-bottom: 24px;">
+                        <span style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 32px; font-weight: 600; letter-spacing: 0.25em; color: #171717;">${otp}</span>
+                    </div>
+                    <p style="font-size: 12px; color: #71717a; margin-bottom: 4px;">This code will expire in 10 minutes.</p>
+                    <p style="font-size: 12px; color: #71717a; margin-bottom: 0;">If you did not request this change, you can safely ignore this email.</p>
+                    <hr style="border: none; border-top: 1px solid #e4e4e7; margin: 32px 0 24px 0;" />
+                    <p style="font-size: 12px; color: #71717a; margin: 0; text-align: center;">Sent from CypherSight Crypto Tracker</p>
                 </div>
-                
-                <p style="color: #a1a1aa; font-size: 12px; line-height: 1.5; margin-bottom: 8px;">
-                    This code will expire in 10 minutes.
-                </p>
-                <p style="color: #a1a1aa; font-size: 12px; line-height: 1.5;">
-                    If you did not request this change, you can safely ignore this email.
-                </p>
             </div>
         `
     });
@@ -332,20 +326,19 @@ export const verifyEmailChangeController = asyncHandler(async (req: Request, res
         recipientName: updatedUser.name,
         subject: "Security Alert: Email Address Changed",
         htmlContent: `
-            <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; background-color: #09090b; color: #fafafa; padding: 32px; border-radius: 16px; border: 1px solid #27272a;">
-                <h1 style="color: #ef4444; font-size: 24px; margin-bottom: 8px;">Security Alert</h1>
-                <p style="color: #d4d4d8; line-height: 1.6; margin-bottom: 24px;">
-                    Your CypherSight account email was just changed to <strong>${data.newEmail}</strong>.
-                </p>
-                <p style="color: #d4d4d8; line-height: 1.6; margin-bottom: 24px;">
-                    If you made this change, you can safely ignore this email.
-                </p>
-                <div style="background-color: #7f1d1d; border: 1px solid #b91c1c; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
-                    <h3 style="color: #fca5a5; margin-top: 0; margin-bottom: 8px;">Wasn't you?</h3>
-                    <p style="color: #fecaca; font-size: 14px; margin-bottom: 16px;">
-                        If you did not authorize this change, your account may be compromised. Click the button below immediately to revert this change and secure your account.
-                    </p>
-                    <a href="${revertUrl}" style="display: inline-block; background-color: #ef4444; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: bold; text-transform: uppercase; font-size: 14px; letter-spacing: 1px;">Revert & Lock Account</a>
+            <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #fafafa; padding: 40px 20px; color: #171717;">
+                <div style="max-width: 500px; margin: 0 auto; background: #ffffff; border: 1px solid #fca5a5; border-radius: 6px; padding: 32px;">
+                    <h1 style="font-size: 20px; font-weight: 600; margin-top: 0; margin-bottom: 24px; color: #171717;">CypherSight</h1>
+                    <h2 style="font-size: 18px; font-weight: 600; margin-top: 0; margin-bottom: 16px; color: #dc2626;">Security Alert</h2>
+                    <p style="font-size: 14px; color: #52525b; line-height: 1.6; margin-bottom: 16px;">Your CypherSight account email was just changed to <strong>${data.newEmail}</strong>.</p>
+                    <p style="font-size: 14px; color: #52525b; line-height: 1.6; margin-bottom: 24px;">If you made this change, you can safely ignore this email.</p>
+                    <div style="background-color: #fef2f2; border: 1px solid #fca5a5; border-radius: 6px; padding: 24px; margin-bottom: 24px;">
+                        <h3 style="font-size: 16px; font-weight: 600; color: #b91c1c; margin-top: 0; margin-bottom: 8px;">Wasn't you?</h3>
+                        <p style="font-size: 14px; color: #991b1b; line-height: 1.6; margin-bottom: 16px;">If you did not authorize this change, your account may be compromised. Click the button below immediately to revert this change and secure your account.</p>
+                        <a href="${revertUrl}" style="display: inline-block; background-color: #dc2626; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 4px; font-weight: 500; font-size: 14px;">Revert & Lock Account</a>
+                    </div>
+                    <hr style="border: none; border-top: 1px solid #e4e4e7; margin: 32px 0 24px 0;" />
+                    <p style="font-size: 12px; color: #71717a; margin: 0; text-align: center;">Sent from CypherSight Crypto Tracker</p>
                 </div>
             </div>
         `,
@@ -459,25 +452,19 @@ export const initiateAccountDeletionController = asyncHandler(async (req: Reques
         recipientName: user.name,
         subject: "Confirm Account Deletion - CypherSight",
         htmlContent: `
-            <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; background-color: #09090b; color: #fafafa; padding: 32px; border-radius: 16px; border: 1px solid #27272a;">
-                <h1 style="color: #ef4444; font-size: 24px; margin-bottom: 8px;">CypherSight</h1>
-                <p style="color: #a1a1aa; font-size: 14px; margin-bottom: 24px; letter-spacing: 0.05em; text-transform: uppercase;">Action Required</p>
-                
-                <h2 style="font-size: 20px; font-weight: 600; margin-bottom: 16px;">Confirm Account Deletion</h2>
-                <p style="color: #d4d4d8; line-height: 1.6; margin-bottom: 24px;">
-                    We received a request to permanently delete your CypherSight account. This action cannot be undone and all your portfolio data will be lost. Use the verification code below to confirm this action.
-                </p>
-                
-                <div style="background-color: #18181b; border: 1px solid #ef4444; border-radius: 8px; padding: 24px; text-align: center; margin-bottom: 24px;">
-                    <span style="font-family: monospace; font-size: 32px; letter-spacing: 0.25em; color: #ef4444;">${otp}</span>
+            <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #fafafa; padding: 40px 20px; color: #171717;">
+                <div style="max-width: 500px; margin: 0 auto; background: #ffffff; border: 1px solid #e4e4e7; border-radius: 6px; padding: 32px;">
+                    <h1 style="font-size: 20px; font-weight: 600; margin-top: 0; margin-bottom: 24px; color: #171717;">CypherSight</h1>
+                    <h2 style="font-size: 18px; font-weight: 600; margin-top: 0; margin-bottom: 16px; color: #dc2626;">Confirm Account Deletion</h2>
+                    <p style="font-size: 14px; color: #52525b; line-height: 1.6; margin-bottom: 24px;">We received a request to permanently delete your CypherSight account. This action cannot be undone and all your portfolio data will be lost. Use the verification code below to confirm this action.</p>
+                    <div style="background-color: #fef2f2; border: 1px solid #fca5a5; border-radius: 6px; padding: 24px; text-align: center; margin-bottom: 24px;">
+                        <span style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 32px; font-weight: 600; letter-spacing: 0.25em; color: #dc2626;">${otp}</span>
+                    </div>
+                    <p style="font-size: 12px; color: #71717a; margin-bottom: 4px;">This code will expire in 10 minutes.</p>
+                    <p style="font-size: 12px; color: #71717a; margin-bottom: 0;">If you did not request to delete your account, change your password immediately.</p>
+                    <hr style="border: none; border-top: 1px solid #e4e4e7; margin: 32px 0 24px 0;" />
+                    <p style="font-size: 12px; color: #71717a; margin: 0; text-align: center;">Sent from CypherSight Crypto Tracker</p>
                 </div>
-                
-                <p style="color: #a1a1aa; font-size: 12px; line-height: 1.5; margin-bottom: 8px;">
-                    This code will expire in 10 minutes.
-                </p>
-                <p style="color: #a1a1aa; font-size: 12px; line-height: 1.5;">
-                    If you did not request to delete your account, change your password immediately.
-                </p>
             </div>
         `
     });
